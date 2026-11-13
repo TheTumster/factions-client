@@ -287,6 +287,10 @@ public final class ModuleRegistry {
 				.toggle(() -> c().customMenu, v -> c().customMenu = v));
 		add(new Module("laG Buttons", "Gradient style on every menu's buttons", Category.CLIENT)
 				.toggle(() -> c().restyleButtons, v -> c().restyleButtons = v));
+		add(new Module("Discord Presence", "Show \"Playing laG Client\" on Discord", Category.CLIENT)
+				.toggle(() -> c().discordPresence, v -> c().discordPresence = v)
+				.settings(() -> List.of(new BoolS("Show server address", () -> c().discordShowServer, v -> c().discordShowServer = v),
+						new InfoS(() -> "Turn off Discord RPC in the Modrinth App so it doesn't override this."))));
 		add(new Module("Updates", "The client updates itself on launch", Category.CLIENT)
 				.settings(() -> List.of(new InfoS(() -> Updater.pending != null ? Updater.pending : "You're on the latest build."))));
 		add(new Module("Team Backend", "Connection for team tracking & sharing", Category.CLIENT)

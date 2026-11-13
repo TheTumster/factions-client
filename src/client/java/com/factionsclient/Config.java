@@ -46,6 +46,12 @@ public class Config {
 	public boolean customMenu = true;
 	public boolean restyleButtons = true;
 
+	// Discord
+	public boolean discordPresence = true;
+	public boolean discordShowServer = true;
+	/** Leave blank to use the built-in laG Client app. */
+	public String discordAppId = "";
+
 	/** HUD element positions: id -> {x fraction, y fraction, scale} */
 	public java.util.Map<String, float[]> hudPos = new java.util.HashMap<>();
 

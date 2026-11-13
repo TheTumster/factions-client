@@ -53,10 +53,12 @@ public class FactionsClient implements ClientModInitializer {
 		ClientLifecycleEvents.CLIENT_STARTED.register(mc -> Updater.checkAsync());
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> Updater.announce());
 		ClientLifecycleEvents.CLIENT_STOPPING.register(Modules::restoreAll);
+		ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> DiscordPresence.close());
 
 		ClientTickEvents.END_CLIENT_TICK.register(mc -> {
 			Modules.tick(mc, zoomKey);
 			if (Smoke.enabled()) Smoke.tick(mc);
+			DiscordPresence.tick(mc);
 			while (menuKey.consumeClick()) mc.setScreen(new com.factionsclient.ui.LaGMenu(mc.screen));
 			while (chunkKey.consumeClick()) {
 				CONFIG.chunkGrid = !CONFIG.chunkGrid;
