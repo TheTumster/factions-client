@@ -3,8 +3,9 @@
 Builds "Factions Client.mrpack": one file your friends import into the Modrinth App
 (or Prism Launcher) to get Fabric + Litematica + Printer + Sodium + this mod, preconfigured.
 
-Usage: python tools/build_mrpack.py <path-to-mod-jar> <output.mrpack>
-Optional env vars (GitHub secrets) to bake the backend config in:
+Usage: python tools/build_mrpack.py <mod-jar> <public.mrpack> <manifest.json> [<private.mrpack>]
+The public pack + manifest go on the (public) GitHub release; the in-game updater reads the manifest.
+If a private pack path is given and these env vars are set, that copy gets the backend config baked in:
   FC_SUPABASE_URL, FC_SUPABASE_ANON_KEY, FC_TEAM_KEY
 """
 import json
@@ -50,7 +51,8 @@ def latest_version(slug):
 
 
 def main():
-    jar, out = sys.argv[1], sys.argv[2]
+    jar, out, manifest_path = sys.argv[1], sys.argv[2], sys.argv[3]
+    private_out = sys.argv[4] if len(sys.argv) > 4 else None
 
     picked = {}  # project_id -> version
     queue = [latest_version(s) for s in PROJECTS]
@@ -97,16 +99,33 @@ def main():
         "dependencies": {"minecraft": MC, "fabric-loader": loader},
     }
 
-    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
-        z.writestr("modrinth.index.json", json.dumps(index, indent=2))
-        z.write(jar, "overrides/mods/" + os.path.basename(jar))
+    def write_pack(path, cfg):
+        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("modrinth.index.json", json.dumps(index, indent=2))
+            z.write(jar, "overrides/mods/" + os.path.basename(jar))
+            if cfg:
+                z.writestr("overrides/config/factionsclient.json", json.dumps(cfg, indent=2))
+
+    write_pack(out, None)
+
+    # Manifest for the in-game updater: every jar the pack manages, including this client.
+    import hashlib
+    jar_name = os.path.basename(jar)
+    jar_sha1 = hashlib.sha1(open(jar, "rb").read()).hexdigest()
+    mods = [{"filename": f["path"].split("/", 1)[1], "url": f["downloads"][0], "sha1": f["hashes"]["sha1"]} for f in files]
+    mods.append({"filename": jar_name, "sha1": jar_sha1,
+                 "url": f"https://github.com/TheTumster/factions-client/releases/download/latest/{jar_name}"})
+    with open(manifest_path, "w") as m:
+        json.dump({"build": index["versionId"], "minecraft": MC, "fabricLoader": loader, "mods": mods}, m, indent=2)
+    print(f"Wrote {manifest_path} ({len(mods)} jars)")
+
+    if private_out:
         url, key, team = (os.environ.get(k, "") for k in ("FC_SUPABASE_URL", "FC_SUPABASE_ANON_KEY", "FC_TEAM_KEY"))
         if url and key and team:
-            cfg = {"supabaseUrl": url, "supabaseAnonKey": key, "teamKey": team}
-            z.writestr("overrides/config/factionsclient.json", json.dumps(cfg, indent=2))
-            print("  + backend config baked in")
+            write_pack(private_out, {"supabaseUrl": url, "supabaseAnonKey": key, "teamKey": team})
+            print(f"Wrote {private_out} with backend config baked in (keep this one private)")
         else:
-            print("  ! no backend secrets set: players must fill config/factionsclient.json themselves")
+            print("  ! no backend secrets set: skipping private pack")
     print(f"Wrote {out} (Fabric Loader {loader})")
 
 

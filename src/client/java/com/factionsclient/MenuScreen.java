@@ -279,6 +279,9 @@ public class MenuScreen extends Screen {
 		super.render(g, mouseX, mouseY, delta);
 		g.drawString(this.font, "FACTIONS CLIENT", px + 8, py + 9, FactionsClient.CONFIG.accentColor, true);
 		g.drawString(this.font, tab.label, cx, py + 9, TEXT, true);
+		if (Updater.pending != null) {
+			g.drawString(this.font, "⬇ " + Updater.pending, px + 118, py + ph - 14, 0xFF55FF55, true);
+		}
 		for (String[] n : notes) {
 			g.drawString(this.font, n[0], Integer.parseInt(n[1]), Integer.parseInt(n[2]), MUTED, false);
 		}
