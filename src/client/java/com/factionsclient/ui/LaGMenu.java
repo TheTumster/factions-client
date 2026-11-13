@@ -186,9 +186,10 @@ public class LaGMenu extends Screen {
 		Theme.outline(g, x, y, w, h, Theme.alpha(Theme.lerp(Theme.LINE, 0x50FFFFFF, hv), a));
 
 		boolean hasPage = m.open != null || !m.settings.get().isEmpty();
-		int nameRoom = w - 20 - (m.toggle != null ? 36 : 0) - (m.toggle != null && hasPage ? 16 : 0) - (m.toggle == null && hasPage ? 14 : 0);
+		int nameRoom = w - 20 - (m.toggle != null ? 36 : 0) - (m.toggle == null && hasPage ? 14 : 0);
 		g.drawString(font, Theme.trim(font, m.name, nameRoom), x + 10, y + 9, Theme.alpha(Theme.TEXT, a), false);
-		g.drawString(font, Theme.trim(font, m.desc, w - 20), x + 10, y + 25, Theme.alpha(Theme.MUTED, a), false);
+		int descRoom = (m.toggle != null && hasPage && hv > 0.05f) ? w - 30 - font.width("settings ›") : w - 20;
+		g.drawString(font, Theme.trim(font, m.desc, descRoom), x + 10, y + 25, Theme.alpha(Theme.MUTED, a), false);
 		if (m.toggle != null) {
 			int sx = x + w - 32, sy = y + 8;
 			sw(m).render(g, sx, sy, on, a);
@@ -200,7 +201,10 @@ public class LaGMenu extends Screen {
 		} else if (hasPage) {
 			g.drawString(font, "›", x + w - 16, y + 9, Theme.alpha(Theme.lerp(Theme.MUTED, 0xFFFFFFFF, hv), a), false);
 		}
-		if (m.toggle != null && hasPage) g.drawString(font, "⚙", x + w - 48, y + 10, Theme.alpha(Theme.lerp(Theme.DIM, Theme.TEXT, hv), a), false);
+		if (m.toggle != null && hasPage && hv > 0.05f) {
+			String more = "settings ›";
+			g.drawString(font, more, x + w - 10 - font.width(more), y + 25, Theme.alpha(Theme.lerp(Theme.MUTED, 0xFFFFFFFF, hv), a * hv), false);
+		}
 
 		if (inView) hits.add(new Hit(x, y, w, h, () -> {
 			click();

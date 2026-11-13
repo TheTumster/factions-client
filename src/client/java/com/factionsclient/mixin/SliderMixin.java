@@ -38,8 +38,9 @@ public abstract class SliderMixin {
 		int fill = (int) Math.round((w - 2) * this.value);
 		Theme.gradient(g, x + 1, y + 1, Math.max(2, fill), h - 2, 0.55f + 0.35f * t);
 		Theme.outline(g, x, y, w, h, Theme.lerp(0x40FFFFFF, 0x90FFFFFF, t));
-		int kx = x + 1 + fill - 3;
-		Theme.rect(g, Math.max(x, Math.min(x + w - 6, kx)), y + 1, 6, h - 2, 0xFFFFFFFF);
+		int kx = Math.max(x + 1, Math.min(x + w - 4, x + 1 + fill - 1));
+		Theme.glow(g, kx, y, 3, h, 0.5f);
+		g.fill(kx, y + 1, kx + 3, y + h - 1, 0xFFFFFFFF);
 		var font = Minecraft.getInstance().font;
 		g.drawCenteredString(font, s.getMessage(), x + w / 2, y + (h - 8) / 2, 0xFFFFFFFF);
 	}
