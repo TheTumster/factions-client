@@ -16,13 +16,25 @@ import zipfile
 
 MC = "1.21.11"
 PROJECTS = ["fabric-api", "litematica", "malilib", "litematica-printer", "sodium"]
-UA = {"User-Agent": "factions-client-pack-builder/1.0"}
+# Modrinth asks for a User-Agent that identifies the project; generic ones get throttled.
+UA = {"User-Agent": "TheTumster/factions-client/1.0 (github.com/TheTumster/factions-client)"}
 
 
 def get(url):
-    req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r)
+    import time
+    import urllib.error
+    for attempt in range(8):
+        req = urllib.request.Request(url, headers=UA)
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code != 429 and e.code < 500:
+                raise
+            wait = int(e.headers.get("X-Ratelimit-Reset") or e.headers.get("Retry-After") or 0) or 2 ** attempt
+            print(f"  ({e.code} from {url.split('?')[0]}, retrying in {min(wait, 60)}s)")
+            time.sleep(min(wait, 60))
+    raise SystemExit(f"Gave up on {url}")
 
 
 def latest_version(slug):
