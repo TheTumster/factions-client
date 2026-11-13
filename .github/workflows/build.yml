@@ -3,6 +3,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -29,3 +32,10 @@ jobs:
           path: |
             Factions Client.mrpack
             build/libs/*.jar
+      - name: Publish as latest release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest "Factions Client.mrpack" --title "Factions Client (build ${{ github.run_number }})" --notes "Drag the .mrpack into the Modrinth App." --latest
