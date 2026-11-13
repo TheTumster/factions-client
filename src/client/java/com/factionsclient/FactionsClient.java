@@ -56,6 +56,7 @@ public class FactionsClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(mc -> {
 			Modules.tick(mc, zoomKey);
+			if (Smoke.enabled()) Smoke.tick(mc);
 			while (menuKey.consumeClick()) mc.setScreen(new com.factionsclient.ui.LaGMenu(mc.screen));
 			while (chunkKey.consumeClick()) {
 				CONFIG.chunkGrid = !CONFIG.chunkGrid;
