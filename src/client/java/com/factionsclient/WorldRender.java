@@ -61,8 +61,9 @@ public final class WorldRender {
 		int cz = mc.player.getBlockZ() >> 4;
 		double x0 = cx << 4, z0 = cz << 4, x1 = x0 + 16, z1 = z0 + 16;
 		double py = Math.floor(mc.player.getY());
-		double yMin = Math.max(mc.level.getMinY(), py - 24);
-		double yMax = py + 24;
+		int hh = FactionsClient.CONFIG.chunkHeight;
+		double yMin = Math.max(mc.level.getMinY(), py - hh);
+		double yMax = py + hh;
 		double t = 0.025;
 
 		// Vertical lines along your chunk's walls (thicker at the corners)
@@ -83,7 +84,7 @@ public final class WorldRender {
 			box(m, vc, cam, x1 - t, y - t, z0, x1 + t, y + t, z1, col);
 		}
 		// Red corner posts for the surrounding chunks
-		for (int dx = -1; dx <= 2; dx++) {
+		if (FactionsClient.CONFIG.chunkCorners) for (int dx = -1; dx <= 2; dx++) {
 			for (int dz = -1; dz <= 2; dz++) {
 				double x = x0 + dx * 16, z = z0 + dz * 16;
 				if ((dx == 0 || dx == 1) && (dz == 0 || dz == 1)) continue; // your own corners

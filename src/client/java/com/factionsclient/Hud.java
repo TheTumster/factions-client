@@ -63,7 +63,7 @@ public final class Hud {
 	public static boolean enabled(String id) {
 		Config c = FactionsClient.CONFIG;
 		return switch (id) {
-			case "info" -> true;
+			case "info" -> c.hudInfo;
 			case "coords" -> c.hudCoords;
 			case "status" -> c.hudStatus;
 			case "team" -> c.team && c.hudTeamList;
@@ -112,7 +112,7 @@ public final class Hud {
 		LocalPlayer p = mc.player;
 		Config cfg = FactionsClient.CONFIG;
 		int accent = cfg.accentColor;
-		List<String[]> lines = new ArrayList<>(); // {text, color hex}
+		List<Line> lines = LINES; lines.clear();
 
 		switch (id) {
 			case "info" -> {
@@ -123,29 +123,29 @@ public final class Hud {
 				}
 				String s = "FPS " + mc.getFps() + "  Ping " + ping + "ms";
 				if (cfg.crumbs) s += "  TNT " + Crumbs.liveTnt();
-				lines.add(new String[] {s, hex(accent)});
+				lines.add(new Line(s, accent));
 			}
 			case "coords" -> {
-				lines.add(new String[] {String.format(Locale.ROOT, "XYZ %d %d %d  %s", p.getBlockX(), p.getBlockY(), p.getBlockZ(),
-						p.getDirection().getSerializedName().toUpperCase(Locale.ROOT)), hex(WHITE)});
+				lines.add(new Line(String.format(Locale.ROOT, "XYZ %d %d %d  %s", p.getBlockX(), p.getBlockY(), p.getBlockZ(),
+						p.getDirection().getSerializedName().toUpperCase(Locale.ROOT)), WHITE));
 				if (mc.level != null && mc.level.dimension() == Level.OVERWORLD) {
-					lines.add(new String[] {String.format(Locale.ROOT, "Nether %d %d", p.getBlockX() / 8, p.getBlockZ() / 8), hex(GRAY)});
+					lines.add(new Line(String.format(Locale.ROOT, "Nether %d %d", p.getBlockX() / 8, p.getBlockZ() / 8), GRAY));
 				} else if (mc.level != null && mc.level.dimension() == Level.NETHER) {
-					lines.add(new String[] {String.format(Locale.ROOT, "Overworld %d %d", p.getBlockX() * 8, p.getBlockZ() * 8), hex(GRAY)});
+					lines.add(new Line(String.format(Locale.ROOT, "Overworld %d %d", p.getBlockX() * 8, p.getBlockZ() * 8), GRAY));
 				}
 			}
 			case "status" -> {
 				boolean tSprint = mc.options.toggleSprint().get() || cfg.autoSprint;
 				boolean tSneak = mc.options.toggleCrouch().get();
-				if (p.isCrouching()) lines.add(new String[] {"[Sneaking" + (tSneak ? " (Toggled)]" : "]"), hex(WHITE)});
-				else if (p.isSprinting()) lines.add(new String[] {"[Sprinting" + (tSprint ? " (Toggled)]" : "]"), hex(WHITE)});
-				else if (preview) lines.add(new String[] {"[Sprinting (Toggled)]", hex(WHITE)});
+				if (p.isCrouching()) lines.add(new Line("[Sneaking" + (tSneak ? " (Toggled)]" : "]"), WHITE));
+				else if (p.isSprinting()) lines.add(new Line("[Sprinting" + (tSprint ? " (Toggled)]" : "]"), WHITE));
+				else if (preview) lines.add(new Line("[Sprinting (Toggled)]", WHITE));
 			}
 			case "team" -> {
 				if (!cfg.backendReady()) {
-					lines.add(new String[] {"Team: not set up", hex(GRAY)});
+					lines.add(new Line("Team: not set up", GRAY));
 				} else if (TeamSync.lastError != null) {
-					lines.add(new String[] {"Team: sync error", hex(RED)});
+					lines.add(new Line("Team: sync error", RED));
 				} else {
 					String dim = TeamSync.dimId(mc);
 					for (TeamSync.Mate m : TeamSync.MATES) {
@@ -157,9 +157,9 @@ public final class Hud {
 						} else {
 							where = "(" + m.dim().replace("minecraft:", "") + ")";
 						}
-						lines.add(new String[] {m.name() + "  " + where, hex(accent)});
+						lines.add(new Line(m.name() + "  " + where, accent));
 					}
-					if (lines.isEmpty() && preview) lines.add(new String[] {"Teammate  42m ↗  120 64 -300", hex(accent)});
+					if (lines.isEmpty() && preview) lines.add(new Line("Teammate  42m ↗  120 64 -300", accent));
 				}
 			}
 			case "keystrokes" -> {
@@ -172,11 +172,11 @@ public final class Hud {
 					String time = e.isInfiniteDuration() ? "∞" : fmt(e.getDuration() / 20);
 					boolean ending = !e.isInfiniteDuration() && e.getDuration() < 200;
 					int color = ending ? RED : (0xFF000000 | e.getEffect().value().getColor());
-					lines.add(new String[] {name + "  " + time, hex(color)});
+					lines.add(new Line(name + "  " + time, color));
 				}
 				if (lines.isEmpty() && preview) {
-					lines.add(new String[] {"Speed II  1:30", hex(0xFF33EBFF)});
-					lines.add(new String[] {"Fire Resistance  7:59", hex(0xFFFF9900)});
+					lines.add(new Line("Speed II  1:30", 0xFF33EBFF));
+					lines.add(new Line("Fire Resistance  7:59", 0xFFFF9900));
 				}
 				return rightAligned(g, f, lines);
 			}
@@ -190,24 +190,24 @@ public final class Hud {
 
 	// ---- element drawing helpers ----
 
-	private static int[] leftAligned(GuiGraphics g, Font f, List<String[]> lines) {
+	private static int[] leftAligned(GuiGraphics g, Font f, List<Line> lines) {
 		int w = 0, y = 0;
-		for (String[] l : lines) w = Math.max(w, f.width(l[0]));
-		for (String[] l : lines) {
-			g.fill(-2, y - 1, f.width(l[0]) + 2, y + 9, BG);
-			g.drawString(f, l[0], 0, y, (int) Long.parseLong(l[1], 16), true);
+		for (Line l : lines) w = Math.max(w, f.width(l.text()));
+		for (Line l : lines) {
+			g.fill(-2, y - 1, f.width(l.text()) + 2, y + 9, BG);
+			g.drawString(f, l.text(), 0, y, l.color(), true);
 			y += 11;
 		}
 		return new int[] {w, y};
 	}
 
-	private static int[] rightAligned(GuiGraphics g, Font f, List<String[]> lines) {
+	private static int[] rightAligned(GuiGraphics g, Font f, List<Line> lines) {
 		int w = 0, y = 0;
-		for (String[] l : lines) w = Math.max(w, f.width(l[0]));
-		for (String[] l : lines) {
-			int lw = f.width(l[0]);
+		for (Line l : lines) w = Math.max(w, f.width(l.text()));
+		for (Line l : lines) {
+			int lw = f.width(l.text());
 			g.fill(w - lw - 2, y - 1, w + 2, y + 9, BG);
-			g.drawString(f, l[0], w - lw, y, (int) Long.parseLong(l[1], 16), true);
+			g.drawString(f, l.text(), w - lw, y, l.color(), true);
 			y += 11;
 		}
 		return new int[] {w, y};
@@ -258,9 +258,9 @@ public final class Hud {
 		return new int[] {w, y};
 	}
 
-	private static String hex(int argb) {
-		return Integer.toHexString(argb);
-	}
+	private record Line(String text, int color) { }
+
+	private static final List<Line> LINES = new ArrayList<>();
 
 	private static String fmt(int secs) {
 		return String.format(Locale.ROOT, "%d:%02d", secs / 60, secs % 60);

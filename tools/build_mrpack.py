@@ -17,7 +17,7 @@ import zipfile
 
 MC = "1.21.11"
 PROJECTS = ["fabric-api", "litematica", "malilib", "litematica-printer", "sodium",
-            "xaeros-minimap", "xaeros-world-map"]
+            "xaeros-minimap", "xaeros-world-map", "modmenu"]
 # Nice-to-haves: skipped (with a warning) if there's no 1.21.11 build
 OPTIONAL = ["iris", "entityculling", "ferrite-core"]
 # Modrinth asks for a User-Agent that identifies the project; generic ones get throttled.
@@ -93,7 +93,7 @@ def main():
         "formatVersion": 1,
         "game": "minecraft",
         "versionId": os.environ.get("GITHUB_RUN_NUMBER", "dev"),
-        "name": "Factions Client",
+        "name": "laG Client",
         "summary": "Private factions client",
         "files": files,
         "dependencies": {"minecraft": MC, "fabric-loader": loader},

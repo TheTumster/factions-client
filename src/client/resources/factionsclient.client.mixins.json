@@ -3,7 +3,10 @@
 	"package": "com.factionsclient.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"OptionInstanceAccessor"
+		"OptionInstanceAccessor",
+		"LoadingOverlayMixin",
+		"MinecraftMixin",
+		"AbstractButtonMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

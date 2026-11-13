@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "factionsclient",
 	"version": "${version}",
-	"name": "Factions Client",
-	"description": "Private factions client: HUD, TNT/sand crumbs, shared patch crumbs, team tracking and schematic sharing.",
+	"name": "laG Client",
+	"description": "laG Client: private factions client.",
 	"authors": [
 		"Jacob"
 	],

@@ -26,6 +26,8 @@ public class Config {
 	public boolean team = true;
 	public boolean shareCrumbs = true;
 	public boolean chunkGrid = false;
+	public int chunkHeight = 24;
+	public boolean chunkCorners = true;
 	public boolean fullbright = false;
 	/** Always sprint when walking forward (separate from vanilla tap-to-toggle sprint). */
 	public boolean autoSprint = false;
@@ -38,6 +40,11 @@ public class Config {
 	public boolean hudTeamList = true;
 	public boolean hudKeystrokes = true;
 	public boolean hudStatus = true;
+	public boolean hudInfo = true;
+
+	// Look
+	public boolean customMenu = true;
+	public boolean restyleButtons = true;
 
 	/** HUD element positions: id -> {x fraction, y fraction, scale} */
 	public java.util.Map<String, float[]> hudPos = new java.util.HashMap<>();
