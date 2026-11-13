@@ -19,16 +19,6 @@ jobs:
           for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do echo "JAR $j"; unzip -oq "$j" 'net/minecraft/client/*'; done
           cd /tmp/mc/net/minecraft/client && pwd && ls | head
           sig() { echo "=====SIG $1"; grep -nP '^\t(public |protected |default |static |boolean |void |int |float |double |@Nullable )[^;=]*\(' "$1"; }
-          sig gui/components/events/GuiEventListener.java
-          sig gui/GuiGraphics.java
-          sig MouseHandler.java
-          sig KeyMapping.java
-          sig gui/screens/worldselection/SelectWorldScreen.java
-          sig gui/screens/multiplayer/JoinMultiplayerScreen.java
-          sig gui/screens/options/OptionsScreen.java
-          sig renderer/PanoramaRenderer.java
-          sig gui/Font.java
-          sig gui/screens/Overlay.java
-          grep -n "public static final RenderPipeline GUI" renderer/RenderPipelines.java
-          echo "=====TITLE RENDER"; sed -n 300,360p gui/screens/TitleScreen.java
+          for f in gui/components/AbstractButton.java gui/components/Button.java gui/components/AbstractWidget.java gui/screens/PauseScreen.java; do echo "=====FILE $f"; cat $f; done
+          echo "=====FILE setScreen"; grep -n "public void setScreen\|public void disconnect\|disconnectFromWorld\|public void stop()" Minecraft.java
           exit 0
