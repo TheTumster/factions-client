@@ -1,0 +1,42 @@
+name: inspect
+on:
+  push:
+    branches: [inspect]
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '25', distribution: 'temurin' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x ./gradlew && ./gradlew genSources -q || ./gradlew genClientOnlySources -q || true
+      - name: dump
+        run: |
+          SRC=$(find ~/.gradle .gradle -name "*minecraft*sources.jar" 2>/dev/null | head -5)
+          echo "$SRC"
+          mkdir src_mc && cd src_mc
+          for j in $SRC; do unzip -oq "$j" 'net/minecraft/client/*' || true; done
+          full() { echo "=====FILE $1"; cat "$1"; }
+          sig() { echo "=====SIG $1"; grep -nE '^\s*(public|protected)[^=]*\(' "$1" | grep -v '^\s*//' ; }
+          cd net/minecraft/client
+          full gui/screens/LoadingOverlay.java
+          full gui/screens/TitleScreen.java
+          full input/MouseButtonEvent.java
+          full input/MouseButtonInfo.java
+          full input/KeyEvent.java
+          full input/InputWithModifiers.java || true
+          sig gui/screens/Screen.java
+          sig gui/components/events/GuiEventListener.java
+          sig gui/components/events/ContainerEventHandler.java
+          sig gui/GuiGraphics.java
+          sig MouseHandler.java
+          sig KeyMapping.java
+          sig gui/components/LogoRenderer.java
+          sig gui/screens/worldselection/SelectWorldScreen.java
+          sig gui/screens/multiplayer/JoinMultiplayerScreen.java
+          sig gui/screens/options/OptionsScreen.java
+          sig renderer/PanoramaRenderer.java
+          sig gui/components/SplashRenderer.java
+          sig gui/Font.java
+          ls gui/screens | head -80
