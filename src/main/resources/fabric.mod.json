@@ -1,0 +1,22 @@
+{
+	"schemaVersion": 1,
+	"id": "factionsclient",
+	"version": "${version}",
+	"name": "Factions Client",
+	"description": "Private factions client: HUD, TNT/sand crumbs, shared patch crumbs, team tracking and schematic sharing.",
+	"authors": ["Jacob"],
+	"license": "All-Rights-Reserved",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["com.factionsclient.FactionsClient"]
+	},
+	"depends": {
+		"fabricloader": ">=0.18.1",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"litematica": "*"
+	}
+}
