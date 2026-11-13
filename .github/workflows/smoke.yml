@@ -30,24 +30,9 @@ jobs:
           (timeout 230 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
           GAME=$!
           mkdir -p shots
-          snap() {  # press F2 in the game, then grab the newest screenshot it saved
-            WID=$(xdotool search --name "Minecraft" | head -1)
-            [ -z "$WID" ] && return
-            xdotool windowactivate --sync $WID 2>/dev/null; xdotool key --window $WID F2
-            sleep 3
-            NEW=$(ls -t run/screenshots/*.png 2>/dev/null | head -1)
-            [ -n "$NEW" ] && convert "$NEW" -resize 960x540 -quality 72 "shots/$1.jpg"
-          }
-          for i in $(seq 1 45); do
-            sleep 5
-            stage=$(grep -o "SMOKE stage [a-z-]*" game.log | tail -1 | awk '{print $3}')
-            if [ -n "$stage" ] && [ ! -f "shots/$stage.done" ]; then
-              sleep 4
-              snap "$stage" && touch "shots/$stage.done"
-            fi
-          done
           wait $GAME || true
           pkill Xvfb || true
+          i=0; for f in $(ls -tr run/screenshots/*.png 2>/dev/null); do i=$((i+1)); convert "$f" -resize 960x540 -quality 72 "shots/s$i.jpg"; done
           for f in $(ls shots/*.jpg 2>/dev/null); do echo "=====SHOT $f"; base64 -w0 "$f"; echo; done
       - name: Report
         if: always()
