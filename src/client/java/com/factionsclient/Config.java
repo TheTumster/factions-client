@@ -25,12 +25,20 @@ public class Config {
 	public boolean crumbs = true;
 	public boolean team = true;
 	public boolean shareCrumbs = true;
+	public boolean chunkGrid = false;
+	public boolean fullbright = false;
+	public boolean toggleSprint = false;
+	public int zoomFov = 15;
 
 	// HUD pieces
 	public boolean hudCoords = true;
 	public boolean hudArmor = true;
 	public boolean hudEffects = true;
 	public boolean hudTeamList = true;
+	public boolean hudKeystrokes = true;
+
+	/** One-time: move Xaero's world map off M so it doesn't clash with Litematica. */
+	public boolean xaeroKeyFixed = false;
 
 	// Crumbs
 	public int crumbSeconds = 20;

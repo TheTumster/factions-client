@@ -41,12 +41,55 @@ public final class WorldRender {
 			}
 		}
 
+		if (cfg.chunkGrid) chunkBorders(m, vc, cam, mc);
+
 		if (cfg.team) {
 			String dim = TeamSync.dimId(mc);
 			for (TeamSync.Mate mate : TeamSync.MATES) {
 				if (!mate.dim().equals(dim)) continue;
 				// Tall thin pillar so you can spot them from far away
 				box(m, vc, cam, mate.x() - 0.15, mate.y(), mate.z() - 0.15, mate.x() + 0.15, mate.y() + 40, mate.z() + 0.15, MATE);
+			}
+		}
+	}
+
+	private static final int CHUNK_EDGE = 0xC0FFE040;   // yellow: your chunk
+	private static final int CHUNK_GRID = 0x50FFE040;   // faint grid on your chunk's walls
+	private static final int CHUNK_CORNER = 0xC0FF3030; // red: neighbor chunk corners
+
+	/** Factions claim view: current chunk walls with a grid, corner posts for the 3x3 around you. */
+	private static void chunkBorders(Matrix4f m, VertexConsumer vc, Vec3 cam, Minecraft mc) {
+		int cx = mc.player.getBlockX() >> 4;
+		int cz = mc.player.getBlockZ() >> 4;
+		double x0 = cx << 4, z0 = cz << 4, x1 = x0 + 16, z1 = z0 + 16;
+		double py = Math.floor(mc.player.getY());
+		double yMin = Math.max(mc.level.getMinY(), py - 24);
+		double yMax = py + 24;
+		double t = 0.025;
+
+		// Vertical lines along your chunk's walls (thicker at the corners)
+		for (int i = 0; i <= 16; i++) {
+			double w = (i == 0 || i == 16) ? 0.06 : t;
+			int col = (i == 0 || i == 16) ? CHUNK_EDGE : CHUNK_GRID;
+			box(m, vc, cam, x0 + i - w, yMin, z0 - w, x0 + i + w, yMax, z0 + w, col);
+			box(m, vc, cam, x0 + i - w, yMin, z1 - w, x0 + i + w, yMax, z1 + w, col);
+			box(m, vc, cam, x0 - w, yMin, z0 + i - w, x0 + w, yMax, z0 + i + w, col);
+			box(m, vc, cam, x1 - w, yMin, z0 + i - w, x1 + w, yMax, z0 + i + w, col);
+		}
+		// Horizontal lines every 2 blocks
+		for (double y = Math.ceil(yMin / 2) * 2; y <= yMax; y += 2) {
+			int col = y == py ? CHUNK_EDGE : CHUNK_GRID;
+			box(m, vc, cam, x0, y - t, z0 - t, x1, y + t, z0 + t, col);
+			box(m, vc, cam, x0, y - t, z1 - t, x1, y + t, z1 + t, col);
+			box(m, vc, cam, x0 - t, y - t, z0, x0 + t, y + t, z1, col);
+			box(m, vc, cam, x1 - t, y - t, z0, x1 + t, y + t, z1, col);
+		}
+		// Red corner posts for the surrounding chunks
+		for (int dx = -1; dx <= 2; dx++) {
+			for (int dz = -1; dz <= 2; dz++) {
+				double x = x0 + dx * 16, z = z0 + dz * 16;
+				if ((dx == 0 || dx == 1) && (dz == 0 || dz == 1)) continue; // your own corners
+				box(m, vc, cam, x - 0.05, yMin, z - 0.05, x + 0.05, yMax, z + 0.05, CHUNK_CORNER);
 			}
 		}
 	}

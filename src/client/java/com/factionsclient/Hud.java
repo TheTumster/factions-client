@@ -77,6 +77,22 @@ public final class Hud {
 			}
 		}
 
+		if (cfg.hudKeystrokes) {
+			Modules.sampleClicks(mc);
+			y += 2;
+			int k = 18, gap = 2;
+			key(g, f, x + k + gap, y, k, "W", mc.options.keyUp.isDown());
+			y += k + gap;
+			key(g, f, x, y, k, "A", mc.options.keyLeft.isDown());
+			key(g, f, x + k + gap, y, k, "S", mc.options.keyDown.isDown());
+			key(g, f, x + 2 * (k + gap), y, k, "D", mc.options.keyRight.isDown());
+			y += k + gap;
+			int half = (3 * k + 2 * gap - gap) / 2;
+			key(g, f, x, y, half, Modules.leftCps() + " CPS", mc.options.keyAttack.isDown());
+			key(g, f, x + half + gap, y, half, Modules.rightCps() + " CPS", mc.options.keyUse.isDown());
+			y += k + gap;
+		}
+
 		if (cfg.hudEffects) {
 			int ey = 4;
 			int right = g.guiWidth() - 4;
@@ -109,6 +125,11 @@ public final class Hud {
 				ay += 17;
 			}
 		}
+	}
+
+	private static void key(GuiGraphics g, Font f, int x, int y, int w, String label, boolean down) {
+		g.fill(x, y, x + w, y + 18, down ? 0xC0FFFFFF : BG);
+		g.drawString(f, label, x + (w - f.width(label)) / 2, y + 5, down ? 0xFF000000 : WHITE, false);
 	}
 
 	private static int line(GuiGraphics g, Font f, int x, int y, String s, int color) {

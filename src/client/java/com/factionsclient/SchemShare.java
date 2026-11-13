@@ -52,8 +52,32 @@ public final class SchemShare {
 	};
 
 	public static int upload(CommandContext<FabricClientCommandSource> ctx) {
+		return uploadFile(StringArgumentType.getString(ctx, "file"));
+	}
+
+	public static int get(CommandContext<FabricClientCommandSource> ctx) {
+		return download(StringArgumentType.getString(ctx, "code"));
+	}
+
+	public static int list(CommandContext<FabricClientCommandSource> ctx) {
+		return listToChat();
+	}
+
+	/** Schematic files in the schematics folder, relative paths, newest first. */
+	public static java.util.List<String> localFiles() {
+		try (Stream<Path> s = Files.walk(dir(), 3)) {
+			return s.filter(Files::isRegularFile)
+					.filter(p -> { String n = p.toString(); return n.endsWith(".litematic") || n.endsWith(".schem") || n.endsWith(".schematic") || n.endsWith(".nbt"); })
+					.sorted(java.util.Comparator.comparingLong((Path p) -> p.toFile().lastModified()).reversed())
+					.map(p -> dir().relativize(p).toString().replace('\\', '/'))
+					.toList();
+		} catch (Exception e) {
+			return java.util.List.of();
+		}
+	}
+
+	public static int uploadFile(String name) {
 		if (!ready()) return 0;
-		String name = StringArgumentType.getString(ctx, "file");
 		Path file = dir().resolve(name).normalize();
 		if (!file.startsWith(dir()) || !Files.isRegularFile(file)) {
 			msg("No file named " + name + " in your schematics folder.", ChatFormatting.RED);
@@ -88,9 +112,9 @@ public final class SchemShare {
 		return 1;
 	}
 
-	public static int get(CommandContext<FabricClientCommandSource> ctx) {
+	public static int download(String rawCode) {
 		if (!ready()) return 0;
-		String code = StringArgumentType.getString(ctx, "code").toUpperCase();
+		String code = rawCode.trim().toUpperCase();
 		msg("Downloading " + code + "...", ChatFormatting.GRAY);
 		Supa.get("schems?select=name,data&code=eq." + Supa.enc(code) + "&team=eq." + Supa.enc(FactionsClient.CONFIG.teamKey))
 				.whenComplete((body, err) -> Minecraft.getInstance().execute(() -> {
@@ -123,7 +147,7 @@ public final class SchemShare {
 		return 1;
 	}
 
-	public static int list(CommandContext<FabricClientCommandSource> ctx) {
+	public static int listToChat() {
 		if (!ready()) return 0;
 		Supa.get("schems?select=code,name,uploader,created_at&team=eq." + Supa.enc(FactionsClient.CONFIG.teamKey)
 				+ "&order=created_at.desc&limit=10")

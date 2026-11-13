@@ -12,10 +12,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -29,6 +31,7 @@ public class FactionsClient implements ClientModInitializer {
 	private static KeyMapping menuKey;
 	private static KeyMapping clearKey;
 	private static KeyMapping crumbsKey;
+	private static KeyMapping zoomKey;
 
 	@Override
 	public void onInitializeClient() {
@@ -39,7 +42,13 @@ public class FactionsClient implements ClientModInitializer {
 		clearKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.clear_crumbs", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, cat));
 		crumbsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.toggle_crumbs", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, cat));
 
+		zoomKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.zoom", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, cat));
+
+		ClientLifecycleEvents.CLIENT_STARTED.register(FactionsClient::moveXaeroMapKey);
+		ClientLifecycleEvents.CLIENT_STOPPING.register(Modules::restoreAll);
+
 		ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+			Modules.tick(mc, zoomKey);
 			while (menuKey.consumeClick()) mc.setScreen(new MenuScreen());
 			while (clearKey.consumeClick()) {
 				Crumbs.clear();
@@ -83,8 +92,28 @@ public class FactionsClient implements ClientModInitializer {
 		LOG.info("Factions Client loaded");
 	}
 
+	/** Xaero's world map and Litematica both default to M. Move the world map to N, once. */
+	private static void moveXaeroMapKey(Minecraft mc) {
+		if (CONFIG.xaeroKeyFixed) return;
+		boolean changed = false;
+		for (KeyMapping k : mc.options.keyMappings) {
+			String name = k.getName().toLowerCase();
+			if (name.contains("xaero") && name.contains("open_map") && k.saveString().equals("key.keyboard.m")) {
+				k.setKey(InputConstants.getKey("key.keyboard.n"));
+				changed = true;
+			}
+		}
+		if (changed) {
+			KeyMapping.resetMapping();
+			mc.options.save();
+			LOG.info("Moved Xaero's world map key from M to N");
+		}
+		CONFIG.xaeroKeyFixed = true;
+		CONFIG.save();
+	}
+
 	private static int help() {
-		SchemShare.msg("Right Shift = menu, K = clear crumbs, J = toggle crumbs", ChatFormatting.WHITE);
+		SchemShare.msg("Right Shift = menu, C = zoom, K = clear crumbs, J = toggle crumbs", ChatFormatting.WHITE);
 		SchemShare.msg("/ss upload <file> | /ss get <code> | /ss list", ChatFormatting.WHITE);
 		SchemShare.msg("/fc reload after editing config/factionsclient.json", ChatFormatting.WHITE);
 		return 1;

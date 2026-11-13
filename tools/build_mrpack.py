@@ -15,7 +15,10 @@ import urllib.request
 import zipfile
 
 MC = "1.21.11"
-PROJECTS = ["fabric-api", "litematica", "malilib", "litematica-printer", "sodium"]
+PROJECTS = ["fabric-api", "litematica", "malilib", "litematica-printer", "sodium",
+            "xaeros-minimap", "xaeros-world-map"]
+# Nice-to-haves: skipped (with a warning) if there's no 1.21.11 build
+OPTIONAL = ["iris", "entityculling", "ferrite-core"]
 # Modrinth asks for a User-Agent that identifies the project; generic ones get throttled.
 UA = {"User-Agent": "TheTumster/factions-client/1.0 (github.com/TheTumster/factions-client)"}
 
@@ -51,6 +54,11 @@ def main():
 
     picked = {}  # project_id -> version
     queue = [latest_version(s) for s in PROJECTS]
+    for slug in OPTIONAL:
+        try:
+            queue.append(latest_version(slug))
+        except SystemExit as e:
+            print(f"  ! skipping optional {slug}: {e}")
     while queue:
         v = queue.pop()
         if v["project_id"] in picked:
