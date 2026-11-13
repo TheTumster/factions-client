@@ -14,7 +14,8 @@ import net.minecraft.network.chat.Component;
 /** Right Shift control hub: every module and tool in one place, split into tabs. */
 public class MenuScreen extends Screen {
 	private enum Tab {
-		FACTIONS("Factions"), SCHEMATICA("Schematica"), SHARE("Schem Share"), RENDER("Render & Player"), HUD("HUD"), MAP("Minimap");
+		FACTIONS("Factions"), SCHEMATICA("Schematica"), SHARE("Schem Share"), RENDER("Player & Render"), HUD("HUD"),
+		CUSTOMIZE("Colors & Keys"), MAP("Minimap");
 
 		final String label;
 
@@ -23,7 +24,8 @@ public class MenuScreen extends Screen {
 		}
 	}
 
-	private static final int ACCENT = 0xFF38E0FF;
+	private static final String[] COLOR_NAMES = {"Cyan", "Red", "Orange", "Yellow", "Lime", "Green", "Blue", "Purple", "Pink", "White"};
+	private static final int[] COLORS = {0xFF38E0FF, 0xFFFF3030, 0xFFFF7A1F, 0xFFFFE040, 0xFF8CFF40, 0xFF20C060, 0xFF4070FF, 0xFFB040FF, 0xFFFF60C0, 0xFFFFFFFF};
 	private static final int TEXT = 0xFFE0E0E0;
 	private static final int MUTED = 0xFF9A9A9A;
 	private static final int PANEL = 0xE0101418;
@@ -156,24 +158,47 @@ public class MenuScreen extends Screen {
 				}
 			}
 			case RENDER -> {
+				var opts = net.minecraft.client.Minecraft.getInstance().options;
 				toggle(0, 0, "Fullbright", () -> c.fullbright, v -> c.fullbright = v);
-				toggle(1, 0, "Toggle Sprint", () -> c.toggleSprint, v -> c.toggleSprint = v);
-				button(0, 1, "Zoom FOV: " + c.zoomFov, b -> {
+				toggle(1, 0, "Auto Sprint", () -> c.autoSprint, v -> c.autoSprint = v);
+				toggle(0, 1, "Toggle Sprint", () -> opts.toggleSprint().get(), v -> {
+					opts.toggleSprint().set(v);
+					opts.save();
+				});
+				toggle(1, 1, "Toggle Sneak", () -> opts.toggleCrouch().get(), v -> {
+					opts.toggleCrouch().set(v);
+					opts.save();
+				});
+				button(0, 2, "Zoom FOV: " + c.zoomFov, b -> {
 					c.zoomFov = c.zoomFov <= 5 ? 30 : c.zoomFov - 5;
 					b.setMessage(Component.literal("Zoom FOV: " + c.zoomFov));
 					c.save();
 				});
-				note(0, 3, "Hold C to zoom. Rebind in Controls > Factions Client.");
-				note(0, 4, "Performance: Sodium + Entity Culling + FerriteCore.");
-				note(0, 5, "Shaders: Video Settings > Shader Packs (Iris).");
+				note(0, 4, "Auto Sprint = always sprint walking forward.");
+				note(0, 5, "Toggle Sprint/Sneak = tap the key once to lock it on.");
+				note(0, 6, "Hold C to zoom. Shaders: Video Settings > Shader Packs.");
 			}
 			case HUD -> {
-				toggle(0, 0, "HUD (master)", () -> c.hud, v -> c.hud = v);
-				toggle(1, 0, "Coords", () -> c.hudCoords, v -> c.hudCoords = v);
-				toggle(0, 1, "Armor", () -> c.hudArmor, v -> c.hudArmor = v);
-				toggle(1, 1, "Potion Effects", () -> c.hudEffects, v -> c.hudEffects = v);
-				toggle(0, 2, "Team List", () -> c.hudTeamList, v -> c.hudTeamList = v);
-				toggle(1, 2, "Keystrokes + CPS", () -> c.hudKeystrokes, v -> c.hudKeystrokes = v);
+				addRenderableWidget(Button.builder(Component.literal("§bEdit HUD Layout (drag & resize)"),
+						b -> minecraft.setScreen(new HudEditorScreen(this))).bounds(colX(0), rowY(0) - 6, colW * 2 + 6, 20).build());
+				toggle(0, 1, "HUD (master)", () -> c.hud, v -> c.hud = v);
+				toggle(1, 1, "Coords", () -> c.hudCoords, v -> c.hudCoords = v);
+				toggle(0, 2, "Armor", () -> c.hudArmor, v -> c.hudArmor = v);
+				toggle(1, 2, "Potion Effects", () -> c.hudEffects, v -> c.hudEffects = v);
+				toggle(0, 3, "Keystrokes + CPS", () -> c.hudKeystrokes, v -> c.hudKeystrokes = v);
+				toggle(1, 3, "Sprint/Sneak Status", () -> c.hudStatus, v -> c.hudStatus = v);
+				toggle(0, 4, "Team List", () -> c.hudTeamList, v -> c.hudTeamList = v);
+			}
+			case CUSTOMIZE -> {
+				colorButton(0, 0, "Accent", () -> c.accentColor, v -> c.accentColor = v);
+				colorButton(1, 0, "TNT Trail", () -> c.tntColor, v -> c.tntColor = v);
+				colorButton(0, 1, "Sand Trail", () -> c.sandColor, v -> c.sandColor = v);
+				colorButton(1, 1, "Chunk Borders", () -> c.chunkColor, v -> c.chunkColor = v);
+				button(0, 3, "Keybinds...", b -> minecraft.setScreen(
+						new net.minecraft.client.gui.screens.options.controls.KeyBindsScreen(this, minecraft.options)));
+				button(1, 3, "Edit HUD Layout", b -> minecraft.setScreen(new HudEditorScreen(this)));
+				note(0, 5, "Click a color to cycle through presets.");
+				note(0, 6, "Our keys are under \"Factions Client\" in Keybinds.");
 			}
 			case MAP -> {
 				note(0, 0, "Minimap: Xaero's Minimap (top-right of your screen).");
@@ -209,6 +234,22 @@ public class MenuScreen extends Screen {
 		}).bounds(colX(col), rowY(row) - 6, colW, 20).build());
 	}
 
+	private void colorButton(int col, int row, String label, Supplier<Integer> get, Consumer<Integer> set) {
+		addRenderableWidget(Button.builder(colorText(label, get.get()), b -> {
+			int i = 0;
+			for (int j = 0; j < COLORS.length; j++) if (COLORS[j] == get.get()) i = j;
+			set.accept(COLORS[(i + 1) % COLORS.length]);
+			b.setMessage(colorText(label, get.get()));
+			FactionsClient.CONFIG.save();
+		}).bounds(colX(col), rowY(row) - 6, colW, 20).build());
+	}
+
+	private static Component colorText(String label, int color) {
+		String name = "Custom";
+		for (int j = 0; j < COLORS.length; j++) if (COLORS[j] == color) name = COLOR_NAMES[j];
+		return Component.literal(label + ": ").append(Component.literal("■ " + name).withColor(color & 0xFFFFFF));
+	}
+
 	private void note(int col, int row, String text) {
 		notes.add(new String[] {text, String.valueOf(colX(col)), String.valueOf(rowY(row))});
 	}
@@ -230,13 +271,13 @@ public class MenuScreen extends Screen {
 		super.renderBackground(g, mouseX, mouseY, delta);
 		g.fill(px, py, px + pw, py + ph, PANEL);
 		g.fill(px, py, px + 112, py + ph, SIDEBAR);
-		g.fill(px, py, px + pw, py + 1, ACCENT);
+		g.fill(px, py, px + pw, py + 1, FactionsClient.CONFIG.accentColor);
 	}
 
 	@Override
 	public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
 		super.render(g, mouseX, mouseY, delta);
-		g.drawString(this.font, "FACTIONS CLIENT", px + 8, py + 9, ACCENT, true);
+		g.drawString(this.font, "FACTIONS CLIENT", px + 8, py + 9, FactionsClient.CONFIG.accentColor, true);
 		g.drawString(this.font, tab.label, cx, py + 9, TEXT, true);
 		for (String[] n : notes) {
 			g.drawString(this.font, n[0], Integer.parseInt(n[1]), Integer.parseInt(n[2]), MUTED, false);

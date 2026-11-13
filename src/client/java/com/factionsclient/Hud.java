@@ -1,6 +1,10 @@
 package com.factionsclient;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -13,141 +17,265 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+/**
+ * HUD made of draggable elements. Each element draws itself at (0,0) in its own space and returns its size;
+ * we translate/scale it to the position saved in the config. The HUD editor uses BOUNDS to drag them.
+ */
 public final class Hud {
-	private static final int WHITE = 0xFFFFFFFF;
-	private static final int GRAY = 0xFFAAAAAA;
-	private static final int ACCENT = 0xFF38E0FF;
-	private static final int RED = 0xFFFF5555;
-	private static final int BG = 0x90000000;
+	static final int WHITE = 0xFFFFFFFF;
+	static final int GRAY = 0xFFAAAAAA;
+	static final int RED = 0xFFFF5555;
+	static final int BG = 0x90000000;
 	private static final EquipmentSlot[] ARMOR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+
+	/** Element ids, in draw order, with their display names. */
+	public static final Map<String, String> ELEMENTS = new LinkedHashMap<>();
+
+	static {
+		ELEMENTS.put("info", "FPS / Ping / TNT");
+		ELEMENTS.put("coords", "Coords");
+		ELEMENTS.put("status", "Sprint / Sneak");
+		ELEMENTS.put("team", "Team List");
+		ELEMENTS.put("keystrokes", "Keystrokes + CPS");
+		ELEMENTS.put("effects", "Potion Effects");
+		ELEMENTS.put("armor", "Armor");
+	}
+
+	/** Default position (fraction of screen) and scale for each element. */
+	public static float[] defaultPos(String id) {
+		return switch (id) {
+			case "info" -> new float[] {0.005f, 0.01f, 1f};
+			case "coords" -> new float[] {0.005f, 0.055f, 1f};
+			case "status" -> new float[] {0.005f, 0.135f, 1f};
+			case "team" -> new float[] {0.005f, 0.18f, 1f};
+			case "keystrokes" -> new float[] {0.005f, 0.62f, 1f};
+			case "effects" -> new float[] {0.85f, 0.01f, 1f};
+			case "armor" -> new float[] {0.90f, 0.70f, 1f};
+			default -> new float[] {0.1f, 0.1f, 1f};
+		};
+	}
+
+	/** Screen-space bounds of each element from the last frame: {x, y, w, h}. */
+	public static final Map<String, int[]> BOUNDS = new LinkedHashMap<>();
 
 	private Hud() { }
 
+	public static boolean enabled(String id) {
+		Config c = FactionsClient.CONFIG;
+		return switch (id) {
+			case "info" -> true;
+			case "coords" -> c.hudCoords;
+			case "status" -> c.hudStatus;
+			case "team" -> c.team && c.hudTeamList;
+			case "keystrokes" -> c.hudKeystrokes;
+			case "effects" -> c.hudEffects;
+			case "armor" -> c.hudArmor;
+			default -> false;
+		};
+	}
+
+	public static float[] pos(String id) {
+		return FactionsClient.CONFIG.hudPos.computeIfAbsent(id, Hud::defaultPos);
+	}
+
 	public static void render(GuiGraphics g, DeltaTracker delta) {
 		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null || !FactionsClient.CONFIG.hud || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen()) return;
+		if (mc.screen instanceof HudEditorScreen) return; // the editor draws its own preview
+		Modules.sampleClicks(mc);
+		drawAll(g, mc, false);
+	}
+
+	/** Draws every enabled element at its saved position. preview = show sample data for empty elements. */
+	public static void drawAll(GuiGraphics g, Minecraft mc, boolean preview) {
+		BOUNDS.clear();
+		for (String id : ELEMENTS.keySet()) {
+			if (!enabled(id)) continue;
+			float[] p = pos(id);
+			int x = Math.round(p[0] * g.guiWidth());
+			int y = Math.round(p[1] * g.guiHeight());
+			float s = p[2];
+
+			g.pose().pushMatrix();
+			g.pose().translate(x, y);
+			g.pose().scale(s, s);
+			int[] size = draw(id, g, mc.font, mc, preview);
+			g.pose().popMatrix();
+
+			if (size[0] > 0 && size[1] > 0) {
+				BOUNDS.put(id, new int[] {x, y, Math.round(size[0] * s), Math.round(size[1] * s)});
+			}
+		}
+	}
+
+	private static int[] draw(String id, GuiGraphics g, Font f, Minecraft mc, boolean preview) {
 		LocalPlayer p = mc.player;
 		Config cfg = FactionsClient.CONFIG;
-		if (p == null || !cfg.hud || mc.options.hideGui || mc.getDebugOverlay().showDebugScreen()) return;
+		int accent = cfg.accentColor;
+		List<String[]> lines = new ArrayList<>(); // {text, color hex}
 
-		Font f = mc.font;
-		int x = 4;
-		int y = 4;
-
-		// Title line: FPS / ping / live TNT
-		int ping = 0;
-		if (mc.getConnection() != null) {
-			PlayerInfo info = mc.getConnection().getPlayerInfo(p.getUUID());
-			if (info != null) ping = info.getLatency();
-		}
-		String head = "FPS " + mc.getFps() + "  Ping " + ping + "ms";
-		if (cfg.crumbs) head += "  TNT " + Crumbs.liveTnt();
-		y = line(g, f, x, y, head, ACCENT);
-
-		if (cfg.hudCoords) {
-			y = line(g, f, x, y, String.format(Locale.ROOT, "XYZ %d %d %d  %s",
-					p.getBlockX(), p.getBlockY(), p.getBlockZ(), p.getDirection().getSerializedName().toUpperCase(Locale.ROOT)), WHITE);
-			if (mc.level != null) {
-				if (mc.level.dimension() == Level.OVERWORLD) {
-					y = line(g, f, x, y, String.format(Locale.ROOT, "Nether %d %d", p.getBlockX() / 8, p.getBlockZ() / 8), GRAY);
-				} else if (mc.level.dimension() == Level.NETHER) {
-					y = line(g, f, x, y, String.format(Locale.ROOT, "Overworld %d %d", p.getBlockX() * 8, p.getBlockZ() * 8), GRAY);
+		switch (id) {
+			case "info" -> {
+				int ping = 0;
+				if (mc.getConnection() != null) {
+					PlayerInfo info = mc.getConnection().getPlayerInfo(p.getUUID());
+					if (info != null) ping = info.getLatency();
+				}
+				String s = "FPS " + mc.getFps() + "  Ping " + ping + "ms";
+				if (cfg.crumbs) s += "  TNT " + Crumbs.liveTnt();
+				lines.add(new String[] {s, hex(accent)});
+			}
+			case "coords" -> {
+				lines.add(new String[] {String.format(Locale.ROOT, "XYZ %d %d %d  %s", p.getBlockX(), p.getBlockY(), p.getBlockZ(),
+						p.getDirection().getSerializedName().toUpperCase(Locale.ROOT)), hex(WHITE)});
+				if (mc.level != null && mc.level.dimension() == Level.OVERWORLD) {
+					lines.add(new String[] {String.format(Locale.ROOT, "Nether %d %d", p.getBlockX() / 8, p.getBlockZ() / 8), hex(GRAY)});
+				} else if (mc.level != null && mc.level.dimension() == Level.NETHER) {
+					lines.add(new String[] {String.format(Locale.ROOT, "Overworld %d %d", p.getBlockX() * 8, p.getBlockZ() * 8), hex(GRAY)});
 				}
 			}
+			case "status" -> {
+				boolean tSprint = mc.options.toggleSprint().get() || cfg.autoSprint;
+				boolean tSneak = mc.options.toggleCrouch().get();
+				if (p.isCrouching()) lines.add(new String[] {"[Sneaking" + (tSneak ? " (Toggled)]" : "]"), hex(WHITE)});
+				else if (p.isSprinting()) lines.add(new String[] {"[Sprinting" + (tSprint ? " (Toggled)]" : "]"), hex(WHITE)});
+				else if (preview) lines.add(new String[] {"[Sprinting (Toggled)]", hex(WHITE)});
+			}
+			case "team" -> {
+				if (!cfg.backendReady()) {
+					lines.add(new String[] {"Team: not set up", hex(GRAY)});
+				} else if (TeamSync.lastError != null) {
+					lines.add(new String[] {"Team: sync error", hex(RED)});
+				} else {
+					String dim = TeamSync.dimId(mc);
+					for (TeamSync.Mate m : TeamSync.MATES) {
+						String where;
+						if (m.dim().equals(dim)) {
+							double dx = m.x() - p.getX(), dz = m.z() - p.getZ();
+							where = (int) Math.sqrt(dx * dx + dz * dz) + "m " + arrow(p.getYRot(), dx, dz) + "  "
+									+ (int) m.x() + " " + (int) m.y() + " " + (int) m.z();
+						} else {
+							where = "(" + m.dim().replace("minecraft:", "") + ")";
+						}
+						lines.add(new String[] {m.name() + "  " + where, hex(accent)});
+					}
+					if (lines.isEmpty() && preview) lines.add(new String[] {"Teammate  42m ↗  120 64 -300", hex(accent)});
+				}
+			}
+			case "keystrokes" -> {
+				return keystrokes(g, f, mc, accent);
+			}
+			case "effects" -> {
+				for (MobEffectInstance e : p.getActiveEffects()) {
+					String name = e.getEffect().value().getDisplayName().getString();
+					if (e.getAmplifier() > 0) name += " " + roman(e.getAmplifier() + 1);
+					String time = e.isInfiniteDuration() ? "∞" : fmt(e.getDuration() / 20);
+					boolean ending = !e.isInfiniteDuration() && e.getDuration() < 200;
+					int color = ending ? RED : (0xFF000000 | e.getEffect().value().getColor());
+					lines.add(new String[] {name + "  " + time, hex(color)});
+				}
+				if (lines.isEmpty() && preview) {
+					lines.add(new String[] {"Speed II  1:30", hex(0xFF33EBFF)});
+					lines.add(new String[] {"Fire Resistance  7:59", hex(0xFFFF9900)});
+				}
+				return rightAligned(g, f, lines);
+			}
+			case "armor" -> {
+				return armor(g, f, p, preview);
+			}
+			default -> { }
 		}
+		return leftAligned(g, f, lines);
+	}
 
-		if (cfg.team && cfg.hudTeamList) {
-			if (!cfg.backendReady()) {
-				y = line(g, f, x, y, "Team: not set up (/fc help)", GRAY);
-			} else if (TeamSync.lastError != null) {
-				y = line(g, f, x, y, "Team: sync error (see log)", RED);
+	// ---- element drawing helpers ----
+
+	private static int[] leftAligned(GuiGraphics g, Font f, List<String[]> lines) {
+		int w = 0, y = 0;
+		for (String[] l : lines) w = Math.max(w, f.width(l[0]));
+		for (String[] l : lines) {
+			g.fill(-2, y - 1, f.width(l[0]) + 2, y + 9, BG);
+			g.drawString(f, l[0], 0, y, (int) Long.parseLong(l[1], 16), true);
+			y += 11;
+		}
+		return new int[] {w, y};
+	}
+
+	private static int[] rightAligned(GuiGraphics g, Font f, List<String[]> lines) {
+		int w = 0, y = 0;
+		for (String[] l : lines) w = Math.max(w, f.width(l[0]));
+		for (String[] l : lines) {
+			int lw = f.width(l[0]);
+			g.fill(w - lw - 2, y - 1, w + 2, y + 9, BG);
+			g.drawString(f, l[0], w - lw, y, (int) Long.parseLong(l[1], 16), true);
+			y += 11;
+		}
+		return new int[] {w, y};
+	}
+
+	private static int[] keystrokes(GuiGraphics g, Font f, Minecraft mc, int accent) {
+		int k = 18, gap = 2;
+		key(g, f, k + gap, 0, k, 18, "W", mc.options.keyUp.isDown(), accent);
+		key(g, f, 0, k + gap, k, 18, "A", mc.options.keyLeft.isDown(), accent);
+		key(g, f, k + gap, k + gap, k, 18, "S", mc.options.keyDown.isDown(), accent);
+		key(g, f, 2 * (k + gap), k + gap, k, 18, "D", mc.options.keyRight.isDown(), accent);
+		int full = 3 * k + 2 * gap;
+		int half = (full - gap) / 2;
+		key(g, f, 0, 2 * (k + gap), half, 18, Modules.leftCps() + " CPS", mc.options.keyAttack.isDown(), accent);
+		key(g, f, half + gap, 2 * (k + gap), full - half - gap, 18, Modules.rightCps() + " CPS", mc.options.keyUse.isDown(), accent);
+		key(g, f, 0, 3 * (k + gap), full, 10, "", mc.options.keyJump.isDown(), accent);
+		return new int[] {full, 3 * (k + gap) + 10};
+	}
+
+	private static void key(GuiGraphics g, Font f, int x, int y, int w, int h, String label, boolean down, int accent) {
+		g.fill(x, y, x + w, y + h, down ? (0xD0000000 | (accent & 0xFFFFFF)) : BG);
+		if (h == 10) {
+			g.fill(x + w / 2 - 10, y + 4, x + w / 2 + 10, y + 5, down ? 0xFF000000 : WHITE); // spacebar line
+		} else {
+			g.drawString(f, label, x + (w - f.width(label)) / 2, y + (h - 8) / 2, down ? 0xFF000000 : WHITE, false);
+		}
+	}
+
+	private static int[] armor(GuiGraphics g, Font f, LocalPlayer p, boolean preview) {
+		int y = 0, w = 0;
+		for (EquipmentSlot slot : ARMOR) {
+			ItemStack stack = p.getItemBySlot(slot);
+			if (stack.isEmpty() && !preview) continue;
+			if (!stack.isEmpty()) {
+				g.renderItem(stack, 0, y);
+				if (stack.isDamageableItem()) {
+					int left = stack.getMaxDamage() - stack.getDamageValue();
+					String s = String.valueOf(left);
+					g.drawString(f, s, 19, y + 4, left * 4 < stack.getMaxDamage() ? RED : WHITE, true);
+					w = Math.max(w, 19 + f.width(s));
+				}
 			} else {
-				String dim = TeamSync.dimId(mc);
-				for (TeamSync.Mate m : TeamSync.MATES) {
-					String where;
-					if (m.dim().equals(dim)) {
-						double dx = m.x() - p.getX();
-						double dz = m.z() - p.getZ();
-						int dist = (int) Math.sqrt(dx * dx + dz * dz);
-						where = dist + "m " + arrow(p.getYRot(), dx, dz) + "  " + (int) m.x() + " " + (int) m.y() + " " + (int) m.z();
-					} else {
-						where = "(" + m.dim().replace("minecraft:", "") + ")";
-					}
-					y = line(g, f, x, y, m.name() + "  " + where, ACCENT);
-				}
+				g.fill(0, y, 16, y + 16, BG); // empty slot placeholder in the editor
 			}
+			w = Math.max(w, 16);
+			y += 17;
 		}
-
-		if (cfg.hudKeystrokes) {
-			Modules.sampleClicks(mc);
-			y += 2;
-			int k = 18, gap = 2;
-			key(g, f, x + k + gap, y, k, "W", mc.options.keyUp.isDown());
-			y += k + gap;
-			key(g, f, x, y, k, "A", mc.options.keyLeft.isDown());
-			key(g, f, x + k + gap, y, k, "S", mc.options.keyDown.isDown());
-			key(g, f, x + 2 * (k + gap), y, k, "D", mc.options.keyRight.isDown());
-			y += k + gap;
-			int half = (3 * k + 2 * gap - gap) / 2;
-			key(g, f, x, y, half, Modules.leftCps() + " CPS", mc.options.keyAttack.isDown());
-			key(g, f, x + half + gap, y, half, Modules.rightCps() + " CPS", mc.options.keyUse.isDown());
-			y += k + gap;
-		}
-
-		if (cfg.hudEffects) {
-			int ey = 4;
-			int right = g.guiWidth() - 4;
-			for (MobEffectInstance e : p.getActiveEffects()) {
-				String name = e.getEffect().value().getDisplayName().getString();
-				if (e.getAmplifier() > 0) name += " " + (e.getAmplifier() + 1);
-				String time = e.isInfiniteDuration() ? "**:**" : fmt(e.getDuration() / 20);
-				String s = name + " " + time;
-				int w = f.width(s);
-				g.fill(right - w - 2, ey - 1, right + 2, ey + 9, BG);
-				g.drawString(f, s, right - w, ey, e.getDuration() < 200 && !e.isInfiniteDuration() ? RED : WHITE, true);
-				ey += 11;
-			}
-		}
-
-		if (cfg.hudArmor) {
-			// Stack armor bottom-right, with durability left
-			int ax = g.guiWidth() - 60;
-			int ay = g.guiHeight() - 4 - 4 * 17;
-			for (EquipmentSlot slot : ARMOR) {
-				ItemStack stack = p.getItemBySlot(slot);
-				if (!stack.isEmpty()) {
-					g.renderItem(stack, ax, ay);
-					if (stack.isDamageableItem()) {
-						int left = stack.getMaxDamage() - stack.getDamageValue();
-						int color = left * 4 < stack.getMaxDamage() ? RED : WHITE;
-						g.drawString(f, String.valueOf(left), ax + 19, ay + 4, color, true);
-					}
-				}
-				ay += 17;
-			}
-		}
+		return new int[] {w, y};
 	}
 
-	private static void key(GuiGraphics g, Font f, int x, int y, int w, String label, boolean down) {
-		g.fill(x, y, x + w, y + 18, down ? 0xC0FFFFFF : BG);
-		g.drawString(f, label, x + (w - f.width(label)) / 2, y + 5, down ? 0xFF000000 : WHITE, false);
-	}
-
-	private static int line(GuiGraphics g, Font f, int x, int y, String s, int color) {
-		g.fill(x - 2, y - 1, x + f.width(s) + 2, y + 9, BG);
-		g.drawString(f, s, x, y, color, true);
-		return y + 11;
+	private static String hex(int argb) {
+		return Integer.toHexString(argb);
 	}
 
 	private static String fmt(int secs) {
 		return String.format(Locale.ROOT, "%d:%02d", secs / 60, secs % 60);
 	}
 
+	private static String roman(int n) {
+		String[] r = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
+		return n < r.length ? r[n] : String.valueOf(n);
+	}
+
 	/** Arrow pointing toward (dx, dz) relative to where the player is looking. */
 	private static String arrow(float yaw, double dx, double dz) {
 		double target = Math.toDegrees(Math.atan2(-dx, dz));
-		double rel = ((target - yaw) % 360 + 540) % 360 - 180; // -180..180, 0 = straight ahead
+		double rel = ((target - yaw) % 360 + 540) % 360 - 180;
 		String[] arrows = {"↑", "↗", "→", "↘", "↓", "↙", "←", "↖"};
-		int idx = (int) Math.round(rel / 45.0);
-		return arrows[(idx + 8) % 8];
+		return arrows[((int) Math.round(rel / 45.0) + 8) % 8];
 	}
 }

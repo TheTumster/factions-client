@@ -13,8 +13,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 
 /** Draws crumb trails, explosion markers and teammate beacons in the world. */
 public final class WorldRender {
-	private static final int TNT_TRAIL = 0xB0FF5A1F;   // orange-red
-	private static final int SAND_TRAIL = 0xB0F2D16B;  // sand yellow
 	private static final int MY_BOOM = 0x90FF1010;     // red
 	private static final int TEAM_BOOM = 0x90B040FF;   // purple (teammate saw it)
 	private static final int MATE = 0x6038E0FF;        // cyan
@@ -53,12 +51,12 @@ public final class WorldRender {
 		}
 	}
 
-	private static final int CHUNK_EDGE = 0xC0FFE040;   // yellow: your chunk
-	private static final int CHUNK_GRID = 0x50FFE040;   // faint grid on your chunk's walls
 	private static final int CHUNK_CORNER = 0xC0FF3030; // red: neighbor chunk corners
 
 	/** Factions claim view: current chunk walls with a grid, corner posts for the 3x3 around you. */
 	private static void chunkBorders(Matrix4f m, VertexConsumer vc, Vec3 cam, Minecraft mc) {
+		int CHUNK_EDGE = alpha(FactionsClient.CONFIG.chunkColor, 0xC0);
+		int CHUNK_GRID = alpha(FactionsClient.CONFIG.chunkColor, 0x50);
 		int cx = mc.player.getBlockX() >> 4;
 		int cz = mc.player.getBlockZ() >> 4;
 		double x0 = cx << 4, z0 = cz << 4, x1 = x0 + 16, z1 = z0 + 16;
@@ -94,8 +92,12 @@ public final class WorldRender {
 		}
 	}
 
+	private static int alpha(int rgb, int a) {
+		return (a << 24) | (rgb & 0xFFFFFF);
+	}
+
 	private static void trail(Matrix4f m, VertexConsumer vc, Vec3 cam, Crumbs.Trail t) {
-		int color = t.tnt ? TNT_TRAIL : SAND_TRAIL;
+		int color = alpha(t.tnt ? FactionsClient.CONFIG.tntColor : FactionsClient.CONFIG.sandColor, 0xB0);
 		double s = t.tnt ? 0.09 : 0.07;
 		for (Vec3 p : t.points) {
 			// Entity position is the bottom-center; lift the dot to the middle of the block-sized entity

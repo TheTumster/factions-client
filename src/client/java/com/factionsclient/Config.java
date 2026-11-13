@@ -27,7 +27,8 @@ public class Config {
 	public boolean shareCrumbs = true;
 	public boolean chunkGrid = false;
 	public boolean fullbright = false;
-	public boolean toggleSprint = false;
+	/** Always sprint when walking forward (separate from vanilla tap-to-toggle sprint). */
+	public boolean autoSprint = false;
 	public int zoomFov = 15;
 
 	// HUD pieces
@@ -36,6 +37,16 @@ public class Config {
 	public boolean hudEffects = true;
 	public boolean hudTeamList = true;
 	public boolean hudKeystrokes = true;
+	public boolean hudStatus = true;
+
+	/** HUD element positions: id -> {x fraction, y fraction, scale} */
+	public java.util.Map<String, float[]> hudPos = new java.util.HashMap<>();
+
+	// Colors (ARGB)
+	public int accentColor = 0xFF38E0FF;
+	public int tntColor = 0xFFFF5A1F;
+	public int sandColor = 0xFFF2D16B;
+	public int chunkColor = 0xFFFFE040;
 
 	/** One-time: move Xaero's world map off M so it doesn't clash with Litematica. */
 	public boolean xaeroKeyFixed = false;
@@ -53,6 +64,7 @@ public class Config {
 			if (Files.exists(FILE)) {
 				Config c = GSON.fromJson(Files.readString(FILE), Config.class);
 				if (c != null) {
+					if (c.hudPos == null) c.hudPos = new java.util.HashMap<>();
 					c.save(); // writes any new fields with defaults
 					return c;
 				}

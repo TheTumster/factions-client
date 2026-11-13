@@ -53,7 +53,7 @@ public final class Modules {
 		}
 
 		// Toggle sprint: hold sprint for you whenever you're walking forward.
-		if (mc.player != null && cfg.toggleSprint) {
+		if (mc.player != null && cfg.autoSprint) {
 			boolean walking = mc.options.keyUp.isDown() && !mc.player.isShiftKeyDown() && !mc.player.isUsingItem();
 			if (walking) {
 				mc.options.keySprint.setDown(true);
