@@ -13,7 +13,7 @@ jobs:
         with: { java-version: '25', distribution: 'temurin' }
       - uses: gradle/actions/setup-gradle@v4
       - name: Install virtual display + software OpenGL
-        run: sudo apt-get update -q && sudo apt-get install -yq xvfb mesa-utils libgl1-mesa-dri x11-apps imagemagick >/dev/null
+        run: sudo apt-get update -q && sudo apt-get install -yq xvfb mesa-utils libgl1-mesa-dri x11-apps imagemagick xdotool >/dev/null
       - name: Launch the game for 150s
         env:
           LAGCLIENT_SMOKE: "1"
@@ -23,19 +23,27 @@ jobs:
           chmod +x ./gradlew
           mkdir -p run
           echo "eula=true" > run/eula.txt
+          printf "onboardAccessibility:false\nskipMultiplayerWarning:true\njoinedFirstServer:true\ntutorialStep:none\n" > run/options.txt
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2
           (timeout 230 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
           GAME=$!
           mkdir -p shots
+          snap() {  # press F2 in the game, then grab the newest screenshot it saved
+            WID=$(xdotool search --name "Minecraft" | head -1)
+            [ -z "$WID" ] && return
+            xdotool windowactivate --sync $WID 2>/dev/null; xdotool key --window $WID F2
+            sleep 3
+            NEW=$(ls -t run/screenshots/*.png 2>/dev/null | head -1)
+            [ -n "$NEW" ] && convert "$NEW" -resize 960x540 -quality 72 "shots/$1.jpg"
+          }
           for i in $(seq 1 45); do
             sleep 5
-            case $i in 12|24|36) import -window root -resize 960x540 -quality 70 "shots/t$((i*5)).jpg" ;; esac
             stage=$(grep -o "SMOKE stage [a-z-]*" game.log | tail -1 | awk '{print $3}')
             if [ -n "$stage" ] && [ ! -f "shots/$stage.done" ]; then
               sleep 4
-              import -window root -resize 960x540 -quality 70 "shots/$stage.jpg" && touch "shots/$stage.done"
+              snap "$stage" && touch "shots/$stage.done"
             fi
           done
           wait $GAME || true
