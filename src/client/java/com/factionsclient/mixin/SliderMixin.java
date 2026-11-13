@@ -1,0 +1,46 @@
+package com.factionsclient.mixin;
+
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+
+import com.factionsclient.FactionsClient;
+import com.factionsclient.ui.Theme;
+
+/** Vanilla sliders (FOV, volume, render distance...) in the laG style: dark track, gradient fill, glowing knob. */
+@Mixin(AbstractSliderButton.class)
+public abstract class SliderMixin {
+	private static final Map<AbstractSliderButton, Float> HOVER = new WeakHashMap<>();
+
+	@Shadow
+	protected double value;
+
+	@Inject(method = "renderWidget", at = @At("HEAD"), cancellable = true)
+	private void factionsclient$laGSlider(GuiGraphics g, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+		if (FactionsClient.CONFIG == null || !FactionsClient.CONFIG.restyleButtons) return;
+		ci.cancel();
+		AbstractSliderButton s = (AbstractSliderButton) (Object) this;
+		int x = s.getX(), y = s.getY(), w = s.getWidth(), h = s.getHeight();
+		float t = Theme.approach(HOVER.getOrDefault(s, 0f), s.isHoveredOrFocused() ? 1f : 0f, 14f);
+		HOVER.put(s, t);
+
+		Theme.glow(g, x, y, w, h, 0.45f * t);
+		Theme.rect(g, x, y, w, h, 0xE0141A23);
+		int fill = (int) Math.round((w - 2) * this.value);
+		Theme.gradient(g, x + 1, y + 1, Math.max(2, fill), h - 2, 0.55f + 0.35f * t);
+		Theme.outline(g, x, y, w, h, Theme.lerp(0x40FFFFFF, 0x90FFFFFF, t));
+		int kx = x + 1 + fill - 3;
+		Theme.rect(g, Math.max(x, Math.min(x + w - 6, kx)), y + 1, 6, h - 2, 0xFFFFFFFF);
+		var font = Minecraft.getInstance().font;
+		g.drawCenteredString(font, s.getMessage(), x + w / 2, y + (h - 8) / 2, 0xFFFFFFFF);
+	}
+}

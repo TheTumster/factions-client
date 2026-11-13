@@ -67,8 +67,8 @@ public class LaGMenu extends Screen {
 	protected void init() {
 		ModuleRegistry.init();
 		ModuleRegistry.parentScreen = this;
-		ww = Math.min(560, this.width - 24);
-		wh = Math.min(340, this.height - 24);
+		ww = Math.min(640, this.width - 24);
+		wh = Math.min(360, this.height - 24);
 		wx = (this.width - ww) / 2;
 		wy = (this.height - wh) / 2;
 	}
@@ -108,7 +108,8 @@ public class LaGMenu extends Screen {
 
 	private void sidebar(GuiGraphics g, int mx, int my, float a) {
 		Theme.logo(g, wx + 10, wy + 8, 100, a);
-		int y = wy + 52;
+		int y = wy + 50;
+		int step = Math.max(19, Math.min(23, (wh - 50 - 22) / Category.values().length));
 		for (Category c : Category.values()) {
 			boolean sel = c == category && search.isEmpty();
 			float h = hover(c, Theme.inside(mx, my, wx + 8, y, 104, 20));
@@ -129,9 +130,9 @@ public class LaGMenu extends Screen {
 				searchFocused = false;
 				scroll = scrollTarget = 0;
 			}));
-			y += 23;
+			y += step;
 		}
-		g.drawString(font, "Right Shift to close", wx + 12, wy + wh - 14, Theme.alpha(Theme.DIM, a), false);
+		if (y + 6 < wy + wh - 14) g.drawString(font, "Right Shift to close", wx + 12, wy + wh - 14, Theme.alpha(Theme.DIM, a), false);
 	}
 
 	private void cards(GuiGraphics g, int mx, int my, float a) {
@@ -184,10 +185,10 @@ public class LaGMenu extends Screen {
 		if (on) Theme.gradient(g, x, y, 3, h, a);
 		Theme.outline(g, x, y, w, h, Theme.alpha(Theme.lerp(Theme.LINE, 0x50FFFFFF, hv), a));
 
-		g.drawString(font, Theme.trim(font, m.name, w - 50), x + 10, y + 9, Theme.alpha(Theme.TEXT, a), false);
-		g.drawString(font, Theme.trim(font, m.desc, w - 20), x + 10, y + 24, Theme.alpha(Theme.MUTED, a), false);
-
 		boolean hasPage = m.open != null || !m.settings.get().isEmpty();
+		int nameRoom = w - 20 - (m.toggle != null ? 36 : 0) - (m.toggle != null && hasPage ? 16 : 0) - (m.toggle == null && hasPage ? 14 : 0);
+		g.drawString(font, Theme.trim(font, m.name, nameRoom), x + 10, y + 9, Theme.alpha(Theme.TEXT, a), false);
+		g.drawString(font, Theme.trim(font, m.desc, w - 20), x + 10, y + 25, Theme.alpha(Theme.MUTED, a), false);
 		if (m.toggle != null) {
 			int sx = x + w - 32, sy = y + 8;
 			sw(m).render(g, sx, sy, on, a);
@@ -199,7 +200,7 @@ public class LaGMenu extends Screen {
 		} else if (hasPage) {
 			g.drawString(font, "›", x + w - 16, y + 9, Theme.alpha(Theme.lerp(Theme.MUTED, 0xFFFFFFFF, hv), a), false);
 		}
-		if (m.toggle != null && hasPage) g.drawString(font, "⚙", x + w - 46, y + 10, Theme.alpha(Theme.lerp(Theme.DIM, Theme.TEXT, hv), a), false);
+		if (m.toggle != null && hasPage) g.drawString(font, "⚙", x + w - 48, y + 10, Theme.alpha(Theme.lerp(Theme.DIM, Theme.TEXT, hv), a), false);
 
 		if (inView) hits.add(new Hit(x, y, w, h, () -> {
 			click();

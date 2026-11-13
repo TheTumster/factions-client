@@ -6,7 +6,8 @@
 		"OptionInstanceAccessor",
 		"LoadingOverlayMixin",
 		"MinecraftMixin",
-		"AbstractButtonMixin"
+		"AbstractButtonMixin",
+		"SliderMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -35,7 +35,7 @@ public abstract class AbstractButtonMixin {
 		}
 		Theme.glow(g, x, y, w, h, 0.6f * t);
 		Theme.rect(g, x, y, w, h, 0xE0141A23);
-		Theme.gradient(g, x, y, w, h, 0.25f + 0.75f * t);
+		Theme.gradient(g, x, y, w, h, 0.35f + 0.65f * t);
 		Theme.outline(g, x, y, w, h, Theme.lerp(0x40FFFFFF, 0x90FFFFFF, t));
 	}
 }
