@@ -20,23 +20,19 @@ jobs:
           full() { echo "=====FILE $1"; cat "$1"; }
           sig() { echo "=====SIG $1"; grep -nE '^\s*(public|protected)[^=]*\(' "$1" | grep -v '^\s*//' ; }
           cd net/minecraft/client
-          full gui/screens/LoadingOverlay.java
-          full gui/screens/TitleScreen.java
-          full input/MouseButtonEvent.java
-          full input/MouseButtonInfo.java
-          full input/KeyEvent.java
-          full input/InputWithModifiers.java || true
-          sig gui/screens/Screen.java
+          set +e
+          sig() { echo "=====SIG $1"; grep -nE '^\s*(public|protected|default|static)?\s*[A-Za-z<>\[\], .?@]+\s+[a-zA-Z]+\(' "$1" | grep -vE '^\s*[0-9]+:\s*(//|return|if|else|this\.|super)' ; }
           sig gui/components/events/GuiEventListener.java
-          sig gui/components/events/ContainerEventHandler.java
           sig gui/GuiGraphics.java
           sig MouseHandler.java
           sig KeyMapping.java
-          sig gui/components/LogoRenderer.java
           sig gui/screens/worldselection/SelectWorldScreen.java
           sig gui/screens/multiplayer/JoinMultiplayerScreen.java
           sig gui/screens/options/OptionsScreen.java
           sig renderer/PanoramaRenderer.java
-          sig gui/components/SplashRenderer.java
           sig gui/Font.java
-          ls gui/screens | head -80
+          sig gui/screens/Overlay.java
+          sig renderer/RenderPipelines.java | head -60
+          grep -n "GUI_TEXTURED\b\|GUI\b =" renderer/RenderPipelines.java
+          sed -n 740,800p gui/screens/TitleScreen.java
+          exit 0
