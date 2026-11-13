@@ -31,6 +31,7 @@ jobs:
           mkdir -p shots
           for i in $(seq 1 45); do
             sleep 5
+            case $i in 12|24|36) import -window root -resize 960x540 -quality 70 "shots/t$((i*5)).jpg" ;; esac
             stage=$(grep -o "SMOKE stage [a-z-]*" game.log | tail -1 | awk '{print $3}')
             if [ -n "$stage" ] && [ ! -f "shots/$stage.done" ]; then
               sleep 4
@@ -39,7 +40,7 @@ jobs:
           done
           wait $GAME || true
           pkill Xvfb || true
-          for f in shots/*.jpg; do echo "=====SHOT $f"; base64 -w0 "$f"; echo; done
+          for f in $(ls shots/*.jpg 2>/dev/null); do echo "=====SHOT $f"; base64 -w0 "$f"; echo; done
       - name: Report
         if: always()
         run: |

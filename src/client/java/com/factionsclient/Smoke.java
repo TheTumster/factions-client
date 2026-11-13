@@ -17,7 +17,16 @@ final class Smoke {
 		return System.getenv("LAGCLIENT_SMOKE") != null;
 	}
 
+	private static long lastLog = 0;
+
 	static void tick(Minecraft mc) {
+		long now = System.currentTimeMillis();
+		if (now - lastLog > 10_000) {
+			lastLog = now;
+			FactionsClient.LOG.info("SMOKE state overlay={} screen={}",
+					mc.getOverlay() == null ? "none" : mc.getOverlay().getClass().getSimpleName(),
+					mc.screen == null ? "none" : mc.screen.getClass().getName());
+		}
 		if (mc.getOverlay() != null) return;
 		if (titleSince < 0) {
 			if (mc.screen instanceof LaGTitleScreen) {
