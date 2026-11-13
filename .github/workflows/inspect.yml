@@ -13,10 +13,10 @@ jobs:
       - run: chmod +x ./gradlew && ./gradlew genSources -q || ./gradlew genClientOnlySources -q || true
       - name: dump
         run: |
-          SRC=$(find ~/.gradle .gradle -name "*minecraft*sources.jar" 2>/dev/null | head -5)
+          SRC=$(find ~/.gradle $PWD/.gradle -name "*minecraft*sources.jar" 2>/dev/null | head -5)
           echo "$SRC"
           mkdir src_mc && cd src_mc
-          for j in $SRC; do unzip -oq "$j" 'net/minecraft/client/*' || true; done
+          for j in $SRC; do unzip -oq "$j" 'net/minecraft/client/*' 'net/minecraft/world/entity/item/*' || true; done
           full() { echo "=====FILE $1"; cat "$1"; }
           sig() { echo "=====SIG $1"; grep -nE '^\s*(public|protected)[^=]*\(' "$1" | grep -v '^\s*//' ; }
           cd net/minecraft/client
