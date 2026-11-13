@@ -10,18 +10,15 @@ jobs:
       - uses: actions/setup-java@v4
         with: { java-version: '25', distribution: 'temurin' }
       - uses: gradle/actions/setup-gradle@v4
-      - run: chmod +x ./gradlew && ./gradlew genSources -q || ./gradlew genClientOnlySources -q || true
+      - run: chmod +x ./gradlew && ./gradlew genSources -q || true
       - name: dump
+        shell: bash
         run: |
-          SRC=$(find ~/.gradle $PWD/.gradle -name "*minecraft*sources.jar" 2>/dev/null | head -5)
-          echo "$SRC"
-          mkdir src_mc && cd src_mc
-          for j in $SRC; do unzip -oq "$j" 'net/minecraft/client/*' 'net/minecraft/world/entity/item/*' || true; done
-          full() { echo "=====FILE $1"; cat "$1"; }
-          sig() { echo "=====SIG $1"; grep -nE '^\s*(public|protected)[^=]*\(' "$1" | grep -v '^\s*//' ; }
-          cd net/minecraft/client
           set +e
-          sig() { echo "=====SIG $1"; grep -nE '^\s*(public|protected|default|static)?\s*[A-Za-z<>\[\], .?@]+\s+[a-zA-Z]+\(' "$1" | grep -vE '^\s*[0-9]+:\s*(//|return|if|else|this\.|super)' ; }
+          mkdir -p /tmp/mc && cd /tmp/mc
+          for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do echo "JAR $j"; unzip -oq "$j" 'net/minecraft/client/*'; done
+          cd /tmp/mc/net/minecraft/client && pwd && ls | head
+          sig() { echo "=====SIG $1"; grep -nP '^\t(public |protected |default |static |boolean |void |int |float |double |@Nullable )[^;=]*\(' "$1"; }
           sig gui/components/events/GuiEventListener.java
           sig gui/GuiGraphics.java
           sig MouseHandler.java
@@ -32,7 +29,6 @@ jobs:
           sig renderer/PanoramaRenderer.java
           sig gui/Font.java
           sig gui/screens/Overlay.java
-          sig renderer/RenderPipelines.java | head -60
-          grep -n "GUI_TEXTURED\b\|GUI\b =" renderer/RenderPipelines.java
-          sed -n 740,800p gui/screens/TitleScreen.java
+          grep -n "public static final RenderPipeline GUI" renderer/RenderPipelines.java
+          echo "=====TITLE RENDER"; sed -n 300,360p gui/screens/TitleScreen.java
           exit 0
