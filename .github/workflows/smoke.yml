@@ -6,6 +6,7 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -26,6 +27,7 @@ jobs:
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2
           (timeout 230 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
+          GAME=$!
           mkdir -p shots
           for i in $(seq 1 45); do
             sleep 5
@@ -35,7 +37,8 @@ jobs:
               import -window root -resize 960x540 -quality 70 "shots/$stage.jpg" && touch "shots/$stage.done"
             fi
           done
-          wait || true
+          wait $GAME || true
+          pkill Xvfb || true
           for f in shots/*.jpg; do echo "=====SHOT $f"; base64 -w0 "$f"; echo; done
       - name: Report
         if: always()
