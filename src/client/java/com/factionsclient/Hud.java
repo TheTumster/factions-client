@@ -142,13 +142,11 @@ public final class Hud {
 				else if (preview) lines.add(new Line("[Sprinting (Toggled)]", WHITE));
 			}
 			case "team" -> {
-				if (!cfg.backendReady()) {
-					lines.add(new Line("Team: not set up", GRAY));
-				} else if (TeamSync.lastError != null) {
-					lines.add(new Line("Team: sync error", RED));
+				if (!ServerLink.connected && !preview) {
+					// Not on RelapsedMC: nothing to show.
 				} else {
-					String dim = TeamSync.dimId(mc);
-					for (TeamSync.Mate m : TeamSync.MATES) {
+					String dim = ServerLink.dimId(mc);
+					for (ServerLink.Mate m : ServerLink.MATES) {
 						String where;
 						if (m.dim().equals(dim)) {
 							double dx = m.x() - p.getX(), dz = m.z() - p.getZ();

@@ -11,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -42,8 +41,6 @@ public final class Crumbs {
 	public static final Map<Integer, Trail> ACTIVE = new HashMap<>();
 	public static final List<Trail> FINISHED = new ArrayList<>();
 	public static final List<Marker> MARKERS = new CopyOnWriteArrayList<>();
-	/** Explosion block positions waiting to be sent to the team. */
-	public static final Set<BlockPos> OUTBOX = new HashSet<>();
 
 	private static ClientLevel lastLevel;
 
@@ -91,11 +88,6 @@ public final class Crumbs {
 			if (t.tnt && t.lastFuse <= 2 && !t.points.isEmpty()) {
 				Vec3 end = t.points.get(t.points.size() - 1);
 				MARKERS.add(new Marker(end, now, false, null));
-				if (FactionsClient.CONFIG.shareCrumbs) {
-					synchronized (OUTBOX) {
-						OUTBOX.add(BlockPos.containing(end));
-					}
-				}
 			}
 		}
 
@@ -115,8 +107,5 @@ public final class Crumbs {
 		ACTIVE.clear();
 		FINISHED.clear();
 		MARKERS.clear();
-		synchronized (OUTBOX) {
-			OUTBOX.clear();
-		}
 	}
 }

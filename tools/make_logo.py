@@ -1,18 +1,22 @@
-"""Generates the splash/menu logo. Usage: python tools/make_logo.py "LAG" "CLIENT" out.png"""
+"""Generates the splash/menu logo. Usage: python tools/make_logo.py "RELAPSED" "CLIENT" out.png"""
 import sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 big, small, out = sys.argv[1], sys.argv[2], sys.argv[3]
 W, H = 1024, 384
 FONT_DIR = "/usr/share/fonts/truetype/google-fonts/"
-fbig = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", 210)
+size = 210
+fbig = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", size)
+while ImageDraw.Draw(Image.new("L", (1, 1))).textlength(big, font=fbig) > W - 60 and size > 60:
+    size -= 6
+    fbig = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", size)
 fsmall = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", 56)
 
 # Gradient-filled big word
 text_mask = Image.new("L", (W, H), 0)
 d = ImageDraw.Draw(text_mask)
 bw = d.textlength(big, font=fbig)
-d.text(((W - bw) / 2, 10), big, font=fbig, fill=255)
+d.text(((W - bw) / 2, 10 + (210 - size) * 0.6), big, font=fbig, fill=255)
 
 grad = Image.new("RGBA", (W, H))
 c1, c2 = (56, 224, 255), (176, 64, 255)  # cyan -> purple

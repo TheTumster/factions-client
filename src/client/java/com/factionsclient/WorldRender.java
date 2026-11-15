@@ -42,8 +42,8 @@ public final class WorldRender {
 		if (cfg.chunkGrid) chunkBorders(m, vc, cam, mc);
 
 		if (cfg.team) {
-			String dim = TeamSync.dimId(mc);
-			for (TeamSync.Mate mate : TeamSync.MATES) {
+			String dim = ServerLink.dimId(mc);
+			for (ServerLink.Mate mate : ServerLink.MATES) {
 				if (!mate.dim().equals(dim)) continue;
 				// Tall thin pillar so you can spot them from far away
 				box(m, vc, cam, mate.x() - 0.15, mate.y(), mate.z() - 0.15, mate.x() + 0.15, mate.y() + 40, mate.z() + 0.15, MATE);

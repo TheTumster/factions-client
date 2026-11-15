@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "factionsclient",
 	"version": "${version}",
-	"name": "laG Client",
-	"description": "laG Client: private factions client.",
+	"name": "RelapsedMC Client",
+	"description": "RelapsedMC Client: the official factions client for RelapsedMC.",
 	"authors": [
 		"Jacob"
 	],

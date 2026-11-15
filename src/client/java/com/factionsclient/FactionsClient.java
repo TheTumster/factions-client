@@ -39,6 +39,7 @@ public class FactionsClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		CONFIG = Config.load();
+		ServerLink.init();
 
 		KeyMapping.Category cat = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
 		menuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.menu", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, cat));
@@ -80,7 +81,7 @@ public class FactionsClient implements ClientModInitializer {
 				SchemShare.msg("Crumbs " + (CONFIG.crumbs ? "on" : "off"), ChatFormatting.GRAY);
 			}
 			Crumbs.tick(mc);
-			TeamSync.tick(mc);
+			ServerLink.tick(mc);
 		});
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "hud"), Hud::render);
@@ -98,9 +99,8 @@ public class FactionsClient implements ClientModInitializer {
 					.then(literal("help").executes(ctx -> help()))
 					.then(literal("reload").executes(ctx -> {
 						CONFIG = Config.load();
-						TeamSync.lastError = null;
-						SchemShare.msg("Config reloaded. Backend " + (CONFIG.backendReady() ? "ready." : "NOT set up."),
-								CONFIG.backendReady() ? ChatFormatting.GREEN : ChatFormatting.RED);
+		ServerLink.init();
+						SchemShare.msg("Config reloaded.", ChatFormatting.GREEN);
 						return 1;
 					}))
 					.then(literal("clear").executes(ctx -> {
@@ -109,7 +109,7 @@ public class FactionsClient implements ClientModInitializer {
 					})));
 		});
 
-		LOG.info("laG Client loaded");
+		LOG.info("laG Client loaded"); // smoke test greps this exact line
 	}
 
 	/** Xaero's world map and Litematica both default to M. Move the world map to N, once. */
@@ -133,7 +133,7 @@ public class FactionsClient implements ClientModInitializer {
 	}
 
 	private static int help() {
-		SchemShare.msg("Right Shift = laG menu, G = chunk borders, C = zoom, J/K = crumbs", ChatFormatting.WHITE);
+		SchemShare.msg("Right Shift = client menu, G = chunk borders, C = zoom, J/K = crumbs", ChatFormatting.WHITE);
 		SchemShare.msg("/ss upload <file> | /ss get <code> | /ss list", ChatFormatting.WHITE);
 		SchemShare.msg("/fc reload after editing config/factionsclient.json", ChatFormatting.WHITE);
 		return 1;

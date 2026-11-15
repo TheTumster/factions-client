@@ -7,7 +7,7 @@ import net.minecraft.resources.Identifier;
 
 /** laG look: dark glass panels, cyan -> purple gradient, soft glow. All drawing helpers live here. */
 public final class Theme {
-	public static final String BRAND = "laG Client";
+	public static final String BRAND = "RelapsedMC Client";
 
 	public static final Identifier GRADIENT = id("textures/gui/gradient.png");
 	public static final Identifier GLOW = id("textures/gui/glow.png");

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Builds "Factions Client.mrpack": one file your friends import into the Modrinth App
+Builds "RelapsedMC Client.mrpack": one file players import into the Modrinth App
 (or Prism Launcher) to get Fabric + Litematica + Printer + Sodium + this mod, preconfigured.
 
 Usage: python tools/build_mrpack.py <mod-jar> <public.mrpack> <manifest.json> [<private.mrpack>]
@@ -93,8 +93,8 @@ def main():
         "formatVersion": 1,
         "game": "minecraft",
         "versionId": os.environ.get("GITHUB_RUN_NUMBER", "dev"),
-        "name": "laG Client",
-        "summary": "Private factions client",
+        "name": "RelapsedMC Client",
+        "summary": "Official RelapsedMC factions client",
         "files": files,
         "dependencies": {"minecraft": MC, "fabric-loader": loader},
     }

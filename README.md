@@ -1,29 +1,30 @@
-# Factions Client (1.21.11)
+# RelapsedMC Client (1.21.11)
 
-Private factions client for me and my friends. Fabric mod + Supabase backend + one-file install.
+The official client for RelapsedMC factions. A free Fabric modpack: install it once, it updates itself.
+(Code name "laG" stays internally: mod id, packages, repo.)
 
 ## What's in it
-- **HUD**: FPS, ping, live TNT count, coords + facing, nether/overworld coords, potion timers, armor durability, teammate list (distance, arrow, coords)
+- **HUD**: FPS, ping, live TNT count, coords + facing, nether/overworld coords, potion timers, armor durability, faction member list (distance, arrow, coords)
 - **Crumbs**: trails for every primed TNT (orange) and falling sand/gravel (yellow), red box where TNT exploded
-- **Patch crumbs (shared)**: explosions your teammates see show up for you in purple
-- **Team tracking**: teammates on the same server show as a cyan pillar + in the HUD list
-- **Schem share**: `/ss upload <file>`, `/ss get <code>`, `/ss list`
-- Bundled in the pack: Litematica, MaLiLib, Litematica Printer, Sodium, Fabric API
+- **Patch crumbs (RelapsedMC)**: TNT that hits your faction's claims shows up for you in purple, wherever you are
+- **Team tracking (RelapsedMC)**: your online faction members show as a cyan pillar + in the HUD list
+- Bundled in the pack: Litematica, MaLiLib, Litematica Printer, Sodium, Xaero's maps, Fabric API
 
 Keys: **Right Shift** menu, **K** clear crumbs, **J** toggle crumbs. `/fc help`, `/fc reload`.
 
-## One-time setup (owner)
-1. Create a free project at supabase.com (separate from anything else).
-2. SQL Editor -> paste `supabase/schema.sql` -> Run.
-3. Project Settings -> API: copy the **Project URL** and the **anon public** key.
-4. Make up a long random team key (your group password).
-5. GitHub repo -> Settings -> Secrets and variables -> Actions -> add:
-   `FC_SUPABASE_URL`, `FC_SUPABASE_ANON_KEY`, `FC_TEAM_KEY`
-6. Actions tab -> latest "build" run -> download the **Factions-Client** artifact.
+## How faction data works
+The RelapsedMC server sends it. `laGCannons` (repo `TheTumster/lag-network`, `ClientLink.java`) looks up your
+FactionsUUID faction and sends only your own faction's members and claim hits over the `relapsed:mates` and
+`relapsed:crumbs` plugin channels. There are no keys in the pack, so nobody can pull another faction's coords.
+On any other server nothing arrives and those features stay off.
 
-## Install (everyone)
+## Install (players)
 1. Install the Modrinth App (modrinth.com/app).
-2. Drag `Factions Client.mrpack` into it (or "Add instance" -> "Import from file").
-3. Hit Play, sign in with your Microsoft account like normal.
+2. Download `RelapsedMC Client.mrpack` from the latest release
+   (https://github.com/TheTumster/factions-client/releases/latest) and drag it into the app.
+3. Hit Play, sign in with your Microsoft account like normal, join RelapsedMC.
 
-The backend config is baked into the pack, so it works on first launch.
+## Schem share (`/ss`), private only
+Schem share still uses the old Supabase backend with a group password, so it only works in the private
+`RelapsedMC Client (team).mrpack` from the Actions tab. Never post that one publicly.
+Setup: `supabase/schema.sql`, then the `FC_SUPABASE_URL`, `FC_SUPABASE_ANON_KEY`, `FC_TEAM_KEY` repo secrets.

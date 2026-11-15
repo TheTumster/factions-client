@@ -186,7 +186,7 @@ public final class ModuleRegistry {
 						new KeyS("Toggle key", () -> FactionsClient.crumbsKey),
 						new KeyS("Clear key", () -> FactionsClient.clearKey))));
 
-		add(new Module("Patch Crumbs", "Share where TNT hits with your team (purple boxes)", Category.FACTIONS)
+		add(new Module("Patch Crumbs", "TNT hitting your faction's claims shows up for you (purple boxes)", Category.FACTIONS)
 				.toggle(() -> c().shareCrumbs, v -> c().shareCrumbs = v)
 				.settings(() -> List.of(new InfoS(ModuleRegistry::backendLine))));
 
@@ -198,7 +198,7 @@ public final class ModuleRegistry {
 						new BoolS("Show neighbor corners", () -> c().chunkCorners, v -> c().chunkCorners = v),
 						new KeyS("Toggle key", () -> FactionsClient.chunkKey))));
 
-		add(new Module("Team Tracking", "See your friends on the HUD and as beacons", Category.FACTIONS)
+		add(new Module("Team Tracking", "See your faction members on the HUD and as beacons", Category.FACTIONS)
 				.toggle(() -> c().team, v -> c().team = v)
 				.settings(() -> List.of(new InfoS(ModuleRegistry::backendLine))));
 
@@ -281,24 +281,21 @@ public final class ModuleRegistry {
 		add(new Module("All Mods", "Every installed mod and its settings", Category.MODS).opens(ModuleRegistry::openModList));
 
 		// ------------------------------------------------ CLIENT
-		add(new Module("laG Menu Key", "The key that opens this menu", Category.CLIENT)
+		add(new Module("Menu Key", "The key that opens this menu", Category.CLIENT)
 				.settings(() -> List.of(new KeyS("Open menu", () -> FactionsClient.menuKey))));
-		add(new Module("laG Main Menu", "Custom title screen instead of Minecraft's", Category.CLIENT)
+		add(new Module("Custom Main Menu", "Custom title screen instead of Minecraft's", Category.CLIENT)
 				.toggle(() -> c().customMenu, v -> c().customMenu = v));
-		add(new Module("laG Buttons", "Gradient style on every menu's buttons", Category.CLIENT)
+		add(new Module("Styled Buttons", "Gradient style on every menu's buttons", Category.CLIENT)
 				.toggle(() -> c().restyleButtons, v -> c().restyleButtons = v));
-		add(new Module("Discord Presence", "Show \"Playing laG Client\" on Discord", Category.CLIENT)
+		add(new Module("Discord Presence", "Show \"Playing RelapsedMC\" on Discord", Category.CLIENT)
 				.toggle(() -> c().discordPresence, v -> c().discordPresence = v)
 				.settings(() -> List.of(new BoolS("Show server address", () -> c().discordShowServer, v -> c().discordShowServer = v),
 						new InfoS(() -> "Turn off Discord RPC in the Modrinth App so it doesn't override this."))));
 		add(new Module("Updates", "The client updates itself on launch", Category.CLIENT)
 				.settings(() -> List.of(new InfoS(() -> Updater.pending != null ? Updater.pending : "You're on the latest build."))));
-		add(new Module("Team Backend", "Connection for team tracking & sharing", Category.CLIENT)
+		add(new Module("RelapsedMC Link", "Faction data sent by the RelapsedMC server", Category.CLIENT)
 				.settings(() -> List.of(new InfoS(ModuleRegistry::backendLine),
-						new ActionS("Reload config file", "Reload", () -> {
-							FactionsClient.CONFIG = Config.load();
-							TeamSync.lastError = null;
-						}))));
+						new ActionS("Reload config file", "Reload", () -> FactionsClient.CONFIG = Config.load()))));
 	}
 
 	private static void hudElement(String id, String name, String desc, Supplier<Boolean> get, Consumer<Boolean> set) {
@@ -330,9 +327,7 @@ public final class ModuleRegistry {
 	}
 
 	static String backendLine() {
-		Config c = FactionsClient.CONFIG;
-		if (!c.backendReady()) return "Backend not set up yet: team features are off.";
-		return TeamSync.lastError == null ? "Connected." : "Error: " + TeamSync.lastError;
+		return ServerLink.status();
 	}
 
 	// ---- third-party config screens through Mod Menu ----

@@ -40,7 +40,7 @@ public class LaGTitleScreen extends Screen {
 		y += bh + gap;
 		int half = (bw - gap) / 2;
 		buttons.add(new Theme.Btn("Options", () -> minecraft.setScreen(new OptionsScreen(this, minecraft.options))).at(cx - bw / 2, y, half, bh));
-		buttons.add(new Theme.Btn("laG Menu", () -> minecraft.setScreen(new LaGMenu(this))).at(cx - bw / 2 + half + gap, y, half, bh));
+		buttons.add(new Theme.Btn("Client Menu", () -> minecraft.setScreen(new LaGMenu(this))).at(cx - bw / 2 + half + gap, y, half, bh));
 		y += bh + gap;
 		buttons.add(new Theme.Btn("Quit", () -> minecraft.stop()).at(cx - bw / 2, y, bw, bh));
 

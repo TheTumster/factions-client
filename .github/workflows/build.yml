@@ -27,21 +27,21 @@ jobs:
         run: |
           JAR=$(ls build/libs/*.jar | grep -v -- '-sources' | head -1)
           echo "JAR=$JAR" >> "$GITHUB_ENV"
-          python3 tools/build_mrpack.py "$JAR" "Factions Client.mrpack" manifest.json "Factions Client (team).mrpack"
+          python3 tools/build_mrpack.py "$JAR" "RelapsedMC Client.mrpack" manifest.json "RelapsedMC Client (team).mrpack"
       # Private copy with the group password baked in: only downloadable by you from the Actions tab.
       - uses: actions/upload-artifact@v4
         with:
           name: release-files
           path: |
-            Factions Client.mrpack
+            RelapsedMC Client.mrpack
             manifest.json
             build/libs/*.jar
       - uses: actions/upload-artifact@v4
         with:
-          name: Factions-Client-PRIVATE
+          name: RelapsedMC-Client-PRIVATE
           path: |
-            Factions Client (team).mrpack
-            Factions Client.mrpack
+            RelapsedMC Client (team).mrpack
+            RelapsedMC Client.mrpack
           if-no-files-found: ignore
 
   # Launch the real game headless and walk through the laG screens. If this fails, nothing gets released.
@@ -107,6 +107,6 @@ jobs:
         run: |
           JAR=$(ls build/libs/*.jar | grep -v -- '-sources' | head -1)
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest "Factions Client.mrpack" manifest.json "$JAR" \
-            --title "laG Client (build ${{ github.run_number }})" \
+          gh release create latest "RelapsedMC Client.mrpack" manifest.json "$JAR" \
+            --title "RelapsedMC Client (build ${{ github.run_number }})" \
             --notes "First time: drag the .mrpack into the Modrinth App. After that the game updates itself on launch." --latest

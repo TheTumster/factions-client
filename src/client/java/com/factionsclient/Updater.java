@@ -118,7 +118,7 @@ public final class Updater {
 		writeState(wanted);
 
 		if (downloaded.isEmpty() && obsolete.isEmpty()) {
-			FactionsClient.LOG.info("Factions Client is up to date (build {})", build);
+			FactionsClient.LOG.info("RelapsedMC Client is up to date (build {})", build);
 			return;
 		}
 		scheduleSwap(mods, downloaded, obsolete);

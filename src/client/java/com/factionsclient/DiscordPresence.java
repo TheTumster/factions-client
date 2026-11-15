@@ -24,7 +24,7 @@ import net.minecraft.client.multiplayer.ServerData;
  * Shows "Playing laG Client" with the logo, where you are, and time played.
  */
 public final class DiscordPresence {
-	/** Discord application ID. The app's name ("laG Client") is what shows after "Playing". */
+	/** Discord application ID. The app's name (set it to "RelapsedMC" in the Discord developer portal) is what shows after "Playing". */
 	public static final String DEFAULT_APP_ID = "";
 
 	private static final long START = System.currentTimeMillis() / 1000;
@@ -90,7 +90,7 @@ public final class DiscordPresence {
 			activity.add("timestamps", ts);
 			JsonObject assets = new JsonObject();
 			assets.addProperty("large_image", "logo");
-			assets.addProperty("large_text", "laG Client");
+			assets.addProperty("large_text", "RelapsedMC Client");
 			activity.add("assets", assets);
 
 			JsonObject args = new JsonObject();
