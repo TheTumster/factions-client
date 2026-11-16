@@ -38,13 +38,13 @@ public final class TeamLink {
 
 	// ---------------------------------------------------------------- payloads
 
-	private static Identifier id(String path) {
+	private static Identifier rid(String path) {
 		return Identifier.fromNamespaceAndPath("relapsed", path);
 	}
 
 	public record StatePayload(String team, String leader, boolean youLead, List<Member> members, List<Invite> invites,
 			List<Schem> schems) implements CustomPacketPayload {
-		public static final Type<StatePayload> TYPE = new Type<>(id("team"));
+		public static final Type<StatePayload> TYPE = new Type<>(rid("team"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, StatePayload> CODEC = StreamCodec.of((buf, p) -> {
 			throw new UnsupportedOperationException("server-only");
 		}, buf -> {
@@ -73,7 +73,7 @@ public final class TeamLink {
 	}
 
 	public record MatesPayload(List<ServerLink.Mate> mates) implements CustomPacketPayload {
-		public static final Type<MatesPayload> TYPE = new Type<>(id("tmates"));
+		public static final Type<MatesPayload> TYPE = new Type<>(rid("tmates"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, MatesPayload> CODEC = StreamCodec.of((buf, p) -> {
 			throw new UnsupportedOperationException("server-only");
 		}, buf -> {
@@ -93,7 +93,7 @@ public final class TeamLink {
 	}
 
 	public record PingPayload(Ping ping) implements CustomPacketPayload {
-		public static final Type<PingPayload> TYPE = new Type<>(id("ping"));
+		public static final Type<PingPayload> TYPE = new Type<>(rid("ping"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, PingPayload> CODEC = StreamCodec.of((buf, p) -> {
 			throw new UnsupportedOperationException("server-only");
 		}, buf -> new PingPayload(new Ping(buf.readUtf(64), buf.readUtf(16), buf.readUtf(128),
@@ -106,7 +106,7 @@ public final class TeamLink {
 	}
 
 	public record SchemDataPayload(int id, String name, int total, int index, byte[] data) implements CustomPacketPayload {
-		public static final Type<SchemDataPayload> TYPE = new Type<>(id("schem_data"));
+		public static final Type<SchemDataPayload> TYPE = new Type<>(rid("schem_data"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SchemDataPayload> CODEC = StreamCodec.of((buf, p) -> {
 			throw new UnsupportedOperationException("server-only");
 		}, buf -> {
@@ -126,7 +126,7 @@ public final class TeamLink {
 	}
 
 	public record SchemUpPayload(String name, int total, int index, byte[] data) implements CustomPacketPayload {
-		public static final Type<SchemUpPayload> TYPE = new Type<>(id("schem_up"));
+		public static final Type<SchemUpPayload> TYPE = new Type<>(rid("schem_up"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SchemUpPayload> CODEC = StreamCodec.of((buf, p) -> {
 			buf.writeUtf(p.name);
 			buf.writeVarInt(p.total);
@@ -144,8 +144,8 @@ public final class TeamLink {
 	}
 
 	public record SchemIdPayload(Type<SchemIdPayload> kind, int id) implements CustomPacketPayload {
-		public static final Type<SchemIdPayload> GET = new Type<>(id("schem_get"));
-		public static final Type<SchemIdPayload> DEL = new Type<>(id("schem_del"));
+		public static final Type<SchemIdPayload> GET = new Type<>(rid("schem_get"));
+		public static final Type<SchemIdPayload> DEL = new Type<>(rid("schem_del"));
 
 		static StreamCodec<RegistryFriendlyByteBuf, SchemIdPayload> codec(Type<SchemIdPayload> t) {
 			return StreamCodec.of((buf, p) -> buf.writeVarInt(p.id), buf -> new SchemIdPayload(t, buf.readVarInt()));

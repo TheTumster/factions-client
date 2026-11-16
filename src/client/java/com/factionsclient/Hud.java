@@ -200,7 +200,7 @@ public final class Hud {
 					}
 					// RelapsedMC team (pink), not already listed as faction mates
 					for (ServerLink.Mate m : TeamLink.MATES) {
-						if (!cfg.teamTrack || !m.dim().equals(dim) || ServerLink.MATES.stream().anyMatch(f -> f.name().equals(m.name()))) continue;
+						if (!cfg.teamTrack || !m.dim().equals(dim) || ServerLink.MATES.stream().anyMatch(fm -> fm.name().equals(m.name()))) continue;
 						double dx = m.x() - p.getX(), dz = m.z() - p.getZ();
 						lines.add(new Line("§d" + m.name() + "  §7" + (int) Math.sqrt(dx * dx + dz * dz) + "m " + arrow(p.getYRot(), dx, dz), accent));
 					}
