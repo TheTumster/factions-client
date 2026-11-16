@@ -13,6 +13,7 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class Litematica {
 	private static final String[] PRINTER_CLASSES = {
+			"me.aleksilassila.litematica.printer.config.Configs", // 3.x (the version the pack ships)
 			"me.aleksilassila.litematica.printer.common.LitematicaMod",
 			"me.aleksilassila.litematica.printer.LitematicaMixinMod",
 			"me.aleksilassila.litematica.printer.LitematicaMod",

@@ -31,21 +31,19 @@ if (project.hasProperty("devPackMods")) {
 				dependencies.add("modLocalRuntime", "maven.modrinth:${id.group(1)}:${id.group(2)}")
 				logger.lifecycle("dev pack mod: ${m.filename}")
 			}
-			// Xaero ships its library inside the minimap jar; the dev game needs it as its own mod.
-			if (m.filename.startsWith("xaerominimap")) {
-				def dir = layout.buildDirectory.dir("dev-pack-mods").get().asFile
-				dir.mkdirs()
-				def jar = new File(dir, m.filename)
-				if (!jar.exists()) new URL(m.url).withInputStream { i -> jar.withOutputStream { it << i } }
-				def zip = new java.util.zip.ZipFile(jar)
-				zip.entries().findAll { it.name ==~ /META-INF\/jars\/xaerolib.*\.jar/ }.each { e ->
-					def lib = new File(dir, e.name.substring(e.name.lastIndexOf('/') + 1))
-					lib.withOutputStream { it << zip.getInputStream(e) }
-					dependencies.add("modLocalRuntime", files(lib))
-					logger.lifecycle("dev pack mod: ${lib.name} (from the minimap jar)")
-				}
-				zip.close()
+			// Mods ship libraries inside their jars (xaerolib, conditional-mixin...); the dev game needs them as mods.
+			def dir = layout.buildDirectory.dir("dev-pack-mods").get().asFile
+			dir.mkdirs()
+			def jar = new File(dir, m.filename)
+			if (!jar.exists()) new URL(m.url).withInputStream { i -> jar.withOutputStream { it << i } }
+			def zip = new java.util.zip.ZipFile(jar)
+			zip.entries().findAll { it.name ==~ /META-INF\/jars\/[^\/]+\.jar/ }.each { e ->
+				def lib = new File(dir, e.name.substring(e.name.lastIndexOf('/') + 1))
+				if (!lib.exists()) lib.withOutputStream { it << zip.getInputStream(e) }
+				dependencies.add("modLocalRuntime", files(lib))
+				logger.lifecycle("dev pack mod: ${lib.name} (inside ${m.filename})")
 			}
+			zip.close()
 		}
 	}
 }
