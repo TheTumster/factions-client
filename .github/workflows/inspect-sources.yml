@@ -2,6 +2,8 @@ name: inspect-sources
 on:
   push:
     branches: [inspect-sources]
+permissions:
+  contents: write
 jobs:
   sources:
     runs-on: ubuntu-24.04
@@ -11,11 +13,11 @@ jobs:
         with: { java-version: '25', distribution: 'temurin' }
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x ./gradlew && ./gradlew genSources -q || true
-      - name: collect
+      - name: commit sources to inspect-sources-out
         run: |
-          mkdir -p out
-          for j in $(find ~/.gradle .gradle -name "*minecraft-*sources.jar" 2>/dev/null); do cp "$j" out/; done
-          for j in $(find ~/.gradle -path "*net.fabricmc.fabric-api*" -name "fabric-networking-api*sources*.jar" -o -path "*fabric*" -name "fabric-screen-api*sources*.jar" 2>/dev/null | head -4); do cp "$j" out/; done
-          ls -la out
-      - uses: actions/upload-artifact@v4
-        with: { name: mc-sources, path: out }
+          mkdir -p /tmp/src && cd /tmp/src
+          for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do unzip -oq "$j" 'net/minecraft/client/*' 'net/minecraft/network/*' 'net/minecraft/resources/*' 'com/mojang/realmsclient/*' || true; done
+          du -sh /tmp/src
+          git init -q -b inspect-sources-out && git add -A
+          git -c user.name=ci -c user.email=ci@x commit -qm sources
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" inspect-sources-out
