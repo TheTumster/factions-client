@@ -102,7 +102,7 @@ final class Smoke {
 				if (m.name.equals("Printer") || m.name.equals("Minimap") || m.name.equals("Video & Performance") || m.name.equals("Litematica: General"))
 					pages.put(m.name, m.settings.get().size());
 			}
-			boolean bridges = pages.size() == 4 && pages.values().stream().allMatch(n -> n >= 3);
+			boolean bridges = pages.size() == 4 && pages.values().stream().allMatch(n -> n >= 3) && pages.get("Printer") < 30; // printer: only its own options
 			FactionsClient.LOG.info("SMOKE bridges {} {}", bridges ? "ok" : "BROKEN", pages);
 			FactionsClient.LOG.info("SMOKE modes={} (sky={} fac={} kept={})", skyOk && facOk && kept ? "ok" : "BROKEN", skyOk, facOk, kept);
 			mc.setScreen(new net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen(new LaGTitleScreen()));

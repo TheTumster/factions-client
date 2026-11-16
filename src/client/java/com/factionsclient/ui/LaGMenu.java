@@ -330,7 +330,9 @@ public class LaGMenu extends Screen {
 			g.drawString(font, Theme.trim(font, info.text.get(), w - 16), x + 8, midY, Theme.alpha(Theme.MUTED, a), false);
 			return;
 		}
-		g.drawString(font, Theme.trim(font, s.name, w / 2), x + 8, midY, Theme.alpha(Theme.TEXT, a), false);
+		// Name gets all the room its control doesn't need
+		int nameRoom = s instanceof BoolS ? w - 50 : s instanceof ModuleRegistry.ChoiceS || s instanceof KeyS ? w - 110 : w / 2;
+		g.drawString(font, Theme.trim(font, s.name, nameRoom), x + 8, midY, Theme.alpha(Theme.TEXT, a), false);
 
 		if (s instanceof BoolS b) {
 			boolean on = b.get.get();

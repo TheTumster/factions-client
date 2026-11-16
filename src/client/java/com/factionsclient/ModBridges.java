@@ -55,6 +55,19 @@ public final class ModBridges {
 		}
 	}
 
+	/** The malilib options declared as public static fields of one class (not lists other mods mixed into). */
+	public static List<?> malilibFields(String className) {
+		List<Object> out = new ArrayList<>();
+		try {
+			for (Field f : Class.forName(className).getFields()) {
+				if (!Modifier.isStatic(f.getModifiers())) continue;
+				Object o = f.get(null);
+				if (o != null && o.getClass().getName().startsWith("fi.dy.masa.malilib.config.options.")) out.add(o);
+			}
+		} catch (Throwable ignored) { }
+		return out;
+	}
+
 	public static List<Setting> malilib(List<?> configs, Runnable save) {
 		List<Setting> out = new ArrayList<>();
 		for (Object cfg : configs) {
@@ -240,7 +253,7 @@ public final class ModBridges {
 			for (Field f : Class.forName(XAERO_OPTIONS).getFields()) {
 				if (!Modifier.isStatic(f.getModifiers())) continue;
 				Object opt = f.get(null);
-				if (opt == null) continue;
+				if (opt == null || f.getName().equals("DISPLAY_MINIMAP")) continue; // that's the card's own switch
 				try {
 					Setting s = xaeroOne(opt, f.getName());
 					if (s != null) out.add(s);

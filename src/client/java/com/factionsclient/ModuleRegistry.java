@@ -286,8 +286,9 @@ public final class ModuleRegistry {
 						s.add(new InfoS(() -> "Printer mod not found in this profile."));
 						return s;
 					}
-					s.addAll(ModBridges.malilib(ModBridges.malilibList("me.aleksilassila.litematica.printer.config.Configs", "getConfigList"), ModBridges::saveLitematica));
-					s.addAll(ModBridges.malilib(ModBridges.malilibList("me.aleksilassila.litematica.printer.config.Hotkeys", "getHotkeyList"), ModBridges::saveLitematica));
+					// Only the printer's own options (its config lists also contain everything Litematica has)
+					s.addAll(ModBridges.malilib(ModBridges.malilibFields("me.aleksilassila.litematica.printer.config.Configs"), ModBridges::saveLitematica));
+					s.addAll(ModBridges.malilib(ModBridges.malilibFields("me.aleksilassila.litematica.printer.config.Hotkeys"), ModBridges::saveLitematica));
 					return s;
 				}));
 
