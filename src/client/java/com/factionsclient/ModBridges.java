@@ -124,11 +124,15 @@ public final class ModBridges {
 			return new ChoiceS(name, () -> str(call(call(cfg, "getOptionListValue"), "getDisplayName")), fwd -> {
 				Object cur = call(cfg, "getOptionListValue");
 				Object next = callArg(cur, "cycle", boolean.class, fwd);
-				for (Method m : cfg.getClass().getMethods()) {
-					if (m.getName().equals("setOptionListValue") && m.getParameterCount() == 1) {
-						m.invoke(cfg, next);
-						break;
+				try {
+					for (Method m : cfg.getClass().getMethods()) {
+						if (m.getName().equals("setOptionListValue") && m.getParameterCount() == 1) {
+							m.invoke(cfg, next);
+							break;
+						}
 					}
+				} catch (Exception e) {
+					FactionsClient.LOG.warn("Couldn't change {}: {}", cfg, e.toString());
 				}
 				save.run();
 			});
