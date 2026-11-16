@@ -112,8 +112,10 @@ public final class ChatTabs {
 				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.6f, 0.6f));
 			}
 		}
-		for (int i = 1; i < tabs.size(); i++) {
-			if (i != active && inTab(tabs.get(i), text)) unread.merge(tabs.get(i).name(), 1, Integer::sum);
+		if (repeat == 1) { // a stacked repeat isn't new news
+			for (int i = 1; i < tabs.size(); i++) {
+				if (i != active && inTab(tabs.get(i), text)) unread.merge(tabs.get(i).name(), 1, Integer::sum);
+			}
 		}
 		MutableComponent out = msg.copy();
 		if (FactionsClient.CONFIG.chatTimestamps) {
@@ -206,7 +208,8 @@ public final class ChatTabs {
 		for (int i = 0; i < tabs.size(); i++) {
 			Tab t = tabs.get(i);
 			int n = unread.getOrDefault(t.name(), 0);
-			String label = t.name() + (n > 0 ? " " + Math.min(n, 99) : "");
+			// Server gets busy: just the colored underline there, no number
+			String label = t.name() + (n > 0 && !t.name().equals("Server") ? " " + Math.min(n, 99) : "");
 			int w = font.width(label) + 10;
 			boolean on = i == active, hov = Theme.inside(mouseX, mouseY, x, y, w, h);
 			Theme.rect(g, x, y, w, h, on ? 0xE0161026 : hov ? 0xC0161026 : 0x900B0716);
