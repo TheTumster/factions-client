@@ -267,6 +267,11 @@ public final class ChatTabs {
 		}
 	}
 
+	/** Bar hidden this frame (command typing): nothing to click. */
+	public static void hideBar() {
+		HITS.clear();
+	}
+
 	public static boolean click(double mx, double my) {
 		for (int[] r : HITS) {
 			if (mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + r[3]) {
