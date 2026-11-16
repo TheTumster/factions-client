@@ -233,7 +233,7 @@ public final class ChatTabs {
 		for (int[] r : HITS) {
 			if (mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + r[3]) {
 				select(r[4]);
-				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.4f, 0.4f));
+				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.4f));
 				return true;
 			}
 		}
