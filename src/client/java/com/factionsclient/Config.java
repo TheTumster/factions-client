@@ -82,6 +82,8 @@ public class Config {
 
 	/** One-time: move Xaero's world map off M so it doesn't clash with Litematica. */
 	public boolean xaeroKeyFixed = false;
+	/** One-time FPS tune (clouds off, render distance 16, no FPS cap) already applied. */
+	public boolean perfTuned = false;
 
 	// Crumbs
 	public int crumbSeconds = 20;

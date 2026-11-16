@@ -69,7 +69,7 @@ jobs:
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2
-          (timeout 480 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
+          (timeout 540 ./gradlew runClient -PdevPackMods --no-daemon > game.log 2>&1 || true) &
           GAME=$!
           mkdir -p shots
           wait $GAME || true
@@ -95,9 +95,10 @@ jobs:
       - name: Verify the game reached every laG screen without crashing
         run: |
           if ls run/crash-reports/*.txt >/dev/null 2>&1; then echo "Game crashed"; exit 1; fi
-          for st in title menu menu-hud options multiplayer menu-factions hud-editor menu-small world-create ingame ingame-hud-editor ingame-menu done; do
+          for st in title menu menu-hud options multiplayer menu-factions hud-editor menu-small world-create ingame ingame-hud-editor ingame-menu printer-page minimap-page video-page done; do
             grep -q "SMOKE stage $st" game.log || { echo "Never reached: $st"; exit 1; }
           done
+          grep -q "SMOKE bridges ok" game.log || { echo "Settings pages for Printer/Litematica/Minimap/Video are empty"; grep "SMOKE bridges" game.log; exit 1; }
           grep -q "SMOKE modes=ok" game.log || { echo "Mode switching is broken"; grep "SMOKE modes" game.log; exit 1; }
           grep -q "SMOKE pinned=true" game.log || { echo "RelapsedMC is not pinned to the top of the server list"; exit 1; }
           echo "All screens OK"

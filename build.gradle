@@ -13,6 +13,28 @@ loom {
 	}
 }
 
+repositories {
+	exclusiveContent {
+		forRepository { maven { name = "Modrinth"; url = "https://api.modrinth.com/maven" } }
+		filter { includeGroup "maven.modrinth" }
+	}
+}
+
+// -PdevPackMods (smoke test only): run the dev game with the same Litematica / Printer / Xaero builds the pack ships,
+// so the in-menu settings pages for those mods get tested too.
+if (project.hasProperty("devPackMods")) {
+	def manifest = new groovy.json.JsonSlurper().parse(new URL("https://github.com/TheTumster/factions-client/releases/latest/download/manifest.json"))
+	manifest.mods.each { m ->
+		if (m.filename ==~ /^(litematica|malilib|xaerominimap).*/) {
+			def id = (m.url =~ /data\/([^\/]+)\/versions\/([^\/]+)\//)
+			if (id.find()) {
+				dependencies.add("modLocalRuntime", "maven.modrinth:${id.group(1)}:${id.group(2)}")
+				logger.lifecycle("dev pack mod: ${m.filename}")
+			}
+		}
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings loom.officialMojangMappings()

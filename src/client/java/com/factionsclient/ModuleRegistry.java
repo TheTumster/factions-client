@@ -56,6 +56,9 @@ public final class ModuleRegistry {
 		public final Supplier<Integer> get;
 		public final Consumer<Integer> set;
 
+		/** Optional: how to show the value (e.g. 0.1 steps, "Unlimited"). */
+		public java.util.function.IntFunction<String> fmt;
+
 		public IntS(String name, int min, int max, int step, String suffix, Supplier<Integer> get, Consumer<Integer> set) {
 			super(name);
 			this.min = min;
@@ -64,6 +67,27 @@ public final class ModuleRegistry {
 			this.suffix = suffix;
 			this.get = get;
 			this.set = set;
+		}
+
+		public IntS fmt(java.util.function.IntFunction<String> f) {
+			this.fmt = f;
+			return this;
+		}
+
+		public String show(int v) {
+			return fmt != null ? fmt.apply(v) : v + suffix;
+		}
+	}
+
+	/** A value you click through (Off / Fast / Fancy...). Left click = next, right click = previous. */
+	public static final class ChoiceS extends Setting {
+		public final Supplier<String> value;
+		public final Consumer<Boolean> cycle; // true = forward
+
+		public ChoiceS(String name, Supplier<String> value, Consumer<Boolean> cycle) {
+			super(name);
+			this.value = value;
+			this.cycle = cycle;
 		}
 	}
 
@@ -80,10 +104,22 @@ public final class ModuleRegistry {
 
 	public static final class KeyS extends Setting {
 		public final Supplier<KeyMapping> key;
+		/** For keys that aren't vanilla KeyMappings (Litematica/Printer hotkeys): current label + rebind (-1 = none). */
+		public final Supplier<String> label;
+		public final java.util.function.IntConsumer bind;
 
 		public KeyS(String name, Supplier<KeyMapping> key) {
 			super(name);
 			this.key = key;
+			this.label = null;
+			this.bind = null;
+		}
+
+		public KeyS(String name, Supplier<String> label, java.util.function.IntConsumer bind) {
+			super(name);
+			this.key = () -> null;
+			this.label = label;
+			this.bind = bind;
 		}
 	}
 
@@ -147,6 +183,14 @@ public final class ModuleRegistry {
 		Module settings(Supplier<List<Setting>> s) {
 			this.settings = s;
 			return this;
+		}
+
+		private Boolean hasSettingsCache;
+
+		/** Cached: building some pages (other mods' options) is too heavy to do every frame. */
+		public boolean hasSettings() {
+			if (hasSettingsCache == null) hasSettingsCache = !settings.get().isEmpty();
+			return hasSettingsCache;
 		}
 
 		Module opens(Runnable r) {
@@ -236,9 +280,16 @@ public final class ModuleRegistry {
 		// ------------------------------------------------ SCHEMATICA
 		add(new Module("Printer", "Auto-places the loaded schematic around you", Category.SCHEMATICA)
 				.toggle(() -> Boolean.TRUE.equals(Litematica.printer()), Litematica::setPrinter)
-				.settings(() -> List.of(
-						new InfoS(() -> Litematica.printer() == null ? "Printer mod not found in this profile." : "Caps Lock also toggles it in-game."),
-						new ActionS("Speed, range & more", "Open", () -> Litematica.open("GuiConfigs", parentScreen)))));
+				.settings(() -> {
+					List<Setting> s = new ArrayList<>();
+					if (Litematica.printer() == null) {
+						s.add(new InfoS(() -> "Printer mod not found in this profile."));
+						return s;
+					}
+					s.addAll(ModBridges.malilib(ModBridges.malilibList("me.aleksilassila.litematica.printer.config.Configs", "getConfigList"), ModBridges::saveLitematica));
+					s.addAll(ModBridges.malilib(ModBridges.malilibList("me.aleksilassila.litematica.printer.config.Hotkeys", "getHotkeyList"), ModBridges::saveLitematica));
+					return s;
+				}));
 
 		add(new Module("Litematica", "Load, place and manage schematics", Category.SCHEMATICA)
 				.settings(() -> {
@@ -251,7 +302,6 @@ public final class ModuleRegistry {
 					s.add(new ActionS("Load a schematic", "Browse", () -> Litematica.open("GuiSchematicLoad", parentScreen)));
 					s.add(new ActionS("Placements", "Open", () -> Litematica.open("GuiSchematicPlacementsList", parentScreen)));
 					s.add(new ActionS("Loaded schematics", "Open", () -> Litematica.open("GuiSchematicLoadedList", parentScreen)));
-					s.add(new ActionS("Litematica settings", "Open", () -> Litematica.open("GuiConfigs", parentScreen)));
 					if (Litematica.schematicRendering() != null)
 						s.add(new BoolS("Show schematic", () -> Boolean.TRUE.equals(Litematica.schematicRendering()), Litematica::setSchematicRendering));
 					if (Litematica.easyPlaceMode() != null)
@@ -259,7 +309,21 @@ public final class ModuleRegistry {
 					return s;
 				}));
 
+		// Every Litematica setting, in our UI (same options as its own config screen)
+		litematicaPage("Litematica: General", "Placement, Easy Place, pasting, pick block", "Configs$Generic", "OPTIONS");
+		litematicaPage("Litematica: Visuals", "How schematics and overlays are drawn", "Configs$Visuals", "OPTIONS");
+		litematicaPage("Litematica: Info Overlays", "Block info, verifier and HUD text", "Configs$InfoOverlays", "OPTIONS");
+		litematicaPage("Litematica: Colors", "Overlay and highlight colors", "Configs$Colors", "OPTIONS");
+		litematicaPage("Litematica: Hotkeys", "Every Litematica key binding", "Hotkeys", "HOTKEY_LIST");
+
 		// ------------------------------------------------ RENDER
+		add(new Module("Video & Performance", "Render distance, FPS cap, clouds, graphics, FOV", Category.RENDER)
+				.settings(Performance::settings));
+
+		add(new Module("Minimap", "Xaero's minimap: size, radar, waypoints, cave mode, everything", Category.RENDER)
+				.toggle(() -> Boolean.TRUE.equals(ModBridges.xaeroBool("DISPLAY_MINIMAP")), v -> ModBridges.setXaeroBool("DISPLAY_MINIMAP", v))
+				.settings(ModBridges::xaeroMinimap));
+
 		add(new Module("Fullbright", "See in caves and at night like it's daytime", Category.RENDER)
 				.toggle(() -> c().fullbright, v -> c().fullbright = v)
 				.settings(() -> List.of(new KeyS("Toggle key", () -> FactionsClient.fullbrightKey))));
@@ -307,7 +371,6 @@ public final class ModuleRegistry {
 		// ------------------------------------------------ MODS (their own settings screens)
 		modCard("Sodium", "Video & performance settings", "sodium");
 		modCard("Iris Shaders", "Shader packs", "iris");
-		modCard("Xaero's Minimap", "Minimap, radar & waypoints", "xaerominimap");
 		modCard("Xaero's World Map", "Full screen map", "xaeroworldmap");
 		modCard("Litematica", "Schematic tool settings", "litematica");
 		modCard("Entity Culling", "Hide what you can't see for FPS", "entityculling");
@@ -340,6 +403,12 @@ public final class ModuleRegistry {
 						new IntS("Size", 50, 300, 10, "%", () -> Math.round(Hud.pos(id)[2] * 100), v -> Hud.pos(id)[2] = v / 100f),
 						new ActionS("Position", "Reset", () -> c().hudPos.put(id, Hud.defaultPos(id))),
 						new ActionS("Move it", "Edit layout", () -> Minecraft.getInstance().setScreen(new HudEditorScreen(parentScreen))))));
+	}
+
+	private static void litematicaPage(String name, String desc, String cls, String member) {
+		if (!Litematica.present()) return;
+		add(new Module(name, desc, Category.SCHEMATICA).settings(() ->
+				ModBridges.malilib(ModBridges.malilibList("fi.dy.masa.litematica.config." + cls, member), ModBridges::saveLitematica)));
 	}
 
 	private static void modCard(String name, String desc, String modId) {

@@ -51,6 +51,7 @@ public class FactionsClient implements ClientModInitializer {
 		fullbrightKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.fullbright", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
 
 		ClientLifecycleEvents.CLIENT_STARTED.register(FactionsClient::moveXaeroMapKey);
+		ClientLifecycleEvents.CLIENT_STARTED.register(Performance::tuneOnce);
 		ClientLifecycleEvents.CLIENT_STARTED.register(mc -> Updater.checkAsync());
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> Updater.announce());
 		ClientLifecycleEvents.CLIENT_STOPPING.register(Modules::restoreAll);

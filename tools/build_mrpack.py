@@ -19,7 +19,9 @@ MC = "1.21.11"
 PROJECTS = ["fabric-api", "litematica", "malilib", "litematica-printer", "sodium",
             "xaeros-minimap", "xaeros-world-map", "modmenu"]
 # Nice-to-haves: skipped (with a warning) if there's no 1.21.11 build
-OPTIONAL = ["iris", "entityculling", "ferrite-core"]
+OPTIONAL = ["iris", "entityculling", "ferrite-core",
+            "bobby",          # chunk caching: keeps chunks you've seen, renders past the server's view distance
+            "immediatelyfast", "modernfix"]  # free FPS / faster loading, no visual changes
 # Modrinth asks for a User-Agent that identifies the project; generic ones get throttled.
 UA = {"User-Agent": "TheTumster/factions-client/1.0 (github.com/TheTumster/factions-client)"}
 

@@ -57,6 +57,7 @@ public class LaGMenu extends Screen {
 	private int dragX, dragW;
 
 	private int wx, wy, ww, wh;
+	private boolean rightClick = false;
 	/** When the visible card list last changed (tab switch / search): cards slide in one after another. */
 	private long listShownAt = System.currentTimeMillis();
 
@@ -73,6 +74,19 @@ public class LaGMenu extends Screen {
 		wh = Math.min(360, this.height - 24);
 		wx = (this.width - ww) / 2;
 		wy = (this.height - wh) / 2;
+	}
+
+	/** Jump straight to a module's settings page (used by the smoke test). */
+	public void openPage(String moduleName) {
+		for (Module m : ModuleRegistry.ALL) {
+			if (m.name.equals(moduleName)) {
+				category = m.category;
+				open = m;
+				openSettings = m.settings.get();
+				scroll = scrollTarget = 0;
+				return;
+			}
+		}
 	}
 
 	// ================================================================ render
@@ -213,7 +227,7 @@ public class LaGMenu extends Screen {
 		if (on) Theme.gradient(g, x, y, 3, h, a);
 		Theme.outline(g, x, y, w, h, Theme.alpha(Theme.lerp(Theme.LINE, 0x50FFFFFF, hv), a));
 
-		boolean hasPage = m.open != null || !m.settings.get().isEmpty();
+		boolean hasPage = m.open != null || m.hasSettings();
 		int nameRoom = w - 20 - (m.toggle != null ? 36 : 0) - (m.toggle == null && hasPage ? 14 : 0);
 		g.drawString(font, Theme.trim(font, m.name, nameRoom), x + 10, y + 9, Theme.alpha(on ? 0xFFFFFFFF : Theme.TEXT, a), false);
 		// Description wraps onto two lines (scaled down a touch) instead of being cut off
@@ -330,7 +344,7 @@ public class LaGMenu extends Screen {
 			int sw = Math.min(150, w / 2 - 50), sx = right - sw, ty = y + h / 2 - 2;
 			int v = is.get.get();
 			float t = (v - is.min) / (float) Math.max(1, is.max - is.min);
-			String val = v + is.suffix;
+			String val = is.show(v);
 			g.drawString(font, val, sx - 8 - font.width(val), midY, Theme.alpha(Theme.MUTED, a), false);
 			Theme.rect(g, sx, ty, sw, 4, Theme.alpha(0xFF262E3B, a));
 			Theme.gradient(g, sx, ty, Math.max(2, Math.round(sw * t)), 4, a);
@@ -365,7 +379,9 @@ public class LaGMenu extends Screen {
 		} else if (s instanceof KeyS ks) {
 			KeyMapping km = ks.key.get();
 			boolean lis = listening == ks;
-			String label = km == null ? "?" : lis ? "Press a key…" : km.isUnbound() ? "None" : km.getTranslatedKeyMessage().getString();
+			String label = lis ? "Press a key…"
+					: ks.label != null ? (ks.label.get() == null || ks.label.get().isBlank() ? "None" : ks.label.get())
+					: km == null ? "?" : km.isUnbound() ? "None" : km.getTranslatedKeyMessage().getString();
 			int bw = Math.max(70, font.width(label) + 16), bx = right - bw, by = y + (h - 16) / 2;
 			float hv = hover(ks, Theme.inside(mx, my, bx, by, bw, 16));
 			if (lis) {
@@ -382,6 +398,19 @@ public class LaGMenu extends Screen {
 				focusedText = null;
 				searchFocused = false;
 				click();
+			}));
+		} else if (s instanceof ModuleRegistry.ChoiceS ch) {
+			String label = ch.value.get() + "  ›";
+			int bw = Math.max(70, font.width(label) + 18), bx = right - bw, by = y + (h - 16) / 2;
+			float hv = hover(ch, Theme.inside(mx, my, bx, by, bw, 16));
+			Theme.rect(g, bx, by, bw, 16, Theme.alpha(Theme.lerp(Theme.FIELD, Theme.CARD_HOVER, hv), a));
+			Theme.gradient(g, bx, by + 15, bw, 1, a * (0.5f + 0.5f * hv));
+			Theme.outline(g, bx, by, bw, 16, Theme.alpha(Theme.LINE, a));
+			Theme.centered(g, font, label, bx + bw / 2, by + 4, Theme.alpha(0xFFFFFFFF, a));
+			if (inView) hits.add(new Hit(bx, by, bw, 16, () -> {
+				click();
+				ch.cycle.accept(!rightClick);
+				FactionsClient.CONFIG.save();
 			}));
 		} else if (s instanceof ActionS act) {
 			int bw = font.width(act.button) + 18, bx = right - bw, by = y + (h - 16) / 2;
@@ -462,7 +491,8 @@ public class LaGMenu extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
-		if (e.button() != 0) return super.mouseClicked(e, doubleClick);
+		if (e.button() != 0 && e.button() != 1) return super.mouseClicked(e, doubleClick);
+		rightClick = e.button() == 1; // right click steps choices backwards
 		double mx = px(e.x()), my = py(e.y());
 		boolean hadFocus = searchFocused || focusedText != null;
 		listening = null;
@@ -521,6 +551,11 @@ public class LaGMenu extends Screen {
 	public boolean keyPressed(KeyEvent e) {
 		int key = e.key();
 		if (listening != null) {
+			if (listening.bind != null) {
+				if (key != InputConstants.KEY_ESCAPE) listening.bind.accept(key == InputConstants.KEY_BACKSPACE ? -1 : key);
+				listening = null;
+				return true;
+			}
 			KeyMapping km = listening.key.get();
 			if (km != null && key != InputConstants.KEY_ESCAPE) {
 				km.setKey(key == InputConstants.KEY_BACKSPACE ? InputConstants.UNKNOWN : InputConstants.Type.KEYSYM.getOrCreate(key));

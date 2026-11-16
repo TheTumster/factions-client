@@ -96,6 +96,14 @@ final class Smoke {
 			com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.SKYBLOCK, false);
 			boolean kept = !c.hudCoords;
 			com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.FACTIONS, false);
+			ModuleRegistry.init();
+			java.util.Map<String, Integer> pages = new java.util.LinkedHashMap<>();
+			for (var m : ModuleRegistry.ALL) {
+				if (m.name.equals("Printer") || m.name.equals("Minimap") || m.name.equals("Video & Performance") || m.name.equals("Litematica: General"))
+					pages.put(m.name, m.settings.get().size());
+			}
+			boolean bridges = pages.size() == 4 && pages.values().stream().allMatch(n -> n >= 3);
+			FactionsClient.LOG.info("SMOKE bridges {} {}", bridges ? "ok" : "BROKEN", pages);
 			FactionsClient.LOG.info("SMOKE modes={} (sky={} fac={} kept={})", skyOk && facOk && kept ? "ok" : "BROKEN", skyOk, facOk, kept);
 			mc.setScreen(new net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen(new LaGTitleScreen()));
 		} else if (stage == 4 && t > 100_000) {
@@ -156,6 +164,27 @@ final class Smoke {
 			setCategory(ModuleRegistry.Category.FACTIONS);
 		} else if (stage == 11 && System.currentTimeMillis() - stageAt > 12_000) {
 			stage = 12;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage printer-page");
+			var menu = new LaGMenu(null);
+			mc.setScreen(menu);
+			menu.openPage("Printer");
+		} else if (stage == 12 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 13;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage minimap-page");
+			var menu = new LaGMenu(null);
+			mc.setScreen(menu);
+			menu.openPage("Minimap");
+		} else if (stage == 13 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 14;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage video-page");
+			var menu = new LaGMenu(null);
+			mc.setScreen(menu);
+			menu.openPage("Video & Performance");
+		} else if (stage == 14 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 15;
 			FactionsClient.LOG.info("SMOKE stage done");
 		}
 	}
