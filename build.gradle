@@ -28,6 +28,33 @@ processResources {
 	}
 }
 
+// The RelapsedMC server pack (logo, icons, menu art: assets/relapsed/**) is baked into the client, so it's always
+// there without the server prompting. Fetched fresh from the network's latest release on every build.
+def relapsedPack = layout.buildDirectory.file("relapsed-pack/RelapsedMC-pack.zip")
+def fetchRelapsedPack = tasks.register("fetchRelapsedPack") {
+	outputs.file(relapsedPack)
+	outputs.upToDateWhen { false }
+	doLast {
+		def f = relapsedPack.get().asFile
+		f.parentFile.mkdirs()
+		try {
+			new URL("https://github.com/TheTumster/lag-network/releases/latest/download/RelapsedMC-pack.zip").withInputStream { i ->
+				f.withOutputStream { it << i }
+			}
+			logger.lifecycle("RelapsedMC pack: ${f.length().intdiv(1024)} KB")
+		} catch (Exception e) {
+			f.delete()
+			logger.warn("Couldn't fetch the RelapsedMC pack (${e.message}); building without it")
+		}
+	}
+}
+processClientResources {
+	dependsOn fetchRelapsedPack
+	from({ relapsedPack.get().asFile.exists() ? zipTree(relapsedPack) : [] }) {
+		include "assets/relapsed/**"
+	}
+}
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.release = 21
 }

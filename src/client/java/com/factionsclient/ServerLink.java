@@ -164,6 +164,20 @@ public final class ServerLink {
 		}
 	}
 
+	/**
+	 * Never actually sent: registering it makes the client advertise "relapsed:pack", which tells RelapsedMC servers
+	 * this client already has the server pack built in (so they don't prompt for it).
+	 */
+	public record PackPayload() implements CustomPacketPayload {
+		public static final Type<PackPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath("relapsed", "pack"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, PackPayload> CODEC = StreamCodec.of((buf, p) -> { }, buf -> new PackPayload());
+
+		@Override
+		public Type<? extends CustomPacketPayload> type() {
+			return TYPE;
+		}
+	}
+
 	/** Realm you're on right now ("" if not on RelapsedMC). */
 	public static volatile String REALM = "";
 
@@ -206,6 +220,8 @@ public final class ServerLink {
 		PayloadTypeRegistry.playS2C().register(ClaimsPayload.TYPE, ClaimsPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(HomePayload.TYPE, HomePayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(RealmPayload.TYPE, RealmPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(PackPayload.TYPE, PackPayload.CODEC);
+		ClientPlayNetworking.registerGlobalReceiver(PackPayload.TYPE, (payload, ctx) -> { });
 
 		ClientPlayNetworking.registerGlobalReceiver(RealmPayload.TYPE, (payload, ctx) -> {
 			connected = true;
