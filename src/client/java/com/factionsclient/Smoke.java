@@ -212,6 +212,7 @@ final class Smoke {
 		if (server != null) server.execute(() -> {
 			var src = server.createCommandSourceStack();
 			String[] cmds = {"time set day", "weather clear",
+					"execute at @p run fill ~-1 ~23 ~-1 ~1 ~23 ~1 minecraft:glass",
 					"execute as @a at @s run tp @s ~ ~24 ~ -70 28",
 					"execute at @p run summon tnt ~14 ~-6 ~4 {fuse:300,Motion:[0.0,0.35,0.05]}",
 					"execute at @p run summon tnt ~18 ~-8 ~-3 {fuse:300,Motion:[0.04,0.4,0.0]}",

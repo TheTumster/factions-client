@@ -50,7 +50,7 @@ public final class Hud {
 			case "territory" -> new float[] {0.46f, 0.02f, 1f};
 			case "status" -> new float[] {0.005f, 0.135f, 1f};
 			case "team" -> new float[] {0.005f, 0.18f, 1f};
-			case "keystrokes" -> new float[] {0.93f, 0.40f, 1f}; // right side: the chat lives bottom-left
+			case "keystrokes" -> new float[] {0.93f, 0.30f, 1f}; // right side: the chat lives bottom-left
 			case "effects" -> new float[] {0.85f, 0.01f, 1f};
 			case "armor" -> new float[] {0.90f, 0.70f, 1f};
 			default -> new float[] {0.1f, 0.1f, 1f};
@@ -58,6 +58,12 @@ public final class Hud {
 	}
 
 	private static final Map<String, int[]> LAST_SIZE = new java.util.HashMap<>();
+	private static final java.util.Set<String> LEFT_STACK = java.util.Set.of("info", "coords", "status", "team");
+
+	private static boolean isDefault(String id, float[] p) {
+		float[] d = defaultPos(id);
+		return Math.abs(p[0] - d[0]) < 1e-4f && Math.abs(p[1] - d[1]) < 1e-4f;
+	}
 
 	/** Screen-space bounds of each element from the last frame: {x, y, w, h}. */
 	public static final Map<String, int[]> BOUNDS = new LinkedHashMap<>();
@@ -94,11 +100,17 @@ public final class Hud {
 	/** Draws every enabled element at its saved position. preview = show sample data for empty elements. */
 	public static void drawAll(GuiGraphics g, Minecraft mc, boolean preview) {
 		BOUNDS.clear();
+		int stackY = 3; // left column: elements you haven't moved stack under each other, never overlapping
 		for (String id : ELEMENTS.keySet()) {
 			if (!enabled(id)) continue;
 			float[] p = pos(id);
 			int x = Math.round(p[0] * g.guiWidth());
 			int y = Math.round(p[1] * g.guiHeight());
+			boolean stacked = LEFT_STACK.contains(id) && isDefault(id, p);
+			if (stacked) {
+				x = 3;
+				y = stackY;
+			}
 			// Never hang off the screen: clamp with this element's size from the last frame.
 			int[] last = LAST_SIZE.get(id);
 			if (last != null) {
@@ -116,6 +128,7 @@ public final class Hud {
 			if (size[0] > 0 && size[1] > 0) {
 				BOUNDS.put(id, new int[] {x, y, Math.round(size[0] * s), Math.round(size[1] * s)});
 				LAST_SIZE.put(id, new int[] {Math.round(size[0] * s), Math.round(size[1] * s)});
+				if (stacked) stackY = y + Math.round(size[1] * s) + 3;
 			}
 		}
 	}
