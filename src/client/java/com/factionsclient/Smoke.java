@@ -187,6 +187,7 @@ final class Smoke {
 			stage = 15;
 			stageAt = System.currentTimeMillis();
 			FactionsClient.LOG.info("SMOKE stage chat-tabs");
+			TeamLink.PINGS.clear();
 			mc.setScreen(null);
 			var chat = mc.gui.getChat();
 			chat.clearMessages(false);
@@ -209,6 +210,20 @@ final class Smoke {
 			FactionsClient.LOG.info("SMOKE chattabs {} (faction tab shows {} of {})", shown == 2 ? "ok" : "BROKEN", shown, lines.length);
 		} else if (stage == 15 && System.currentTimeMillis() - stageAt > 12_000) {
 			stage = 16;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage team-page");
+			var menu = new LaGMenu(null);
+			mc.setScreen(menu);
+			menu.openPage("Your Team");
+		} else if (stage == 16 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 17;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage team-schems");
+			var menu = new LaGMenu(null);
+			mc.setScreen(menu);
+			menu.openPage("Team Schematics");
+		} else if (stage == 17 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 18;
 			FactionsClient.LOG.info("SMOKE stage done");
 		}
 	}
@@ -261,6 +276,17 @@ final class Smoke {
 		mc.player.onUpdateAbilities();
 		mc.gui.getChat().clearMessages(false);
 		ServerLink.lastMatesForSmoke();
+		// Pretend we're in a RelapsedMC team too: a pink teammate, an enemy ping, a shared schematic
+		TeamLink.connected = true;
+		TeamLink.team = "Relapse";
+		TeamLink.leader = mc.getUser().getName();
+		TeamLink.youLead = true;
+		TeamLink.members = java.util.List.of(new TeamLink.Member(mc.getUser().getName(), true, "factions"),
+				new TeamLink.Member("Builder", true, "skyblock"), new TeamLink.Member("Scout", false, ""));
+		TeamLink.schems = java.util.List.of(new TeamLink.Schem(7, "east-wall.litematic", "Builder", 48_213, System.currentTimeMillis()));
+		TeamLink.MATES = java.util.List.of(new ServerLink.Mate("Scout", pos.x + 30, pos.y, pos.z + 25, ServerLink.dimId(mc)));
+		TeamLink.lastMatesForSmoke();
+		TeamLink.PINGS.add(new TeamLink.Ping("Scout", "enemy", ServerLink.dimId(mc), pos.x + 26, pos.y + 2, pos.z - 6, System.currentTimeMillis()));
 		var server = mc.getSingleplayerServer();
 		if (server != null) server.execute(() -> {
 			var src = server.createCommandSourceStack();

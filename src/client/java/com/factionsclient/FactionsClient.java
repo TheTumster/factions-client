@@ -35,11 +35,13 @@ public class FactionsClient implements ClientModInitializer {
 	public static KeyMapping zoomKey;
 	public static KeyMapping chunkKey;
 	public static KeyMapping fullbrightKey;
+	public static KeyMapping pingKey;
 
 	@Override
 	public void onInitializeClient() {
 		CONFIG = Config.load();
 		ServerLink.init();
+		TeamLink.init();
 
 		KeyMapping.Category cat = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "main"));
 		menuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.menu", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, cat));
@@ -49,6 +51,7 @@ public class FactionsClient implements ClientModInitializer {
 		zoomKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.zoom", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, cat));
 		chunkKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.chunk_borders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, cat));
 		fullbrightKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.fullbright", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
+		pingKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.ping", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, cat));
 
 		ClientLifecycleEvents.CLIENT_STARTED.register(FactionsClient::moveXaeroMapKey);
 		ClientLifecycleEvents.CLIENT_STARTED.register(Performance::tuneOnce);
@@ -83,6 +86,7 @@ public class FactionsClient implements ClientModInitializer {
 			}
 			Crumbs.tick(mc);
 			ServerLink.tick(mc);
+			TeamLink.tick(mc);
 		});
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "hud"), Hud::render);
@@ -100,7 +104,6 @@ public class FactionsClient implements ClientModInitializer {
 					.then(literal("help").executes(ctx -> help()))
 					.then(literal("reload").executes(ctx -> {
 						CONFIG = Config.load();
-		ServerLink.init();
 						SchemShare.msg("Config reloaded.", ChatFormatting.GREEN);
 						return 1;
 					}))

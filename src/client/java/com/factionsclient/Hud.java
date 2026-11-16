@@ -183,7 +183,7 @@ public final class Hud {
 				else if (preview) lines.add(new Line("[Sprinting (Toggled)]", WHITE));
 			}
 			case "team" -> {
-				if (!ServerLink.connected && !preview) {
+				if (!ServerLink.connected && !TeamLink.connected && !preview) {
 					// Not on RelapsedMC: nothing to show.
 				} else {
 					String dim = ServerLink.dimId(mc);
@@ -197,6 +197,18 @@ public final class Hud {
 							where = "(" + m.dim().replace("minecraft:", "") + ")";
 						}
 						lines.add(new Line("§f" + m.name() + "  §7" + where, accent));
+					}
+					// RelapsedMC team (pink), not already listed as faction mates
+					for (ServerLink.Mate m : TeamLink.MATES) {
+						if (!cfg.teamTrack || !m.dim().equals(dim) || ServerLink.MATES.stream().anyMatch(f -> f.name().equals(m.name()))) continue;
+						double dx = m.x() - p.getX(), dz = m.z() - p.getZ();
+						lines.add(new Line("§d" + m.name() + "  §7" + (int) Math.sqrt(dx * dx + dz * dz) + "m " + arrow(p.getYRot(), dx, dz), accent));
+					}
+					for (TeamLink.Ping pg : TeamLink.PINGS) {
+						if (!pg.dim().equals(dim)) continue;
+						double dx = pg.x() - p.getX(), dz = pg.z() - p.getZ();
+						lines.add(new Line((pg.kind().equals("enemy") ? "§c⚠ Enemy" : "§6◆ Ping") + " §7from §f" + pg.from() + "  §7"
+								+ (int) Math.sqrt(dx * dx + dz * dz) + "m " + arrow(p.getYRot(), dx, dz), accent));
 					}
 					ServerLink.Home h = ServerLink.HOME;
 					if (cfg.homeBeacon && h != null && h.dim().equals(dim)) {

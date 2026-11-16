@@ -33,6 +33,8 @@ public final class ChatTabs {
 	// FactionsUUID's chat formats ("[faction-only] ...", "[member+] ...", "[ally-only] ...")
 	private static final Pattern FACTION = Pattern.compile("^\\s*\\[(faction-only|[a-z]+\\+)\\]", Pattern.CASE_INSENSITIVE);
 	private static final Pattern ALLY = Pattern.compile("^\\s*\\[(ally|truce)-only\\]", Pattern.CASE_INSENSITIVE);
+	// RelapsedMC Teams (/tc): "[Team] Name: message"
+	private static final Pattern TEAM = Pattern.compile("^\\s*\\[Team\\]");
 	// Vanilla /msg ("X whispers to you: ...", "You whisper to X: ..."), and the common "[X -> me]" style
 	private static final Pattern PRIVATE = Pattern.compile(
 			"(whispers to you:|^You whisper to |->\\s*me\\]|^\\[me\\s*->)", Pattern.CASE_INSENSITIVE);
@@ -59,23 +61,45 @@ public final class ChatTabs {
 	public static void rebuild() {
 		Config c = FactionsClient.CONFIG;
 		List<Tab> t = new ArrayList<>();
-		t.add(new Tab("All", null, Theme.TEXT, true));
-		if (c.chatTabFaction) t.add(new Tab("Faction", FACTION, 0xFF4DFF88, true));
-		if (c.chatTabAlly) t.add(new Tab("Ally", ALLY, 0xFFB040FF, true));
-		if (c.chatTabPrivate) t.add(new Tab("Private", PRIVATE, 0xFFFF4DD2, true));
-		if (c.chatTabServer) t.add(new Tab("Server", null, 0xFFFFC23D, true));
+		t.add(new Tab("All", null, color("All", Theme.TEXT), true));
+		if (c.chatTabTeam) t.add(new Tab("Team", TEAM, color("Team", 0xFFFF7AE0), true));
+		if (c.chatTabFaction) t.add(new Tab("Faction", FACTION, color("Faction", 0xFF4DFF88), true));
+		if (c.chatTabAlly) t.add(new Tab("Ally", ALLY, color("Ally", 0xFFB040FF), true));
+		if (c.chatTabPrivate) t.add(new Tab("Private", PRIVATE, color("Private", 0xFFFF4DD2), true));
+		if (c.chatTabServer) t.add(new Tab("Server", null, color("Server", 0xFFFFC23D), true));
 		for (String spec : c.chatCustomTabs) {
 			int i = spec.indexOf(':');
 			if (i <= 0) continue;
 			try {
-				t.add(new Tab(spec.substring(0, i).trim(), Pattern.compile(spec.substring(i + 1).trim(), Pattern.CASE_INSENSITIVE),
-						0xFF38E0FF, false));
+				String name = spec.substring(0, i).trim();
+				t.add(new Tab(name, Pattern.compile(spec.substring(i + 1).trim(), Pattern.CASE_INSENSITIVE),
+						color(name, 0xFF38E0FF), false));
 			} catch (Exception ignored) {
 				// bad regex: skip that tab
 			}
 		}
 		tabs = t;
 		if (active >= tabs.size()) active = 0;
+	}
+
+	/** Built-in tab names and their default colors (for the color pickers). */
+	public static final String[] BUILTIN = {"All", "Team", "Faction", "Ally", "Private", "Server"};
+
+	public static int defaultColor(String tab) {
+		return switch (tab) {
+			case "Team" -> 0xFFFF7AE0;
+			case "Faction" -> 0xFF4DFF88;
+			case "Ally" -> 0xFFB040FF;
+			case "Private" -> 0xFFFF4DD2;
+			case "Server" -> 0xFFFFC23D;
+			case "All" -> Theme.TEXT;
+			default -> 0xFF38E0FF;
+		};
+	}
+
+	private static int color(String tab, int def) {
+		Integer c = FactionsClient.CONFIG.chatTabColors.get(tab);
+		return c == null ? def : 0xFF000000 | c;
 	}
 
 	public static boolean enabled() {
@@ -86,7 +110,7 @@ public final class ChatTabs {
 		if (tab.pattern() != null) return tab.pattern().matcher(text).find();
 		if (tab.name().equals("Server")) {
 			return !PLAYER_CHAT.matcher(text).find() && !FACTION.matcher(text).find() && !ALLY.matcher(text).find()
-					&& !PRIVATE.matcher(text).find();
+					&& !PRIVATE.matcher(text).find() && !TEAM.matcher(text).find();
 		}
 		return true; // All
 	}
@@ -180,6 +204,10 @@ public final class ChatTabs {
 				serverMode = want;
 			}
 		}
+		if (tab.equals("Team") && TeamLink.inTeam()) {
+			mc.player.connection.sendCommand("tc " + msg);
+			return true;
+		}
 		if (tab.equals("Private") && partner != null) {
 			mc.player.connection.sendCommand("msg " + partner + " " + msg);
 			return true;
@@ -225,6 +253,9 @@ public final class ChatTabs {
 		}
 		if (tabs.get(active).name().equals("Private")) {
 			String hint = partner == null ? "No one has messaged you yet" : "Replying to " + partner;
+			g.drawString(font, hint, x + 4, y + 2, Theme.DIM, false);
+		} else if (tabs.get(active).name().equals("Team")) {
+			String hint = TeamLink.inTeam() ? "Typing to " + TeamLink.team + " (every realm)" : "Not in a team: Right Shift > Team";
 			g.drawString(font, hint, x + 4, y + 2, Theme.DIM, false);
 		} else if (FactionsClient.CONFIG.chatRoute && "factions".equalsIgnoreCase(ServerLink.REALM)
 				&& (tabs.get(active).name().equals("Faction") || tabs.get(active).name().equals("Ally"))) {

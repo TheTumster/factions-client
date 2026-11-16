@@ -98,6 +98,13 @@ public class Config {
 	public boolean chatPrivatePing = true;
 	/** Your own tabs: "Name: regex" */
 	public java.util.List<String> chatCustomTabs = new java.util.ArrayList<>();
+	public boolean chatTabTeam = true;
+	/** tab name -> ARGB color (missing = the tab's default) */
+	public java.util.Map<String, Integer> chatTabColors = new java.util.HashMap<>();
+
+	// RelapsedMC Teams (TeamLink.java)
+	public boolean teamTrack = true;
+	public boolean teamPings = true;
 
 	// Crumbs
 	public int crumbSeconds = 20;

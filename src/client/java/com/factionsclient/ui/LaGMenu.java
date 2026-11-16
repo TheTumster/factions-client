@@ -89,10 +89,23 @@ public class LaGMenu extends Screen {
 		}
 	}
 
+	private long pageRefreshAt = 0;
+
+	/** Team pages show live server data: rebuild them every second while open. */
+	private void refreshLivePage() {
+		if (open == null || open.category != Category.TEAM || listening != null) return;
+		long now = System.currentTimeMillis();
+		if (now - pageRefreshAt < 1000) return;
+		pageRefreshAt = now;
+		boolean typing = openSettings != null && openSettings.stream().anyMatch(st -> st instanceof ModuleRegistry.TextS t && !t.value.isEmpty());
+		if (!typing) openSettings = open.settings.get();
+	}
+
 	// ================================================================ render
 
 	@Override
 	public void render(GuiGraphics g, int mx, int my, float delta) {
+		refreshLivePage();
 		Theme.tickFrame();
 		super.render(g, mx, my, delta);
 		hits.clear();

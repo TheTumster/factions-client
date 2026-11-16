@@ -52,14 +52,35 @@ public final class SchemShare {
 	};
 
 	public static int upload(CommandContext<FabricClientCommandSource> ctx) {
-		return uploadFile(StringArgumentType.getString(ctx, "file"));
+		String file = StringArgumentType.getString(ctx, "file");
+		if (TeamLink.inTeam()) { // on RelapsedMC in a team: share with the team through the server
+			TeamLink.upload(file);
+			msg(TeamLink.status, ChatFormatting.LIGHT_PURPLE);
+			return 1;
+		}
+		return uploadFile(file);
 	}
 
 	public static int get(CommandContext<FabricClientCommandSource> ctx) {
-		return download(StringArgumentType.getString(ctx, "code"));
+		String code = StringArgumentType.getString(ctx, "code");
+		if (TeamLink.inTeam()) {
+			for (TeamLink.Schem s : TeamLink.schems) {
+				if (String.valueOf(s.id()).equals(code) || s.name().equalsIgnoreCase(code)) {
+					TeamLink.download(s);
+					msg(TeamLink.status, ChatFormatting.LIGHT_PURPLE);
+					return 1;
+				}
+			}
+		}
+		return download(code);
 	}
 
 	public static int list(CommandContext<FabricClientCommandSource> ctx) {
+		if (TeamLink.inTeam()) {
+			if (TeamLink.schems.isEmpty()) msg("Nothing shared with " + TeamLink.team + " yet. /ss upload <file>", ChatFormatting.GRAY);
+			for (TeamLink.Schem s : TeamLink.schems) msg("#" + s.id() + "  " + s.name() + "  (" + s.by() + ")  /ss get " + s.id(), ChatFormatting.LIGHT_PURPLE);
+			return 1;
+		}
 		return listToChat();
 	}
 

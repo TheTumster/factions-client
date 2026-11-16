@@ -54,6 +54,33 @@ public final class WorldRender {
 				box(m, vc, cam, mate.x() - 0.3, mate.y() + 2.1, mate.z() - 0.3, mate.x() + 0.3, mate.y() + 2.7, mate.z() + 0.3, 0xE038E0FF);
 			}
 		}
+
+		// RelapsedMC team: pink pillars (any realm), skip anyone already drawn as a faction mate
+		if (cfg.teamTrack) {
+			String dim = ServerLink.dimId(mc);
+			for (ServerLink.Mate mate : TeamLink.MATES) {
+				if (!mate.dim().equals(dim) || ServerLink.MATES.stream().anyMatch(f -> f.name().equals(mate.name()))) continue;
+				double d = Math.sqrt(mc.player.distanceToSqr(mate.x(), mate.y(), mate.z()));
+				double r = 0.2 + Math.min(0.6, d / 200.0);
+				box(m, vc, cam, mate.x() - r, mate.y(), mate.z() - r, mate.x() + r, mate.y() + 48, mate.z() + r, 0x80FF4DD2);
+				box(m, vc, cam, mate.x() - 0.3, mate.y() + 2.1, mate.z() - 0.3, mate.x() + 0.3, mate.y() + 2.7, mate.z() + 0.3, 0xE0FF4DD2);
+			}
+		}
+
+		// Team pings: a pulsing marker + short beam, red for "enemy"
+		if (cfg.teamPings && !TeamLink.PINGS.isEmpty()) {
+			String dim = ServerLink.dimId(mc);
+			long now = System.currentTimeMillis();
+			for (TeamLink.Ping p : TeamLink.PINGS) {
+				if (!p.dim().equals(dim)) continue;
+				float age = (now - p.at()) / 12_000f;
+				int a = (int) (0xE0 * Math.max(0, 1 - age * age));
+				int rgb = p.kind().equals("enemy") ? 0xFF3B4E : 0xFFC23D;
+				double pulse = 0.35 + 0.15 * Math.sin(now / 150.0);
+				box(m, vc, cam, p.x() - pulse, p.y() - pulse + 0.5, p.z() - pulse, p.x() + pulse, p.y() + pulse + 0.5, p.z() + pulse, alpha(rgb, a));
+				box(m, vc, cam, p.x() - 0.08, p.y() + 1, p.z() - 0.08, p.x() + 0.08, p.y() + 24, p.z() + 0.08, alpha(rgb, a / 2));
+			}
+		}
 	}
 
 	private static final int CHUNK_CORNER = 0xC0FF3030; // red: neighbor chunk corners

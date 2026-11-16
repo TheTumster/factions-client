@@ -17,7 +17,7 @@ import com.factionsclient.ui.Theme;
 /** Every feature in the client, its category, its on/off switch and all of its settings. */
 public final class ModuleRegistry {
 	public enum Category {
-		MODES("Modes", "◈"), FACTIONS("Factions", "⚔"), SCHEMATICA("Schematica", "▦"), RENDER("Render", "☀"), MOVEMENT("Movement", "➜"),
+		MODES("Modes", "◈"), TEAM("Team", "♦"), FACTIONS("Factions", "⚔"), SCHEMATICA("Schematica", "▦"), RENDER("Render", "☀"), MOVEMENT("Movement", "➜"),
 		HUD("HUD", "▣"), MODS("Mods", "✦"), CLIENT("Client", "⚙");
 
 		public final String label;
@@ -274,7 +274,18 @@ public final class ModuleRegistry {
 				.settings(() -> List.of(new InfoS(() -> ServerLink.HOME == null ? "No /f home set (or not on RelapsedMC)."
 						: "Home: " + (int) ServerLink.HOME.x() + " " + (int) ServerLink.HOME.y() + " " + (int) ServerLink.HOME.z()))));
 
-		add(new Module("Schem Share", "Send schematics to your team with a code", Category.FACTIONS)
+		// ------------------------------------------------ TEAM (RelapsedMC Teams: works on every realm)
+		add(new Module("Your Team", "Create a team, invite friends, see who's online and where", Category.TEAM)
+				.settings(ModuleRegistry::teamPage));
+		add(new Module("Team Schematics", "Share schematics with your team: one click to download", Category.TEAM)
+				.settings(ModuleRegistry::teamSchemPage));
+		add(new Module("Team Tracking", "Teammates as pink beacons + in the HUD team list", Category.TEAM)
+				.toggle(() -> c().teamTrack, v -> c().teamTrack = v));
+		add(new Module("Team Pings", "Press Z to ping where you look (Shift+Z = enemy)", Category.TEAM)
+				.toggle(() -> c().teamPings, v -> c().teamPings = v)
+				.settings(() -> List.of(new KeyS("Ping key", () -> FactionsClient.pingKey),
+						new InfoS(() -> "Teammates on the same realm see a marker + hear a chime for 12s."))));
+		add(new Module("Schem Share (old)", "Private-group codes: /ss upload, /ss get (team pack only)", Category.FACTIONS)
 				.settings(ModuleRegistry::schemShareSettings));
 
 		// ------------------------------------------------ SCHEMATICA
@@ -398,6 +409,7 @@ public final class ModuleRegistry {
 				})
 				.settings(() -> {
 					List<Setting> s = new ArrayList<>();
+					s.add(new BoolS("Team tab", () -> c().chatTabTeam, v -> { c().chatTabTeam = v; ChatTabs.rebuild(); }));
 					s.add(new BoolS("Faction tab", () -> c().chatTabFaction, v -> { c().chatTabFaction = v; ChatTabs.rebuild(); }));
 					s.add(new BoolS("Ally tab", () -> c().chatTabAlly, v -> { c().chatTabAlly = v; ChatTabs.rebuild(); }));
 					s.add(new BoolS("Private tab", () -> c().chatTabPrivate, v -> { c().chatTabPrivate = v; ChatTabs.rebuild(); }));
@@ -406,6 +418,16 @@ public final class ModuleRegistry {
 					s.add(new BoolS("Timestamps", () -> c().chatTimestamps, v -> c().chatTimestamps = v));
 					s.add(new BoolS("Stack repeated messages (x3)", () -> c().chatStack, v -> c().chatStack = v));
 					s.add(new BoolS("Sound on private message", () -> c().chatPrivatePing, v -> c().chatPrivatePing = v));
+					// A color for every tab
+					List<String> names = new ArrayList<>(List.of(ChatTabs.BUILTIN));
+					for (String spec : c().chatCustomTabs) if (spec.indexOf(':') > 0) names.add(spec.substring(0, spec.indexOf(':')).trim());
+					for (String n : names) {
+						s.add(new ColorS(n + " tab color", () -> c().chatTabColors.getOrDefault(n, ChatTabs.defaultColor(n) & 0xFFFFFF),
+								v -> {
+									c().chatTabColors.put(n, v & 0xFFFFFF);
+									ChatTabs.rebuild();
+								}));
+					}
 					for (String spec : new ArrayList<>(c().chatCustomTabs)) {
 						s.add(new ActionS("Tab  " + spec, "Remove", () -> {
 							c().chatCustomTabs.remove(spec);
@@ -435,6 +457,72 @@ public final class ModuleRegistry {
 						new IntS("Size", 50, 300, 10, "%", () -> Math.round(Hud.pos(id)[2] * 100), v -> Hud.pos(id)[2] = v / 100f),
 						new ActionS("Position", "Reset", () -> c().hudPos.put(id, Hud.defaultPos(id))),
 						new ActionS("Move it", "Edit layout", () -> Minecraft.getInstance().setScreen(new HudEditorScreen(parentScreen))))));
+	}
+
+	private static List<Setting> teamPage() {
+		List<Setting> s = new ArrayList<>();
+		if (!TeamLink.connected) {
+			s.add(new InfoS(() -> "Teams work on RelapsedMC. Join play.relapsedmc.com."));
+			return s;
+		}
+		if (!TeamLink.inTeam()) {
+			s.add(new InfoS(() -> "You're not in a team yet. Teams work on every realm."));
+			s.add(new TextS("Create a team", "3-16 letters, numbers or _", 16, "Create", v -> TeamLink.cmd("team create " + v.trim())));
+			for (TeamLink.Invite inv : TeamLink.invites) {
+				s.add(new ActionS("Invite: " + inv.team() + "  (from " + inv.by() + ")", "Accept", () -> TeamLink.cmd("team accept " + inv.team())));
+				s.add(new ActionS("    decline " + inv.team(), "Deny", () -> TeamLink.cmd("team deny " + inv.team())));
+			}
+			return s;
+		}
+		long online = TeamLink.members.stream().filter(TeamLink.Member::online).count();
+		s.add(new InfoS(() -> TeamLink.team + "  ·  " + online + "/" + TeamLink.members.size() + " online  ·  leader " + TeamLink.leader));
+		for (TeamLink.Member m : TeamLink.members) {
+			String line = (m.online() ? "§a● §f" : "§8● §7") + m.name() + (m.online() && !m.realm().isEmpty() ? "  §7on " + m.realm() : "")
+					+ (m.name().equals(TeamLink.leader) ? "  §d★" : "");
+			boolean self = net.minecraft.client.Minecraft.getInstance().player != null
+					&& m.name().equals(net.minecraft.client.Minecraft.getInstance().getUser().getName());
+			if (TeamLink.youLead && !self) {
+				s.add(new ActionS(line, "Remove", () -> TeamLink.cmd("team kick " + m.name())));
+			} else {
+				s.add(new InfoS(() -> line));
+			}
+		}
+		if (TeamLink.youLead) s.add(new TextS("Invite a player", "Their Minecraft name", 16, "Invite", v -> TeamLink.cmd("team invite " + v.trim())));
+		s.add(new ActionS("Leave " + TeamLink.team, "Leave", () -> TeamLink.cmd("team leave")));
+		if (TeamLink.youLead) s.add(new ActionS("Disband the team (everyone is removed)", "Disband", () -> TeamLink.cmd("team disband")));
+		s.add(new InfoS(() -> "Team chat: the Team tab in chat, or /tc <message>"));
+		return s;
+	}
+
+	private static String pickedSchem = null;
+
+	private static List<Setting> teamSchemPage() {
+		List<Setting> s = new ArrayList<>();
+		if (!TeamLink.connected || !TeamLink.inTeam()) {
+			s.add(new InfoS(() -> TeamLink.connected ? "Join or create a team first (Your Team)." : "Team schematics work on RelapsedMC."));
+			return s;
+		}
+		List<String> files = TeamLink.localFiles();
+		if (files.isEmpty()) {
+			s.add(new InfoS(() -> "No schematics in your schematics folder yet (save one with Litematica)."));
+		} else {
+			if (pickedSchem == null || !files.contains(pickedSchem)) pickedSchem = files.get(0);
+			s.add(new ChoiceS("File", () -> pickedSchem, fwd -> {
+				int i = files.indexOf(pickedSchem), n = files.size();
+				pickedSchem = files.get(((i < 0 ? 0 : i) + (fwd ? 1 : n - 1)) % n);
+			}));
+			s.add(new ActionS("Share it with " + TeamLink.team, "Upload", () -> TeamLink.upload(pickedSchem)));
+		}
+		s.add(new InfoS(() -> TeamLink.status.isEmpty() ? "Shared with your team:" : TeamLink.status));
+		if (TeamLink.schems.isEmpty()) s.add(new InfoS(() -> "Nothing shared yet."));
+		for (TeamLink.Schem sc : TeamLink.schems) {
+			String label = sc.name() + "  §7" + sc.by() + " · " + (sc.size() / 1024) + " KB";
+			s.add(new ActionS(label, "Download", () -> TeamLink.download(sc)));
+			boolean mine = net.minecraft.client.Minecraft.getInstance().player != null
+					&& sc.by().equals(net.minecraft.client.Minecraft.getInstance().getUser().getName());
+			if (mine || TeamLink.youLead) s.add(new ActionS("    remove " + sc.name(), "Delete", () -> TeamLink.delete(sc)));
+		}
+		return s;
 	}
 
 	private static void litematicaPage(String name, String desc, String cls, String member) {
