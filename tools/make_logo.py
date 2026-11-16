@@ -3,6 +3,8 @@
 
 Writes into src/client/resources/assets/factionsclient/:
   textures/gui/logo.png      1024x384  white RELAPSED, purple glow, gradient bar, tiny MC bottom-right
+  textures/gui/splash_logo.png 1024x384  the same logo without the bar: the loading screen draws its progress bar there
+                                       (bar position printed for LoadingOverlayMixin.BAR_*)
   textures/gui/gradient.png  256x16    cyan -> purple -> pink (buttons, bars, switches)
   icon.png                   128x128   "R" monogram (Mod Menu / window)
 Run: python3 tools/make_logo.py   (needs Pillow and the Inter font in /usr/share/fonts/opentype/inter)
@@ -33,7 +35,11 @@ def gradient(w, h, stops, sheen=True):
     return g
 
 
-def wordmark(scale):
+BAR_RECT = None  # (x1, y1, x2, y2) of the bar inside the wordmark image, set by wordmark()
+
+
+def wordmark(scale, with_bar=True):
+    global BAR_RECT
     f = ImageFont.truetype(os.path.join(FONT_DIR, "InterDisplay-Black.otf"), 38 * scale)
     word, spacing, pad = "RELAPSED", 5 * scale, 6 * scale
     bb = f.getbbox(word)
@@ -70,7 +76,10 @@ def wordmark(scale):
     bar = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     bm = Image.new("L", (W, H))
     by = mcy + mm.height // 2 - 1 * scale
-    ImageDraw.Draw(bm).rounded_rectangle((4 * scale, by, mcx - 4 * scale, by + 3 * scale), radius=2 * scale, fill=255)
+    BAR_RECT = (4 * scale, by, mcx - 4 * scale, by + 3 * scale)
+    if not with_bar:
+        return out
+    ImageDraw.Draw(bm).rounded_rectangle(BAR_RECT, radius=2 * scale, fill=255)
     bar.paste(gradient(W, H, [CYAN, PURPLE, PINK]), (0, 0), bm)
     out = Image.alpha_composite(out, bar.filter(ImageFilter.GaussianBlur(2 * scale)))
     out = Image.alpha_composite(out, bar)
@@ -79,13 +88,22 @@ def wordmark(scale):
 
 def logo():
     W, H = 1024, 384
-    mark = wordmark(8)
-    mark = mark.crop(mark.getbbox())
-    k = min((W - 48) / mark.width, (H - 48) / mark.height)
-    mark = mark.resize((int(mark.width * k), int(mark.height * k)), Image.LANCZOS)
-    out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    out.alpha_composite(mark, ((W - mark.width) // 2, (H - mark.height) // 2))
-    out.save(os.path.join(ASSETS, "textures", "gui", "logo.png"))
+    full = wordmark(8)
+    box = full.getbbox()
+    k = min((W - 48) / (box[2] - box[0]), (H - 48) / (box[3] - box[1]))
+    size = (int((box[2] - box[0]) * k), int((box[3] - box[1]) * k))
+    ox, oy = (W - size[0]) // 2, (H - size[1]) // 2
+
+    def place(mark):
+        out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        out.alpha_composite(mark.crop(box).resize(size, Image.LANCZOS), (ox, oy))
+        return out
+
+    place(full).save(os.path.join(ASSETS, "textures", "gui", "logo.png"))
+    rect = BAR_RECT
+    place(wordmark(8, with_bar=False)).save(os.path.join(ASSETS, "textures", "gui", "splash_logo.png"))
+    x1, y1, x2, y2 = [(rect[0] - box[0]) * k + ox, (rect[1] - box[1]) * k + oy, (rect[2] - box[0]) * k + ox, (rect[3] - box[1]) * k + oy]
+    print(f"splash bar (texture px): x {x1:.1f}..{x2:.1f}, y {y1:.1f}..{y2:.1f}")
 
 
 def icon(size=128):

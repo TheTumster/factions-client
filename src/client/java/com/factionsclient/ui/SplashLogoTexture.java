@@ -12,7 +12,10 @@ import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-/** Logo for the loading screen. Read straight from our jar because resource packs aren't loaded yet. */
+/**
+ * Logo for the loading screen, without its gradient bar (the loading progress is drawn in its place).
+ * Read straight from our jar because resource packs aren't loaded yet.
+ */
 public class SplashLogoTexture extends ReloadableTexture {
 	public static final Identifier ID = Identifier.fromNamespaceAndPath("factionsclient", "splash_logo");
 
@@ -22,7 +25,7 @@ public class SplashLogoTexture extends ReloadableTexture {
 
 	@Override
 	public TextureContents loadContents(ResourceManager resourceManager) throws IOException {
-		try (InputStream in = SplashLogoTexture.class.getResourceAsStream("/assets/factionsclient/textures/gui/logo.png")) {
+		try (InputStream in = SplashLogoTexture.class.getResourceAsStream("/assets/factionsclient/textures/gui/splash_logo.png")) {
 			if (in == null) throw new IOException("laG logo missing from jar");
 			return new TextureContents(NativeImage.read(in), new TextureMetadataSection(true, true, MipmapStrategy.MEAN, 0.0F));
 		}
