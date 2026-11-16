@@ -108,7 +108,12 @@ public class HudEditorScreen extends Screen {
 		g.drawString(font, Theme.trim(font, name, 120), x + 8, y + 1, selected == null ? Theme.MUTED : Theme.TEXT, false);
 		for (Theme.Btn b : bar) b.render(g, font, mx, my, 1f);
 
-		g.drawCenteredString(font, "Drag to move  •  Scroll to resize  •  Arrow keys to nudge", this.width / 2, 8, 0xFFB8C2D0);
+		if (mc.player != null && dragging == null) {
+			String hint = "Drag to move  •  Scroll to resize  •  Arrow keys to nudge";
+			int hw = font.width(hint) + 12, hx = this.width / 2 - hw / 2, hy = y - 22;
+			Theme.rect(g, hx, hy, hw, 14, 0xC00B0716);
+			g.drawString(font, hint, hx + 6, hy + 3, 0xFFB8B0CC, false);
+		}
 	}
 
 	@Override

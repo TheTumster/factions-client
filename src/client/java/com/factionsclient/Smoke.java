@@ -139,6 +139,9 @@ final class Smoke {
 			stageAt = System.currentTimeMillis();
 			FactionsClient.LOG.info("SMOKE stage ingame");
 			setUpScene(mc);
+		} else if (stage == 9 && !chatCleared && System.currentTimeMillis() - stageAt > 4_000) {
+			chatCleared = true; // command feedback arrives late: clear it before the screenshot
+			mc.gui.getChat().clearMessages(false);
 		} else if (stage == 9 && System.currentTimeMillis() - stageAt > 14_000) {
 			stage = 10;
 			stageAt = System.currentTimeMillis();
@@ -158,6 +161,7 @@ final class Smoke {
 	}
 
 	private static long loadedAt = 0;
+	private static boolean chatCleared = false;
 
 	/** Creative world, like vanilla's debug world button. */
 	private static void createWorld(Minecraft mc) {
@@ -198,15 +202,20 @@ final class Smoke {
 		ServerLink.REALM = "factions";
 		ServerLink.connected = true;
 		var pos = mc.player.position();
-		ServerLink.HOME = new ServerLink.Home(ServerLink.dimId(mc), pos.x + 40, pos.y, pos.z + 70);
-		ServerLink.MATES = java.util.List.of(new ServerLink.Mate("Teammate", pos.x - 25, pos.y, pos.z + 30, ServerLink.dimId(mc)));
+		ServerLink.HOME = new ServerLink.Home(ServerLink.dimId(mc), pos.x + 70, pos.y, pos.z + 22);
+		ServerLink.MATES = java.util.List.of(new ServerLink.Mate("Teammate", pos.x + 40, pos.y, pos.z - 18, ServerLink.dimId(mc)));
+		mc.player.getAbilities().flying = true;
+		mc.player.onUpdateAbilities();
+		mc.gui.getChat().clearMessages(false);
 		ServerLink.lastMatesForSmoke();
 		var server = mc.getSingleplayerServer();
 		if (server != null) server.execute(() -> {
 			var src = server.createCommandSourceStack();
-			String[] cmds = {"time set day", "weather clear", "tp @a ~ ~ ~ -35 20",
-					"summon tnt ~6 ~3 ~12 {fuse:200,Motion:[0.0,0.45,0.08]}",
-					"summon tnt ~-4 ~3 ~14 {fuse:200,Motion:[0.05,0.5,0.0]}"};
+			String[] cmds = {"time set day", "weather clear",
+					"execute as @a at @s run tp @s ~ ~24 ~ -70 28",
+					"execute at @p run summon tnt ~14 ~-6 ~4 {fuse:300,Motion:[0.0,0.35,0.05]}",
+					"execute at @p run summon tnt ~18 ~-8 ~-3 {fuse:300,Motion:[0.04,0.4,0.0]}",
+					"execute at @p run summon tnt ~22 ~-10 ~1 {fuse:300,Motion:[-0.03,0.45,0.02]}"};
 			for (String cmd : cmds) {
 				try {
 					server.getCommands().performPrefixedCommand(src, cmd);

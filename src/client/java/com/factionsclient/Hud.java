@@ -47,15 +47,17 @@ public final class Hud {
 		return switch (id) {
 			case "info" -> new float[] {0.005f, 0.01f, 1f};
 			case "coords" -> new float[] {0.005f, 0.055f, 1f};
-			case "territory" -> new float[] {0.5f, 0.02f, 1f};
+			case "territory" -> new float[] {0.46f, 0.02f, 1f};
 			case "status" -> new float[] {0.005f, 0.135f, 1f};
 			case "team" -> new float[] {0.005f, 0.18f, 1f};
-			case "keystrokes" -> new float[] {0.005f, 0.62f, 1f};
+			case "keystrokes" -> new float[] {0.93f, 0.40f, 1f}; // right side: the chat lives bottom-left
 			case "effects" -> new float[] {0.85f, 0.01f, 1f};
 			case "armor" -> new float[] {0.90f, 0.70f, 1f};
 			default -> new float[] {0.1f, 0.1f, 1f};
 		};
 	}
+
+	private static final Map<String, int[]> LAST_SIZE = new java.util.HashMap<>();
 
 	/** Screen-space bounds of each element from the last frame: {x, y, w, h}. */
 	public static final Map<String, int[]> BOUNDS = new LinkedHashMap<>();
@@ -97,6 +99,12 @@ public final class Hud {
 			float[] p = pos(id);
 			int x = Math.round(p[0] * g.guiWidth());
 			int y = Math.round(p[1] * g.guiHeight());
+			// Never hang off the screen: clamp with this element's size from the last frame.
+			int[] last = LAST_SIZE.get(id);
+			if (last != null) {
+				x = Math.max(0, Math.min(x, g.guiWidth() - last[0]));
+				y = Math.max(0, Math.min(y, g.guiHeight() - last[1]));
+			}
 			float s = p[2];
 
 			g.pose().pushMatrix();
@@ -107,6 +115,7 @@ public final class Hud {
 
 			if (size[0] > 0 && size[1] > 0) {
 				BOUNDS.put(id, new int[] {x, y, Math.round(size[0] * s), Math.round(size[1] * s)});
+				LAST_SIZE.put(id, new int[] {Math.round(size[0] * s), Math.round(size[1] * s)});
 			}
 		}
 	}
@@ -290,6 +299,8 @@ public final class Hud {
 			com.factionsclient.ui.Theme.outline(g, x, y, w, h, down ? 0x60FFFFFF : 0x1CFFFFFF);
 			if (h == 10) {
 				g.fill(x + w / 2 - 10, y + 4, x + w / 2 + 10, y + 5, WHITE);
+			} else if (f.width(label) > w - 4) {
+				com.factionsclient.ui.Theme.scaled(g, f, label, x + (w - f.width(label) * 0.7f) / 2f, y + (h - 5.6f) / 2f, 0.7f, WHITE, down);
 			} else {
 				g.drawString(f, label, x + (w - f.width(label)) / 2, y + (h - 8) / 2, WHITE, down);
 			}
