@@ -76,6 +76,14 @@ jobs:
           pkill Xvfb || true
           i=0; for f in $(ls -tr run/screenshots/*.png 2>/dev/null); do i=$((i+1)); convert "$f" -resize 960x540 -quality 72 "shots/s$i.jpg"; done
           for f in $(ls shots/*.jpg 2>/dev/null); do echo "=====SHOT $f"; base64 -w0 "$f"; echo; done
+      - name: Push screenshots to the smoke-shots branch (for review)
+        if: always()
+        run: |
+          mkdir -p /tmp/shots && cp run/screenshots/*.png /tmp/shots/ 2>/dev/null || true
+          cp game.log /tmp/shots/game.log 2>/dev/null || true
+          cd /tmp/shots && ls -la
+          git init -q -b smoke-shots && git add -A && git -c user.name=ci -c user.email=ci@x commit -qm "smoke ${{ github.run_number }} (${{ github.ref_name }})" || exit 0
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" smoke-shots || true
       - name: Report
         if: always()
         run: |

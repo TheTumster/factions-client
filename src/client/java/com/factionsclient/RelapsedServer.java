@@ -64,7 +64,7 @@ public final class RelapsedServer {
 			}
 			// If the ping never answers, let the next refresh try again.
 			try {
-				Thread.sleep(10_000);
+				Thread.sleep(5_000); // unknown host / no answer never calls back
 			} catch (InterruptedException ignored) { }
 			if (pinging) mc.execute(() -> {
 				if (pinging) {

@@ -26,7 +26,7 @@ public abstract class ServerListMixin {
 	@Final
 	private List<ServerData> hiddenServerList;
 
-	@Inject(method = "load", at = @At("TAIL"))
+	@Inject(method = "load", at = @At("RETURN")) // RETURN, not TAIL: load() returns early when servers.dat doesn't exist yet (new installs)
 	private void factionsclient$pinRelapsed(CallbackInfo ci) {
 		if (FactionsClient.CONFIG == null || !FactionsClient.CONFIG.pinServer) return;
 		ServerData pinned = null;
