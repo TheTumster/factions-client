@@ -55,7 +55,13 @@ public class HudEditorScreen extends Screen {
 	@Override
 	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
 		// Keep the world visible so you can place things over the real game.
-		g.fill(0, 0, this.width, this.height, 0x50000000);
+		if (Minecraft.getInstance().level == null) {
+			this.renderPanorama(g, delta);
+			this.renderBlurredBackground(g);
+			g.fill(0, 0, this.width, this.height, 0xA00B0716);
+		} else {
+			g.fill(0, 0, this.width, this.height, 0x50000000);
+		}
 	}
 
 	@Override
@@ -70,7 +76,16 @@ public class HudEditorScreen extends Screen {
 			if (snapCY) g.fill(0, this.height / 2, this.width, this.height / 2 + 1, 0x9038E0FF);
 		}
 
-		if (mc.player != null) Hud.drawAll(g, mc, true);
+		if (mc.player != null) {
+			Hud.drawAll(g, mc, true);
+		} else {
+			// Opened from the main menu: there's no game to lay the HUD over yet.
+			Hud.BOUNDS.clear();
+			String l1 = "Join a world or server to edit your HUD";
+			String l2 = "Then press Right Shift  ›  HUD  ›  Edit HUD Layout";
+			com.factionsclient.ui.Theme.scaled(g, this.font, l1, this.width / 2f - this.font.width(l1) * 0.7f, this.height / 2f - 16, 1.4f, 0xFFFFFFFF, true);
+			g.drawCenteredString(this.font, l2, this.width / 2, this.height / 2 + 4, com.factionsclient.ui.Theme.MUTED);
+		}
 
 		for (Map.Entry<String, int[]> e : Hud.BOUNDS.entrySet()) {
 			int[] b = e.getValue();

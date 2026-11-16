@@ -120,7 +120,102 @@ final class Smoke {
 			ModuleRegistry.init();
 			mc.setScreen(new LaGMenu(new LaGTitleScreen()));
 			setCategory(ModuleRegistry.Category.HUD);
+		} else if (stage == 7 && t > 160_000) {
+			stage = 8;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage world-create");
+			mc.options.guiScale().set(0);
+			mc.resizeDisplay();
+			createWorld(mc);
+		} else if (stage == 8) {
+			// Wait for the world to actually be playable
+			if (mc.player == null || mc.level == null || mc.screen != null) {
+				loadedAt = 0;
+				return;
+			}
+			if (loadedAt == 0) loadedAt = System.currentTimeMillis();
+			if (System.currentTimeMillis() - loadedAt < 6_000) return;
+			stage = 9;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage ingame");
+			setUpScene(mc);
+		} else if (stage == 9 && System.currentTimeMillis() - stageAt > 14_000) {
+			stage = 10;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage ingame-hud-editor");
+			mc.setScreen(new com.factionsclient.HudEditorScreen(null));
+		} else if (stage == 10 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 11;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage ingame-menu");
+			ModuleRegistry.init();
+			mc.setScreen(new LaGMenu(null));
+			setCategory(ModuleRegistry.Category.FACTIONS);
+		} else if (stage == 11 && System.currentTimeMillis() - stageAt > 12_000) {
+			stage = 12;
+			FactionsClient.LOG.info("SMOKE stage done");
 		}
+	}
+
+	private static long loadedAt = 0;
+
+	/** Creative world, like vanilla's debug world button. */
+	private static void createWorld(Minecraft mc) {
+		try {
+			var settings = new net.minecraft.world.level.LevelSettings("SMOKE world", net.minecraft.world.level.GameType.CREATIVE,
+					false, net.minecraft.world.Difficulty.PEACEFUL, true,
+					new net.minecraft.world.level.gamerules.GameRules(net.minecraft.world.level.WorldDataConfiguration.DEFAULT.enabledFeatures()),
+					net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
+			mc.createWorldOpenFlows().createFreshLevel("SMOKE world", settings,
+					net.minecraft.client.gui.screens.worldselection.SelectWorldScreen.TEST_OPTIONS,
+					net.minecraft.world.level.levelgen.presets.WorldPresets::createNormalWorldDimensions, mc.screen);
+		} catch (Throwable e) {
+			FactionsClient.LOG.warn("SMOKE world create failed: {}", e.toString());
+		}
+	}
+
+	/**
+	 * Pretend we're on RelapsedMC Factions: claims around us (own/ally/enemy/safezone), a teammate, an /f home,
+	 * and some live TNT for crumb trails, so one screenshot shows every overlay.
+	 */
+	private static void setUpScene(Minecraft mc) {
+		com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.FACTIONS, false);
+		var c = FactionsClient.CONFIG;
+		c.crumbs = true;
+		c.claimMap = true;
+		c.homeBeacon = true;
+		c.team = true;
+		c.hud = true;
+		int pcx = mc.player.getBlockX() >> 4, pcz = mc.player.getBlockZ() >> 4;
+		java.util.Map<Long, ServerLink.Claim> claims = new java.util.HashMap<>();
+		for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+			claims.put(ServerLink.chunkKey(pcx + dx, pcz + dz), new ServerLink.Claim(ServerLink.OWN, "Relapse"));
+		for (int dz = -1; dz <= 1; dz++) claims.put(ServerLink.chunkKey(pcx + 3, pcz + dz), new ServerLink.Claim(ServerLink.ENEMY, "Ravens"));
+		for (int dx = -1; dx <= 0; dx++) claims.put(ServerLink.chunkKey(pcx + dx, pcz - 3), new ServerLink.Claim(ServerLink.ALLY, "Allies"));
+		claims.put(ServerLink.chunkKey(pcx - 3, pcz + 1), new ServerLink.Claim(ServerLink.SAFEZONE, "SafeZone"));
+		ServerLink.CLAIMS = claims;
+		ServerLink.CLAIMS_DIM = ServerLink.dimId(mc);
+		ServerLink.REALM = "factions";
+		ServerLink.connected = true;
+		var pos = mc.player.position();
+		ServerLink.HOME = new ServerLink.Home(ServerLink.dimId(mc), pos.x + 40, pos.y, pos.z + 70);
+		ServerLink.MATES = java.util.List.of(new ServerLink.Mate("Teammate", pos.x - 25, pos.y, pos.z + 30, ServerLink.dimId(mc)));
+		ServerLink.lastMatesForSmoke();
+		var server = mc.getSingleplayerServer();
+		if (server != null) server.execute(() -> {
+			var src = server.createCommandSourceStack();
+			String[] cmds = {"time set day", "weather clear", "tp @a ~ ~ ~ -35 20",
+					"summon tnt ~6 ~3 ~12 {fuse:200,Motion:[0.0,0.45,0.08]}",
+					"summon tnt ~-4 ~3 ~14 {fuse:200,Motion:[0.05,0.5,0.0]}"};
+			for (String cmd : cmds) {
+				try {
+					server.getCommands().performPrefixedCommand(src, cmd);
+				} catch (Throwable e) {
+					FactionsClient.LOG.warn("SMOKE command failed {}: {}", cmd, e.toString());
+				}
+			}
+		});
+		FactionsClient.LOG.info("SMOKE scene ready mode={} claims={}", com.factionsclient.Modes.current(), claims.size());
 	}
 
 	private static void setCategory(ModuleRegistry.Category c) {

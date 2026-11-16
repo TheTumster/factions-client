@@ -260,6 +260,11 @@ public final class ServerLink {
 		});
 	}
 
+	/** Smoke test only: pretend the server just sent teammates so tick() doesn't clear them. */
+	static void lastMatesForSmoke() {
+		lastMates = System.currentTimeMillis() + 600_000;
+	}
+
 	/** Drop stale teammates if the server stops sending (left factions, switched servers, etc.). */
 	public static void tick(Minecraft mc) {
 		if (!MATES.isEmpty() && System.currentTimeMillis() - lastMates > 5000) MATES = List.of();
