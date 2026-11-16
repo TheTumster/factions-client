@@ -5,19 +5,41 @@ on:
 permissions:
   contents: write
 jobs:
-  sources:
+  jars:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { java-version: '25', distribution: 'temurin' }
-      - uses: gradle/actions/setup-gradle@v4
-      - run: chmod +x ./gradlew && ./gradlew genSources -q || true
-      - name: commit sources to inspect-sources-out
+      - name: Download the pack's mod jars and dump class signatures
         run: |
-          mkdir -p /tmp/src && cd /tmp/src
-          for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do unzip -oq "$j" 'net/minecraft/client/*' 'net/minecraft/network/*' 'net/minecraft/resources/*' 'com/mojang/realmsclient/*' || true; done
-          du -sh /tmp/src
-          git init -q -b inspect-sources-out && git add -A
-          git -c user.name=ci -c user.email=ci@x commit -qm sources
-          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" inspect-sources-out
+          mkdir -p /tmp/jars /tmp/out && cd /tmp/jars
+          curl -sSL https://github.com/TheTumster/factions-client/releases/latest/download/manifest.json -o manifest.json
+          python3 - <<'PY'
+          import json, urllib.request
+          m = json.load(open("manifest.json"))
+          for x in m["mods"]:
+              n = x["filename"]
+              if any(k in n for k in ("litematica-printer", "litematica-fabric", "malilib", "xaerominimap", "xaeroworldmap", "sodium")):
+                  urllib.request.urlretrieve(x["url"], n); print("got", n)
+          PY
+          for j in *.jar; do
+            name=${j%.jar}; mkdir -p /tmp/out/$name
+            unzip -l "$j" | awk '{print $4}' | grep '\.class$' > /tmp/out/$name/classes.txt
+          done
+          # Printer: every class (small mod)
+          P=$(ls litematica-printer*.jar)
+          for c in $(unzip -Z1 "$P" | grep '\.class$' | sed 's/\.class$//' | tr / .); do javap -p -cp "$P" "$c" >> /tmp/out/printer-javap.txt 2>/dev/null; done
+          # malilib config types
+          M=$(ls malilib*.jar)
+          for c in $(unzip -Z1 "$M" | grep -E 'malilib/config/(options|IConfig|ConfigType|IConfigBase|IConfigBoolean|IConfigInteger|IConfigDouble|IConfigOptionList|IConfigOptionListEntry)[^/]*\.class$|malilib/hotkeys/(IKeybind|KeybindMulti|IHotkey)[^/]*\.class$|malilib/config/options/[^/]*\.class$' | sed 's/\.class$//' | tr / .); do javap -p -cp "$M" "$c" >> /tmp/out/malilib-javap.txt 2>/dev/null; done
+          # Xaero minimap: settings classes
+          X=$(ls xaerominimap*.jar)
+          for c in $(unzip -Z1 "$X" | grep -E 'settings/[^/]*\.class$|/HudMod[^/]*\.class$|/XaeroMinimap[^/]*\.class$|/IXaeroMinimap\.class$|/MinimapLogs|common/minimap/MinimapInterface\.class$' | sed 's/\.class$//' | tr / .); do javap -p -constants -cp "$X" "$c" >> /tmp/out/xaero-javap.txt 2>/dev/null; done
+          # Litematica Configs
+          L=$(ls litematica-fabric*.jar)
+          for c in $(unzip -Z1 "$L" | grep -E 'litematica/config/[^/]*\.class$' | sed 's/\.class$//' | tr / .); do javap -p -cp "$L" "$c" >> /tmp/out/litematica-javap.txt 2>/dev/null; done
+          # keep jars small enough to commit for deeper looks
+          cp "$P" "$X" /tmp/out/ 2>/dev/null || true
+          ls -la /tmp/out; wc -l /tmp/out/*.txt
+          cd /tmp/out && git init -q -b inspect-jars-out && git add -A && git -c user.name=ci -c user.email=ci@x commit -qm jars
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" inspect-jars-out
