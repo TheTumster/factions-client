@@ -168,6 +168,10 @@ public final class ChatTabs {
 		Minecraft.getInstance().gui.getChat().rescaleChat(); // rebuild visible lines through the filter
 	}
 
+	public static void selectByName(String name) {
+		for (int i = 0; i < tabs.size(); i++) if (tabs.get(i).name().equals(name)) select(i);
+	}
+
 	public static void reset() {
 		active = 0;
 		unread.clear();

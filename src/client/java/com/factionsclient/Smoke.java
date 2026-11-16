@@ -204,7 +204,7 @@ final class Smoke {
 					"Server restarting in 5 minutes"};
 			for (String l : lines) chat.addMessage(net.minecraft.network.chat.Component.literal(l));
 			mc.setScreen(new net.minecraft.client.gui.screens.ChatScreen("", false));
-			ChatTabs.select(1); // Faction
+			ChatTabs.selectByName("Faction");
 			int shown = 0;
 			for (String l : lines) if (ChatTabs.visible(net.minecraft.network.chat.Component.literal(l))) shown++;
 			FactionsClient.LOG.info("SMOKE chattabs {} (faction tab shows {} of {})", shown == 2 ? "ok" : "BROKEN", shown, lines.length);
