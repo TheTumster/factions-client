@@ -86,6 +86,17 @@ final class Smoke {
 			list.load();
 			boolean pinned = list.size() > 0 && com.factionsclient.RelapsedServer.isRelapsed(list.get(0).ip);
 			FactionsClient.LOG.info("SMOKE pinned={}", pinned);
+			// Modes: Skyblock turns factions overlays off, Factions turns them back on, a tweak sticks to its mode.
+			var c = FactionsClient.CONFIG;
+			com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.SKYBLOCK, false);
+			boolean skyOk = !c.crumbs && !c.claimMap && c.hudCoords;
+			c.hudCoords = false; // player tweak while in Skyblock
+			com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.FACTIONS, false);
+			boolean facOk = c.crumbs && c.claimMap && c.team && c.hudCoords;
+			com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.SKYBLOCK, false);
+			boolean kept = !c.hudCoords;
+			com.factionsclient.Modes.set(com.factionsclient.Modes.Mode.FACTIONS, false);
+			FactionsClient.LOG.info("SMOKE modes={} (sky={} fac={} kept={})", skyOk && facOk && kept ? "ok" : "BROKEN", skyOk, facOk, kept);
 			mc.setScreen(new net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen(new LaGTitleScreen()));
 		} else if (stage == 4 && t > 100_000) {
 			stage = 5;

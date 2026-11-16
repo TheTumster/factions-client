@@ -17,7 +17,7 @@ import com.factionsclient.ui.Theme;
 /** Every feature in the client, its category, its on/off switch and all of its settings. */
 public final class ModuleRegistry {
 	public enum Category {
-		FACTIONS("Factions", "⚔"), SCHEMATICA("Schematica", "▦"), RENDER("Render", "☀"), MOVEMENT("Movement", "➜"),
+		MODES("Modes", "◈"), FACTIONS("Factions", "⚔"), SCHEMATICA("Schematica", "▦"), RENDER("Render", "☀"), MOVEMENT("Movement", "➜"),
 		HUD("HUD", "▣"), MODS("Mods", "✦"), CLIENT("Client", "⚙");
 
 		public final String label;
@@ -175,6 +175,22 @@ public final class ModuleRegistry {
 		if (!ALL.isEmpty()) return;
 
 		// ------------------------------------------------ FACTIONS
+		// ------------------------------------------------ MODES (one preset per realm)
+		for (Modes.Mode m : Modes.Mode.values()) {
+			add(new Module(m.icon + "  " + m.label, m.desc, Category.MODES)
+					.toggle(() -> Modes.current() == m, v -> {
+						if (v) Modes.set(m, false);
+					})
+					.settings(() -> List.of(
+							new InfoS(() -> Modes.current() == m ? "Active. Changes you make now are saved to " + m.label + "."
+									: "Click the switch to use " + m.label + "."),
+							new ActionS("Back to the default " + m.label + " setup", "Reset", () -> Modes.reset(m)))));
+		}
+		add(new Module("Auto-switch by realm", "RelapsedMC tells the client which realm you joined", Category.MODES)
+				.toggle(() -> c().autoMode, v -> c().autoMode = v)
+				.settings(() -> List.of(new InfoS(() -> ServerLink.REALM.isEmpty() ? "Not on RelapsedMC right now."
+						: "You're on " + ServerLink.REALM + "."))));
+
 		add(new Module("TNT Crumbs", "Trails for every TNT & falling sand, red where TNT blew", Category.FACTIONS)
 				.toggle(() -> c().crumbs, v -> c().crumbs = v)
 				.settings(() -> List.of(

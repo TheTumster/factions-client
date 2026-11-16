@@ -20,6 +20,13 @@ public class Config {
 	/** Shared secret for your group. Anyone without it sees nothing. */
 	public String teamKey = "";
 
+	// Modes (one preset per realm: see Modes.java)
+	public String mode = "";
+	/** Switch mode automatically when RelapsedMC says which realm you joined. */
+	public boolean autoMode = true;
+	/** mode name -> that mode's module toggles */
+	public java.util.Map<String, java.util.Map<String, Boolean>> modes = new java.util.HashMap<>();
+
 	// Modules
 	public boolean hud = true;
 	public boolean crumbs = true;
@@ -86,6 +93,7 @@ public class Config {
 				Config c = GSON.fromJson(Files.readString(FILE), Config.class);
 				if (c != null) {
 					if (c.hudPos == null) c.hudPos = new java.util.HashMap<>();
+					Modes.migrate(c);
 					c.save(); // writes any new fields with defaults
 					return c;
 				}
@@ -94,6 +102,8 @@ public class Config {
 			FactionsClient.LOG.error("Failed to read config, using defaults", e);
 		}
 		Config c = new Config();
+		c.mode = Modes.Mode.GENERAL.name();
+		Modes.migrate(c);
 		c.save();
 		return c;
 	}

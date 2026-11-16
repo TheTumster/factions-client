@@ -56,7 +56,7 @@ public final class DiscordPresence {
 			state = null;
 		} else if (sd != null) {
 			details = cfg.discordShowServer ? "Playing on " + sd.ip.toLowerCase(Locale.ROOT) : "Playing multiplayer";
-			state = "Factions";
+			state = ServerLink.REALM.isEmpty() ? null : Modes.current().label;
 		} else {
 			details = "Singleplayer";
 			state = null;

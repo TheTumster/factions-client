@@ -39,7 +39,7 @@ public class LaGMenu extends Screen {
 	private record Hit(int x, int y, int w, int h, Runnable action) { }
 
 	private final Screen parent;
-	private static Category category = Category.FACTIONS;
+	private static Category category = Category.MODES;
 	private Module open = null;
 	private List<Setting> openSettings = List.of();
 

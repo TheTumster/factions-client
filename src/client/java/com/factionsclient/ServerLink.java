@@ -26,6 +26,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  *  relapsed:crumbs -> utf dim, varint n, then n x (int x, int y, int z)
  *  relapsed:claims -> utf dim, varint radius, varint nTags, nTags x utf, varint n, n x (int cx, int cz, byte rel, varint tag)
  *  relapsed:home   -> bool has, then utf dim, double x, double y, double z
+ *  relapsed:realm  -> utf realm (hub, factions, skyblock, smp, cannons): laGCore sends it when you arrive
  */
 public final class ServerLink {
 	public record Mate(String name, double x, double y, double z, String dim) { }
@@ -152,6 +153,20 @@ public final class ServerLink {
 		}
 	}
 
+	public record RealmPayload(String realm) implements CustomPacketPayload {
+		public static final Type<RealmPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath("relapsed", "realm"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, RealmPayload> CODEC = StreamCodec.of(
+				(buf, p) -> buf.writeUtf(p.realm), buf -> new RealmPayload(buf.readUtf(64)));
+
+		@Override
+		public Type<? extends CustomPacketPayload> type() {
+			return TYPE;
+		}
+	}
+
+	/** Realm you're on right now ("" if not on RelapsedMC). */
+	public static volatile String REALM = "";
+
 	public static long chunkKey(int cx, int cz) {
 		return ((long) cx << 32) | (cz & 0xFFFFFFFFL);
 	}
@@ -190,6 +205,21 @@ public final class ServerLink {
 		PayloadTypeRegistry.playS2C().register(CrumbsPayload.TYPE, CrumbsPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(ClaimsPayload.TYPE, ClaimsPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(HomePayload.TYPE, HomePayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(RealmPayload.TYPE, RealmPayload.CODEC);
+
+		ClientPlayNetworking.registerGlobalReceiver(RealmPayload.TYPE, (payload, ctx) -> {
+			connected = true;
+			boolean changed = !payload.realm().equalsIgnoreCase(REALM);
+			REALM = payload.realm();
+			// Switching realms through the proxy keeps the same connection: clear the last realm's data.
+			if (changed) {
+				MATES = List.of();
+				CLAIMS = Map.of();
+				CLAIMS_DIM = "";
+				HOME = null;
+			}
+			Modes.onRealm(payload.realm());
+		});
 
 		ClientPlayNetworking.registerGlobalReceiver(ClaimsPayload.TYPE, (payload, ctx) -> {
 			connected = true;
@@ -223,7 +253,11 @@ public final class ServerLink {
 		});
 
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) -> reset());
-		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> reset());
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> {
+			reset();
+			var sd = mc.getCurrentServer();
+			if (sd == null || !RelapsedServer.isRelapsed(sd.ip)) Modes.onOtherServer();
+		});
 	}
 
 	/** Drop stale teammates if the server stops sending (left factions, switched servers, etc.). */
@@ -236,6 +270,7 @@ public final class ServerLink {
 		CLAIMS = Map.of();
 		CLAIMS_DIM = "";
 		HOME = null;
+		REALM = "";
 		connected = false;
 	}
 

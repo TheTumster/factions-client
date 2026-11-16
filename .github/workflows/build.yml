@@ -98,6 +98,7 @@ jobs:
           for st in title menu menu-hud options multiplayer menu-factions; do
             grep -q "SMOKE stage $st" game.log || { echo "Never reached: $st"; exit 1; }
           done
+          grep -q "SMOKE modes=ok" game.log || { echo "Mode switching is broken"; grep "SMOKE modes" game.log; exit 1; }
           grep -q "SMOKE pinned=true" game.log || { echo "RelapsedMC is not pinned to the top of the server list"; exit 1; }
           echo "All screens OK"
 
