@@ -15,7 +15,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 public final class WorldRender {
 	private static final int MY_BOOM = 0x90FF1010;     // red
 	private static final int TEAM_BOOM = 0x90B040FF;   // purple (teammate saw it)
-	private static final int MATE = 0x6038E0FF;        // cyan
+	private static final int MATE = 0x8038E0FF;        // cyan
 
 	private WorldRender() { }
 
@@ -47,8 +47,11 @@ public final class WorldRender {
 			String dim = ServerLink.dimId(mc);
 			for (ServerLink.Mate mate : ServerLink.MATES) {
 				if (!mate.dim().equals(dim)) continue;
-				// Tall thin pillar so you can spot them from far away
-				box(m, vc, cam, mate.x() - 0.15, mate.y(), mate.z() - 0.15, mate.x() + 0.15, mate.y() + 40, mate.z() + 0.15, MATE);
+				// Tall pillar so you can spot them from far away, with a bright marker at head height
+				double d = Math.sqrt(mc.player.distanceToSqr(mate.x(), mate.y(), mate.z()));
+				double r = 0.2 + Math.min(0.6, d / 200.0);
+				box(m, vc, cam, mate.x() - r, mate.y(), mate.z() - r, mate.x() + r, mate.y() + 48, mate.z() + r, MATE);
+				box(m, vc, cam, mate.x() - 0.3, mate.y() + 2.1, mate.z() - 0.3, mate.x() + 0.3, mate.y() + 2.7, mate.z() + 0.3, 0xE038E0FF);
 			}
 		}
 	}
@@ -123,7 +126,7 @@ public final class WorldRender {
 			int cx = ServerLink.chunkX(e.getKey()), cz = ServerLink.chunkZ(e.getKey());
 			ServerLink.Claim c = e.getValue();
 			int rgb = relationColor(c.rel());
-			int wall = alpha(rgb, 0x22), edge = alpha(rgb, 0xC0);
+			int wall = alpha(rgb, 0x3A), edge = alpha(rgb, 0xE8);
 			double x0 = cx << 4, z0 = cz << 4, x1 = x0 + 16, z1 = z0 + 16;
 			// north (-z), south (+z), west (-x), east (+x)
 			if (differs(c, claims.get(ServerLink.chunkKey(cx, cz - 1)))) wallX(m, vc, cam, x0, x1, z0, y0, y1, t, wall, edge);
@@ -139,14 +142,17 @@ public final class WorldRender {
 
 	private static void wallX(Matrix4f m, VertexConsumer vc, Vec3 cam, double xa, double xb, double z, double y0, double y1, double t, int wall, int edge) {
 		box(m, vc, cam, xa, y0, z - t, xb, y1, z + t, wall);
-		box(m, vc, cam, xa, y0 - 0.03, z - 0.04, xb, y0 + 0.03, z + 0.04, edge);
-		box(m, vc, cam, xa, y1 - 0.03, z - 0.04, xb, y1 + 0.03, z + 0.04, edge);
+		box(m, vc, cam, xa, y0 - 0.05, z - 0.06, xb, y0 + 0.05, z + 0.06, edge);
+		box(m, vc, cam, xa, y1 - 0.05, z - 0.06, xb, y1 + 0.05, z + 0.06, edge);
+		// posts every 4 blocks so the wall reads from far away
+		for (double x = xa; x <= xb + 0.01; x += 4) box(m, vc, cam, x - 0.05, y0, z - 0.05, x + 0.05, y1, z + 0.05, edge);
 	}
 
 	private static void wallZ(Matrix4f m, VertexConsumer vc, Vec3 cam, double za, double zb, double x, double y0, double y1, double t, int wall, int edge) {
 		box(m, vc, cam, x - t, y0, za, x + t, y1, zb, wall);
-		box(m, vc, cam, x - 0.04, y0 - 0.03, za, x + 0.04, y0 + 0.03, zb, edge);
-		box(m, vc, cam, x - 0.04, y1 - 0.03, za, x + 0.04, y1 + 0.03, zb, edge);
+		box(m, vc, cam, x - 0.06, y0 - 0.05, za, x + 0.06, y0 + 0.05, zb, edge);
+		box(m, vc, cam, x - 0.06, y1 - 0.05, za, x + 0.06, y1 + 0.05, zb, edge);
+		for (double z = za; z <= zb + 0.01; z += 4) box(m, vc, cam, x - 0.05, y0, z - 0.05, x + 0.05, y1, z + 0.05, edge);
 	}
 
 	/** A tall gradient beam at your faction's /f home, visible from far away. */
@@ -156,12 +162,14 @@ public final class WorldRender {
 		double bx = Math.floor(h.x()) + 0.5, bz = Math.floor(h.z()) + 0.5, by = Math.floor(h.y());
 		double dist = Math.sqrt(mc.player.distanceToSqr(bx, by, bz));
 		if (dist < 6) return; // you're there
-		double r = 0.18 + Math.min(0.6, dist / 400.0); // a bit thicker far away so it stays visible
+		double r = 0.35 + Math.min(1.0, dist / 160.0); // thicker far away so it stays visible
+		double core = r * 0.35;
 		int segs = 12;
 		for (int i = 0; i < segs; i++) {
 			int col = com.factionsclient.ui.Theme.gradientAt(i / (float) (segs - 1));
 			double ya = by + i * 16, yb = ya + 16;
-			box(m, vc, cam, bx - r, ya, bz - r, bx + r, yb, bz + r, alpha(col, 0x70));
+			box(m, vc, cam, bx - r, ya, bz - r, bx + r, yb, bz + r, alpha(col, 0x58));
+			box(m, vc, cam, bx - core, ya, bz - core, bx + core, yb, bz + core, alpha(col, 0xE0));
 		}
 		box(m, vc, cam, bx - 0.5, by, bz - 0.5, bx + 0.5, by + 0.05, bz + 0.5, alpha(0x4DFF88, 0xA0));
 	}
