@@ -162,16 +162,16 @@ public class LaGTitleScreen extends Screen {
 			case ONLINE -> {
 				String on = RelapsedServer.onlineText();
 				long ms = RelapsedServer.ping();
-				play.sub = "● " + (on != null ? on : "Online") + (ms >= 0 ? "  ·  " + ms + "ms" : "");
-				play.subColor = 0xFF8CFFB4;
+				play.sub = (on != null ? on : "Online") + (ms >= 0 ? "  ·  " + ms + "ms" : "");
+				play.subColor = 0xFF4DFF88;
 			}
 			case OFFLINE -> {
-				play.sub = "● Server offline";
-				play.subColor = 0xFFFF8A9A;
+				play.sub = "Server offline";
+				play.subColor = 0xFFFF3B4E;
 			}
 			default -> {
-				play.sub = "● " + RelapsedServer.IP;
-				play.subColor = 0xFFD8D0EA;
+				play.sub = RelapsedServer.IP;
+				play.subColor = 0xFFFFFFFF;
 			}
 		}
 

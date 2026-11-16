@@ -195,9 +195,16 @@ public final class Theme {
 			outline(g, x, y, w, h, alpha(lerp(0x30FFFFFF, 0x80FFFFFF, hover), a));
 			int tc = alpha(lerp(primary ? TEXT : 0xFFC9D1DD, 0xFFFFFFFF, hover), a);
 			if (sub != null) {
+				// Label + a small status line. The colored dot carries the state; the text stays white so it
+				// reads on the bright gradient.
 				int ty = y + h / 2 - 9;
-				g.drawString(f, label, x + (w - f.width(label)) / 2, ty, tc, lit > 0.3f);
-				scaled(g, f, sub, x + (w - f.width(sub) * 0.75f) / 2f, ty + 12, 0.75f, alpha(subColor, a), false);
+				g.drawString(f, label, x + (w - f.width(label)) / 2, ty, tc, true);
+				float sw = (f.width(sub) + 8) * 0.75f;
+				float sx = x + (w - sw) / 2f;
+				int dy = ty + 13;
+				g.fill(Math.round(sx), dy, Math.round(sx) + 4, dy + 4, alpha(0xFF000000, a * 0.6f));
+				g.fill(Math.round(sx), dy - 1, Math.round(sx) + 3, dy + 2, alpha(subColor, a));
+				scaled(g, f, sub, sx + 6, ty + 12, 0.75f, alpha(0xFFFFFFFF, a * 0.92f), true);
 			} else {
 				g.drawString(f, label, x + (w - f.width(label)) / 2, y + (h - 8) / 2, tc, lit > 0.3f);
 			}
