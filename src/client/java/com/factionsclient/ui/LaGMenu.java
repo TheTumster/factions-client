@@ -57,6 +57,8 @@ public class LaGMenu extends Screen {
 	private int dragX, dragW;
 
 	private int wx, wy, ww, wh;
+	/** When the visible card list last changed (tab switch / search): cards slide in one after another. */
+	private long listShownAt = System.currentTimeMillis();
 
 	public LaGMenu(Screen parent) {
 		super(Component.literal(Theme.BRAND));
@@ -96,6 +98,8 @@ public class LaGMenu extends Screen {
 		Theme.glow(g, wx, wy, ww, wh, 0.35f * a);
 		Theme.rect(g, wx, wy, ww, wh, Theme.alpha(Theme.PANEL, a));
 		Theme.rect(g, wx, wy, 120, wh, Theme.alpha(Theme.SIDEBAR, a));
+		g.fill(wx + 120, wy + 2, wx + 121, wy + wh - 1, Theme.alpha(Theme.LINE, a));
+		g.fillGradient(wx + 121, wy + 2, wx + ww - 1, wy + 40, Theme.alpha(0x14B040FF, a), 0x00000000);
 		Theme.gradientLine(g, wx, wy, ww, 2, a);
 		Theme.outline(g, wx, wy, ww, wh, Theme.alpha(Theme.LINE, a));
 
@@ -124,6 +128,7 @@ public class LaGMenu extends Screen {
 			g.drawString(font, c.label, wx + 30, y + 6, Theme.alpha(tc, a), sel);
 			final Category cc = c;
 			hits.add(new Hit(wx + 8, y, 104, 20, () -> {
+				if (category != cc) listShownAt = System.currentTimeMillis();
 				category = cc;
 				open = null;
 				search = "";
@@ -132,7 +137,24 @@ public class LaGMenu extends Screen {
 			}));
 			y += step;
 		}
-		if (y + 6 < wy + wh - 14) g.drawString(font, "Right Shift to close", wx + 12, wy + wh - 14, Theme.alpha(Theme.DIM, a), false);
+		// Current mode, bottom of the sidebar (click: go to Modes)
+		int py = wy + wh - 26;
+		if (y + 4 < py) {
+			var mode = com.factionsclient.Modes.current();
+			String label = mode.icon + " " + mode.label + " mode";
+			float ph = hover("modepill", Theme.inside(mx, my, wx + 8, py, 104, 18));
+			Theme.rect(g, wx + 8, py, 104, 18, Theme.alpha(Theme.lerp(Theme.CARD, Theme.CARD_HOVER, ph), a));
+			Theme.gradient(g, wx + 8, py + 17, 104, 1, a * 0.9f);
+			Theme.outline(g, wx + 8, py, 104, 18, Theme.alpha(0x30FFFFFF, a));
+			g.drawString(font, Theme.trim(font, label, 96), wx + 13, py + 5, Theme.alpha(Theme.TEXT, a), false);
+			hits.add(new Hit(wx + 8, py, 104, 18, () -> {
+				if (category != Category.MODES) listShownAt = System.currentTimeMillis();
+				category = Category.MODES;
+				open = null;
+				search = "";
+				scroll = scrollTarget = 0;
+			}));
+		}
 	}
 
 	private void cards(GuiGraphics g, int mx, int my, float a) {
@@ -157,19 +179,25 @@ public class LaGMenu extends Screen {
 		}
 
 		int top = wy + 36, bottom = wy + wh - 10;
-		int colW = (cw - 8) / 2, cardH = 44, gap = 8;
-		int rows = (list.size() + 1) / 2;
+		int gap = 8;
+		int cols = Math.max(1, Math.min(2, (cw + gap) / (200 + gap)));
+		int colW = (cw - (cols - 1) * gap) / cols, cardH = 50;
+		int rows = (list.size() + cols - 1) / cols;
 		maxScroll = Math.max(0, rows * (cardH + gap) - gap - (bottom - top));
 		scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
 		scroll = Theme.approach(scroll, scrollTarget, 16f);
 
 		g.enableScissor(cx - 4, top - 2, cx + cw + 4, bottom);
+		long now = System.currentTimeMillis();
 		for (int i = 0; i < list.size(); i++) {
 			Module m = list.get(i);
-			int x = cx + (i % 2) * (colW + gap);
-			int y = top + (i / 2) * (cardH + gap) - Math.round(scroll);
+			int x = cx + (i % cols) * (colW + gap);
+			int y = top + (i / cols) * (cardH + gap) - Math.round(scroll);
 			if (y + cardH < top || y > bottom) continue;
-			card(g, m, x, y, colW, cardH, mx, my, a, my >= top && my < bottom);
+			float t = Math.max(0f, Math.min(1f, (now - listShownAt - Math.min(i, 10) * 28) / 260f));
+			float e = 1f - (1f - t) * (1f - t) * (1f - t);
+			int slide = Math.round((1 - e) * 8);
+			card(g, m, x, y + slide, colW, cardH, mx, my, a * e, my >= top && my < bottom && e > 0.9f);
 		}
 		g.disableScissor();
 		if (list.isEmpty()) g.drawString(font, "Nothing matches \"" + search + "\"", cx, top + 4, Theme.alpha(Theme.MUTED, a), false);
@@ -187,9 +215,23 @@ public class LaGMenu extends Screen {
 
 		boolean hasPage = m.open != null || !m.settings.get().isEmpty();
 		int nameRoom = w - 20 - (m.toggle != null ? 36 : 0) - (m.toggle == null && hasPage ? 14 : 0);
-		g.drawString(font, Theme.trim(font, m.name, nameRoom), x + 10, y + 9, Theme.alpha(Theme.TEXT, a), false);
-		int descRoom = (m.toggle != null && hasPage && hv > 0.05f) ? w - 30 - font.width("settings ›") : w - 20;
-		g.drawString(font, Theme.trim(font, m.desc, descRoom), x + 10, y + 25, Theme.alpha(Theme.MUTED, a), false);
+		g.drawString(font, Theme.trim(font, m.name, nameRoom), x + 10, y + 9, Theme.alpha(on ? 0xFFFFFFFF : Theme.TEXT, a), false);
+		// Description wraps onto two lines (scaled down a touch) instead of being cut off
+		int descRoom = w - 20 - (m.toggle != null && hasPage ? 16 : 0);
+		var lines = font.split(Component.literal(m.desc), Math.round(descRoom / 0.85f));
+		for (int li = 0; li < Math.min(2, lines.size()); li++) {
+			g.pose().pushMatrix();
+			g.pose().translate(x + 10, y + 24 + li * 10);
+			g.pose().scale(0.85f, 0.85f);
+			var seq = lines.get(li);
+			if (li == 1 && lines.size() > 2) {
+				String rest = Theme.trim(font, m.desc.substring(Math.min(m.desc.length(), Math.max(0, cutIndex(m.desc, lines.get(0))))), Math.round(descRoom / 0.85f));
+				g.drawString(font, rest, 0, 0, Theme.alpha(Theme.MUTED, a), false);
+			} else {
+				g.drawString(font, seq, 0, 0, Theme.alpha(Theme.MUTED, a), false);
+			}
+			g.pose().popMatrix();
+		}
 		if (m.toggle != null) {
 			int sx = x + w - 32, sy = y + 8;
 			sw(m).render(g, sx, sy, on, a);
@@ -202,8 +244,8 @@ public class LaGMenu extends Screen {
 			g.drawString(font, "›", x + w - 16, y + 9, Theme.alpha(Theme.lerp(Theme.MUTED, 0xFFFFFFFF, hv), a), false);
 		}
 		if (m.toggle != null && hasPage && hv > 0.05f) {
-			String more = "settings ›";
-			g.drawString(font, more, x + w - 10 - font.width(more), y + 25, Theme.alpha(Theme.lerp(Theme.MUTED, 0xFFFFFFFF, hv), a * hv), false);
+			// small gear under the switch: this card has settings
+			g.drawString(font, "⚙", x + w - 24, y + 26, Theme.alpha(Theme.lerp(Theme.MUTED, 0xFFFFFFFF, hv), a * hv), false);
 		}
 
 		if (inView) hits.add(new Hit(x, y, w, h, () -> {
@@ -219,6 +261,18 @@ public class LaGMenu extends Screen {
 				FactionsClient.CONFIG.save();
 			}
 		}));
+	}
+
+	/** How many characters of `full` the first wrapped line used. */
+	private int cutIndex(String full, net.minecraft.util.FormattedCharSequence first) {
+		StringBuilder sb = new StringBuilder();
+		first.accept((idx, style, cp) -> {
+			sb.appendCodePoint(cp);
+			return true;
+		});
+		int n = sb.length();
+		while (n < full.length() && full.charAt(n) == ' ') n++;
+		return n;
 	}
 
 	private void settingsPage(GuiGraphics g, int mx, int my, float a) {

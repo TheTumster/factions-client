@@ -56,6 +56,10 @@ public class Config {
 	public boolean hudStatus = true;
 	public boolean hudInfo = true;
 	public boolean hudTerritory = true;
+	/** 0 glass panels, 1 minimal, 2 classic black boxes */
+	public int hudStyle = 0;
+	/** Glass panel opacity, percent */
+	public int hudOpacity = 66;
 
 	// Look
 	public boolean customMenu = true;

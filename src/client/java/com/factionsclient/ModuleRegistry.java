@@ -291,6 +291,10 @@ public final class ModuleRegistry {
 				.opens(() -> Minecraft.getInstance().setScreen(new HudEditorScreen(parentScreen))));
 		add(new Module("HUD", "Master switch for every HUD element", Category.HUD)
 				.toggle(() -> c().hud, v -> c().hud = v));
+		add(new Module("HUD Style", "Glass panels, minimal text, or classic boxes", Category.HUD)
+				.settings(() -> List.of(
+						new IntS("Style (0 glass, 1 minimal, 2 classic)", 0, 2, 1, "", () -> c().hudStyle, v -> c().hudStyle = v),
+						new IntS("Glass opacity", 20, 100, 5, "%", () -> c().hudOpacity, v -> c().hudOpacity = v))));
 		hudElement("info", "FPS / Ping / TNT", "Performance and live TNT count", () -> c().hudInfo, v -> c().hudInfo = v);
 		hudElement("coords", "Coordinates", "XYZ, facing and nether coords", () -> c().hudCoords, v -> c().hudCoords = v);
 		hudElement("status", "Sprint / Sneak Status", "[Sprinting (Toggled)]", () -> c().hudStatus, v -> c().hudStatus = v);

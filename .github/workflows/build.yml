@@ -69,7 +69,7 @@ jobs:
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2
-          (timeout 260 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
+          (timeout 300 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
           GAME=$!
           mkdir -p shots
           wait $GAME || true
@@ -95,7 +95,7 @@ jobs:
       - name: Verify the game reached every laG screen without crashing
         run: |
           if ls run/crash-reports/*.txt >/dev/null 2>&1; then echo "Game crashed"; exit 1; fi
-          for st in title menu menu-hud options multiplayer menu-factions; do
+          for st in title menu menu-hud options multiplayer menu-factions hud-editor menu-small; do
             grep -q "SMOKE stage $st" game.log || { echo "Never reached: $st"; exit 1; }
           done
           grep -q "SMOKE modes=ok" game.log || { echo "Mode switching is broken"; grep "SMOKE modes" game.log; exit 1; }

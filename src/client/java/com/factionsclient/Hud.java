@@ -124,17 +124,17 @@ public final class Hud {
 					PlayerInfo info = mc.getConnection().getPlayerInfo(p.getUUID());
 					if (info != null) ping = info.getLatency();
 				}
-				String s = "FPS " + mc.getFps() + "  Ping " + ping + "ms";
-				if (cfg.crumbs) s += "  TNT " + Crumbs.liveTnt();
-				lines.add(new Line(s, accent));
+				String s = "§7FPS §f" + mc.getFps() + "  §7Ping §f" + ping + "ms";
+				if (cfg.crumbs) s += "  §7TNT §f" + Crumbs.liveTnt();
+				lines.add(new Line(s, WHITE));
 			}
 			case "coords" -> {
-				lines.add(new Line(String.format(Locale.ROOT, "XYZ %d %d %d  %s", p.getBlockX(), p.getBlockY(), p.getBlockZ(),
+				lines.add(new Line(String.format(Locale.ROOT, "§7XYZ §f%d %d %d  §7%s", p.getBlockX(), p.getBlockY(), p.getBlockZ(),
 						p.getDirection().getSerializedName().toUpperCase(Locale.ROOT)), WHITE));
 				if (mc.level != null && mc.level.dimension() == Level.OVERWORLD) {
-					lines.add(new Line(String.format(Locale.ROOT, "Nether %d %d", p.getBlockX() / 8, p.getBlockZ() / 8), GRAY));
+					lines.add(new Line(String.format(Locale.ROOT, "§cNether §7%d %d", p.getBlockX() / 8, p.getBlockZ() / 8), GRAY));
 				} else if (mc.level != null && mc.level.dimension() == Level.NETHER) {
-					lines.add(new Line(String.format(Locale.ROOT, "Overworld %d %d", p.getBlockX() * 8, p.getBlockZ() * 8), GRAY));
+					lines.add(new Line(String.format(Locale.ROOT, "§aOverworld §7%d %d", p.getBlockX() * 8, p.getBlockZ() * 8), GRAY));
 				}
 			}
 			case "territory" -> {
@@ -173,7 +173,7 @@ public final class Hud {
 						} else {
 							where = "(" + m.dim().replace("minecraft:", "") + ")";
 						}
-						lines.add(new Line(m.name() + "  " + where, accent));
+						lines.add(new Line("§f" + m.name() + "  §7" + where, accent));
 					}
 					ServerLink.Home h = ServerLink.HOME;
 					if (cfg.homeBeacon && h != null && h.dim().equals(dim)) {
@@ -211,11 +211,35 @@ public final class Hud {
 
 	// ---- element drawing helpers ----
 
+	/** HUD looks: 0 = glass panel (default), 1 = minimal (text only), 2 = classic (black box per line). */
+	static int style() {
+		return FactionsClient.CONFIG.hudStyle;
+	}
+
+	/** One rounded purple-black glass panel with a thin accent bar on the side the text hugs. */
+	static void panel(GuiGraphics g, int x, int y, int w, int h, boolean barRight) {
+		int bg = (FactionsClient.CONFIG.hudOpacity * 255 / 100) << 24 | 0x0B0716;
+		com.factionsclient.ui.Theme.rect(g, x, y, w, h, bg);
+		com.factionsclient.ui.Theme.outline(g, x, y, w, h, 0x1CFFFFFF);
+		int bx = barRight ? x + w - 2 : x;
+		g.fillGradient(bx, y + 2, bx + 2, y + h - 2, 0xFF38E0FF, 0xFFFF4DD2);
+	}
+
 	private static int[] leftAligned(GuiGraphics g, Font f, List<Line> lines) {
+		if (lines.isEmpty()) return new int[] {0, 0};
 		int w = 0, y = 0;
 		for (Line l : lines) w = Math.max(w, f.width(l.text()));
+		if (style() == 0) {
+			int h = lines.size() * 10 + 5;
+			panel(g, 0, 0, w + 11, h, false);
+			for (Line l : lines) {
+				g.drawString(f, l.text(), 6, y + 3, l.color(), true);
+				y += 10;
+			}
+			return new int[] {w + 11, h};
+		}
 		for (Line l : lines) {
-			g.fill(-2, y - 1, f.width(l.text()) + 2, y + 9, BG);
+			if (style() == 2) g.fill(-2, y - 1, f.width(l.text()) + 2, y + 9, BG);
 			g.drawString(f, l.text(), 0, y, l.color(), true);
 			y += 11;
 		}
@@ -223,11 +247,21 @@ public final class Hud {
 	}
 
 	private static int[] rightAligned(GuiGraphics g, Font f, List<Line> lines) {
+		if (lines.isEmpty()) return new int[] {0, 0};
 		int w = 0, y = 0;
 		for (Line l : lines) w = Math.max(w, f.width(l.text()));
+		if (style() == 0) {
+			int h = lines.size() * 10 + 5;
+			panel(g, 0, 0, w + 11, h, true);
+			for (Line l : lines) {
+				g.drawString(f, l.text(), 5 + w - f.width(l.text()), y + 3, l.color(), true);
+				y += 10;
+			}
+			return new int[] {w + 11, h};
+		}
 		for (Line l : lines) {
 			int lw = f.width(l.text());
-			g.fill(w - lw - 2, y - 1, w + 2, y + 9, BG);
+			if (style() == 2) g.fill(w - lw - 2, y - 1, w + 2, y + 9, BG);
 			g.drawString(f, l.text(), w - lw, y, l.color(), true);
 			y += 11;
 		}
@@ -249,6 +283,18 @@ public final class Hud {
 	}
 
 	private static void key(GuiGraphics g, Font f, int x, int y, int w, int h, String label, boolean down, int accent) {
+		if (style() != 2) {
+			int bg = (FactionsClient.CONFIG.hudOpacity * 255 / 100) << 24 | 0x0B0716;
+			com.factionsclient.ui.Theme.rect(g, x, y, w, h, bg);
+			if (down) com.factionsclient.ui.Theme.gradient(g, x, y, w, h, 0.95f);
+			com.factionsclient.ui.Theme.outline(g, x, y, w, h, down ? 0x60FFFFFF : 0x1CFFFFFF);
+			if (h == 10) {
+				g.fill(x + w / 2 - 10, y + 4, x + w / 2 + 10, y + 5, WHITE);
+			} else {
+				g.drawString(f, label, x + (w - f.width(label)) / 2, y + (h - 8) / 2, WHITE, down);
+			}
+			return;
+		}
 		g.fill(x, y, x + w, y + h, down ? (0xD0000000 | (accent & 0xFFFFFF)) : BG);
 		if (h == 10) {
 			g.fill(x + w / 2 - 10, y + 4, x + w / 2 + 10, y + 5, down ? 0xFF000000 : WHITE); // spacebar line

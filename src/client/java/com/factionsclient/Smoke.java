@@ -105,6 +105,21 @@ final class Smoke {
 			ModuleRegistry.init();
 			mc.setScreen(new LaGMenu(new LaGTitleScreen()));
 			setCategory(ModuleRegistry.Category.FACTIONS);
+		} else if (stage == 5 && t > 120_000) {
+			stage = 6;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage hud-editor");
+			mc.setScreen(new com.factionsclient.HudEditorScreen(new LaGTitleScreen()));
+		} else if (stage == 6 && t > 140_000) {
+			stage = 7;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage menu-small");
+			// Small window: the menu must still fit and not cut names off.
+			mc.options.guiScale().set(4);
+			mc.resizeDisplay();
+			ModuleRegistry.init();
+			mc.setScreen(new LaGMenu(new LaGTitleScreen()));
+			setCategory(ModuleRegistry.Category.HUD);
 		}
 	}
 
