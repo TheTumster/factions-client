@@ -1,0 +1,436 @@
+Compiled from "ActionHandler.java"
+public class me.aleksilassila.litematica.printer.ActionHandler {
+  private final net.minecraft.class_310 client;
+  private final net.minecraft.class_746 player;
+  private final java.util.Queue<me.aleksilassila.litematica.printer.actions.Action> actionQueue;
+  public me.aleksilassila.litematica.printer.actions.PrepareAction lookAction;
+  private int tick;
+  public me.aleksilassila.litematica.printer.ActionHandler(net.minecraft.class_310, net.minecraft.class_746);
+  public void onGameTick();
+  public boolean acceptsActions();
+  public void addActions(me.aleksilassila.litematica.printer.actions.Action...);
+}
+Compiled from "BlockHelper.java"
+public abstract class me.aleksilassila.litematica.printer.BlockHelper {
+  public static java.util.List<java.lang.Class<?>> interactiveBlocks;
+  public static final net.minecraft.class_1792[] SHOVEL_ITEMS;
+  public me.aleksilassila.litematica.printer.BlockHelper();
+  static {};
+}
+Compiled from "LitematicaMixinMod.java"
+public class me.aleksilassila.litematica.printer.LitematicaMixinMod implements net.fabricmc.api.ModInitializer {
+  public static me.aleksilassila.litematica.printer.Printer printer;
+  public me.aleksilassila.litematica.printer.LitematicaMixinMod();
+  public void onInitialize();
+}
+Compiled from "Printer.java"
+public class me.aleksilassila.litematica.printer.Printer {
+  public static final org.apache.logging.log4j.Logger logger;
+  public final net.minecraft.class_746 player;
+  public final me.aleksilassila.litematica.printer.ActionHandler actionHandler;
+  private final me.aleksilassila.litematica.printer.guides.Guides interactionGuides;
+  public me.aleksilassila.litematica.printer.Printer(net.minecraft.class_310, net.minecraft.class_746);
+  public boolean onGameTick();
+  private java.util.List<net.minecraft.class_2338> getReachablePositions();
+  public static void printDebug(java.lang.String, java.lang.Object...);
+  private int lambda$getReachablePositions$2(net.minecraft.class_2338, net.minecraft.class_2338);
+  private boolean lambda$getReachablePositions$1(net.minecraft.class_2338);
+  private static me.aleksilassila.litematica.printer.actions.Action[] lambda$onGameTick$0(int);
+  static {};
+}
+Compiled from "PrinterReference.java"
+public class me.aleksilassila.litematica.printer.PrinterReference {
+  public static final java.lang.String MOD_ID;
+  public static final java.lang.String MOD_KEY;
+  public static final java.lang.String MOD_NAME;
+  public static final java.lang.String MOD_VERSION;
+  public static final java.lang.String MC_VERSION;
+  public static final java.lang.String MOD_STRING;
+  public me.aleksilassila.litematica.printer.PrinterReference();
+  static {};
+}
+Compiled from "SchematicBlockState.java"
+public class me.aleksilassila.litematica.printer.SchematicBlockState {
+  public final net.minecraft.class_1937 world;
+  public final fi.dy.masa.litematica.world.WorldSchematic schematic;
+  public final net.minecraft.class_2338 blockPos;
+  public final net.minecraft.class_2680 targetState;
+  public final net.minecraft.class_2680 currentState;
+  public me.aleksilassila.litematica.printer.SchematicBlockState(net.minecraft.class_1937, fi.dy.masa.litematica.world.WorldSchematic, net.minecraft.class_2338);
+  public me.aleksilassila.litematica.printer.SchematicBlockState offset(net.minecraft.class_2350);
+  public java.lang.String toString();
+}
+Compiled from "UpdateChecker.java"
+public class me.aleksilassila.litematica.printer.UpdateChecker {
+  public static final java.lang.String version;
+  public me.aleksilassila.litematica.printer.UpdateChecker();
+  public static java.lang.String getPrinterVersion();
+  static {};
+}
+Compiled from "Action.java"
+public abstract class me.aleksilassila.litematica.printer.actions.Action {
+  public me.aleksilassila.litematica.printer.actions.Action();
+  public abstract void send(net.minecraft.class_310, net.minecraft.class_746);
+}
+Compiled from "InteractAction.java"
+public abstract class me.aleksilassila.litematica.printer.actions.InteractAction extends me.aleksilassila.litematica.printer.actions.Action {
+  public final me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext context;
+  public me.aleksilassila.litematica.printer.actions.InteractAction(me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext);
+  protected abstract void interact(net.minecraft.class_310, net.minecraft.class_746, net.minecraft.class_1268, net.minecraft.class_3965);
+  public void send(net.minecraft.class_310, net.minecraft.class_746);
+  public java.lang.String toString();
+}
+Compiled from "PrepareAction.java"
+public class me.aleksilassila.litematica.printer.actions.PrepareAction extends me.aleksilassila.litematica.printer.actions.Action {
+  public final me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext context;
+  public boolean modifyYaw;
+  public boolean modifyPitch;
+  public float yaw;
+  public float pitch;
+  public me.aleksilassila.litematica.printer.actions.PrepareAction(me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext);
+  public me.aleksilassila.litematica.printer.actions.PrepareAction(me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext, float, float);
+  public void send(net.minecraft.class_310, net.minecraft.class_746);
+  private void addPickBlock(net.minecraft.class_1661, net.minecraft.class_1799);
+  public java.lang.String toString();
+}
+Compiled from "ReleaseShiftAction.java"
+public class me.aleksilassila.litematica.printer.actions.ReleaseShiftAction extends me.aleksilassila.litematica.printer.actions.Action {
+  public me.aleksilassila.litematica.printer.actions.ReleaseShiftAction();
+  public void send(net.minecraft.class_310, net.minecraft.class_746);
+}
+Compiled from "Configs.java"
+public class me.aleksilassila.litematica.printer.config.Configs {
+  private static final java.lang.String GENERIC_KEY;
+  public static final fi.dy.masa.malilib.config.options.ConfigInteger PRINTING_INTERVAL;
+  public static final fi.dy.masa.malilib.config.options.ConfigDouble PRINTING_RANGE;
+  public static final fi.dy.masa.malilib.config.options.ConfigBoolean PRINT_MODE;
+  public static final fi.dy.masa.malilib.config.options.ConfigBoolean PRINT_DEBUG;
+  public static final fi.dy.masa.malilib.config.options.ConfigBoolean REPLACE_FLUIDS_SOURCE_BLOCKS;
+  public static final fi.dy.masa.malilib.config.options.ConfigBoolean STRIP_LOGS;
+  public static final fi.dy.masa.malilib.config.options.ConfigBoolean INTERACT_BLOCKS;
+  public static final fi.dy.masa.malilib.config.options.ConfigBoolean PRINT_IN_AIR;
+  public me.aleksilassila.litematica.printer.config.Configs();
+  public static com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigBase> getConfigList();
+  static {};
+}
+Compiled from "Hotkeys.java"
+public class me.aleksilassila.litematica.printer.config.Hotkeys {
+  private static final java.lang.String HOTKEY_KEY;
+  public static final fi.dy.masa.malilib.config.options.ConfigHotkey PRINT;
+  public static final fi.dy.masa.malilib.config.options.ConfigHotkey TOGGLE_PRINTING_MODE;
+  public me.aleksilassila.litematica.printer.config.Hotkeys();
+  public static java.util.List<fi.dy.masa.malilib.config.options.ConfigHotkey> getHotkeyList();
+  static {};
+}
+Compiled from "KeyCallbacks.java"
+public class me.aleksilassila.litematica.printer.event.KeyCallbacks {
+  public me.aleksilassila.litematica.printer.event.KeyCallbacks();
+  public static void init(net.minecraft.class_310);
+}
+Compiled from "Guide.java"
+public abstract class me.aleksilassila.litematica.printer.guides.Guide extends me.aleksilassila.litematica.printer.implementation.BlockHelperImpl {
+  protected final me.aleksilassila.litematica.printer.SchematicBlockState state;
+  protected final net.minecraft.class_2680 currentState;
+  protected final net.minecraft.class_2680 targetState;
+  public me.aleksilassila.litematica.printer.guides.Guide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected boolean playerHasRightItem(net.minecraft.class_746);
+  protected int getSlotWithItem(net.minecraft.class_746, net.minecraft.class_1799);
+  protected int getRequiredItemStackSlot(net.minecraft.class_746);
+  public boolean canExecute(net.minecraft.class_746);
+  public abstract java.util.List<me.aleksilassila.litematica.printer.actions.Action> execute(net.minecraft.class_746);
+  protected abstract java.util.List<net.minecraft.class_1799> getRequiredItems();
+  protected java.util.Optional<net.minecraft.class_1799> getRequiredItem(net.minecraft.class_746);
+  protected boolean statesEqualIgnoreProperties(net.minecraft.class_2680, net.minecraft.class_2680, net.minecraft.class_2769<?>...);
+  protected static <T extends java.lang.Comparable<T>> java.util.Optional<T> getProperty(net.minecraft.class_2680, net.minecraft.class_2769<T>);
+  protected boolean statesEqual(net.minecraft.class_2680, net.minecraft.class_2680);
+  public boolean skipOtherGuides();
+  private java.lang.Integer lambda$getRequiredItemStackSlot$0(net.minecraft.class_746, net.minecraft.class_1799);
+}
+Compiled from "Guides.java"
+public class me.aleksilassila.litematica.printer.guides.Guides {
+  protected static final java.util.ArrayList<net.minecraft.class_3545<java.lang.Class<? extends me.aleksilassila.litematica.printer.guides.Guide>, java.lang.Class<? extends net.minecraft.class_2248>[]>> guides;
+  public me.aleksilassila.litematica.printer.guides.Guides();
+  protected static void registerGuide(java.lang.Class<? extends me.aleksilassila.litematica.printer.guides.Guide>, java.lang.Class<? extends net.minecraft.class_2248>...);
+  public java.util.ArrayList<net.minecraft.class_3545<java.lang.Class<? extends me.aleksilassila.litematica.printer.guides.Guide>, java.lang.Class<? extends net.minecraft.class_2248>[]>> getGuides();
+  public me.aleksilassila.litematica.printer.guides.Guide[] getInteractionGuides(me.aleksilassila.litematica.printer.SchematicBlockState);
+  private static me.aleksilassila.litematica.printer.guides.Guide[] lambda$getInteractionGuides$0(int);
+  static {};
+}
+Compiled from "SkipGuide.java"
+public class me.aleksilassila.litematica.printer.guides.SkipGuide extends me.aleksilassila.litematica.printer.guides.Guide {
+  public me.aleksilassila.litematica.printer.guides.SkipGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean skipOtherGuides();
+  public boolean canExecute(net.minecraft.class_746);
+  public java.util.List<me.aleksilassila.litematica.printer.actions.Action> execute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+}
+Compiled from "CampfireExtinguishGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.CampfireExtinguishGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  boolean shouldBeLit;
+  boolean isLit;
+  public me.aleksilassila.litematica.printer.guides.interaction.CampfireExtinguishGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean canExecute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+}
+Compiled from "CycleStateGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.CycleStateGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  private static final net.minecraft.class_2769<?>[] propertiesToIgnore;
+  public me.aleksilassila.litematica.printer.guides.interaction.CycleStateGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean canExecute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  protected boolean statesEqual(net.minecraft.class_2680, net.minecraft.class_2680);
+  static {};
+}
+Compiled from "EnderEyeGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.EnderEyeGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  public me.aleksilassila.litematica.printer.guides.interaction.EnderEyeGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean canExecute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+}
+Compiled from "FlowerPotFillGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.FlowerPotFillGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  private final net.minecraft.class_2248 content;
+  public me.aleksilassila.litematica.printer.guides.interaction.FlowerPotFillGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean canExecute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+}
+Compiled from "InteractionGuide.java"
+public abstract class me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide extends me.aleksilassila.litematica.printer.guides.Guide {
+  public me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public java.util.List<me.aleksilassila.litematica.printer.actions.Action> execute(net.minecraft.class_746);
+  protected abstract java.util.List<net.minecraft.class_1799> getRequiredItems();
+}
+Compiled from "LightCandleGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.LightCandleGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  boolean shouldBeLit;
+  boolean isLit;
+  public me.aleksilassila.litematica.printer.guides.interaction.LightCandleGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  public boolean canExecute(net.minecraft.class_746);
+}
+Compiled from "LogStrippingGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.LogStrippingGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  static final net.minecraft.class_1792[] AXE_ITEMS;
+  public static final java.util.Map<net.minecraft.class_2248, net.minecraft.class_2248> STRIPPED_BLOCKS;
+  public me.aleksilassila.litematica.printer.guides.interaction.LogStrippingGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean canExecute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  static {};
+}
+Compiled from "TillingGuide.java"
+public class me.aleksilassila.litematica.printer.guides.interaction.TillingGuide extends me.aleksilassila.litematica.printer.guides.interaction.InteractionGuide {
+  public static final net.minecraft.class_1792[] HOE_ITEMS;
+  public me.aleksilassila.litematica.printer.guides.interaction.TillingGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean canExecute(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  private boolean lambda$canExecute$0(net.minecraft.class_2248);
+  static {};
+}
+Compiled from "BlockIndifferentGuesserGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.BlockIndifferentGuesserGuide extends me.aleksilassila.litematica.printer.guides.placement.GuesserGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.BlockIndifferentGuesserGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected boolean statesEqual(net.minecraft.class_2680, net.minecraft.class_2680);
+}
+Compiled from "BlockReplacementGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.BlockReplacementGuide extends me.aleksilassila.litematica.printer.guides.placement.PlacementGuide {
+  private static final java.util.HashMap<net.minecraft.class_2758, net.minecraft.class_1792> increasingProperties;
+  private java.lang.Integer currentLevel;
+  private java.lang.Integer targetLevel;
+  private net.minecraft.class_2758 increasingProperty;
+  public me.aleksilassila.litematica.printer.guides.placement.BlockReplacementGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected boolean getUseShift(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext getPlacementContext(net.minecraft.class_746);
+  public boolean canExecute(net.minecraft.class_746);
+  static {};
+}
+Compiled from "ChestGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.ChestGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.ChestGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected boolean getRequiresExplicitShift();
+  public boolean skipOtherGuides();
+  protected java.util.Optional<net.minecraft.class_2350> getLookDirection();
+  protected java.util.List<net.minecraft.class_2350> getPossibleSides();
+  private boolean willConnectToSide(me.aleksilassila.litematica.printer.SchematicBlockState, net.minecraft.class_2350);
+  private boolean wantsToConnectToSide(me.aleksilassila.litematica.printer.SchematicBlockState, net.minecraft.class_2350);
+  private static java.util.Optional lambda$getLookDirection$0(net.minecraft.class_2350);
+}
+Compiled from "FallingBlockGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.FallingBlockGuide extends me.aleksilassila.litematica.printer.guides.placement.GuesserGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.FallingBlockGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  boolean blockPlacement();
+  public boolean canExecute(net.minecraft.class_746);
+  public boolean skipOtherGuides();
+}
+Compiled from "FarmlandGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.FarmlandGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public static final net.minecraft.class_2248[] TILLABLE_BLOCKS;
+  public me.aleksilassila.litematica.printer.guides.placement.FarmlandGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  private net.minecraft.class_1799 lambda$getRequiredItems$0(net.minecraft.class_2248);
+  static {};
+}
+Compiled from "FlowerPotGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.FlowerPotGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.FlowerPotGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+}
+Compiled from "GeneralPlacementGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide extends me.aleksilassila.litematica.printer.guides.placement.PlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_2350> getPossibleSides();
+  protected java.util.Optional<net.minecraft.class_2350> getLookDirection();
+  protected boolean getRequiresSupport();
+  protected boolean getRequiresExplicitShift();
+  protected net.minecraft.class_243 getHitModifier(net.minecraft.class_2350);
+  private java.util.Optional<net.minecraft.class_2350> getValidSide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected boolean getUseShift(me.aleksilassila.litematica.printer.SchematicBlockState);
+  private java.util.Optional<net.minecraft.class_243> getHitVector(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext getPlacementContext(net.minecraft.class_746);
+  private net.minecraft.class_243 lambda$getHitVector$0(me.aleksilassila.litematica.printer.SchematicBlockState, net.minecraft.class_2350);
+}
+Compiled from "GuesserGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.GuesserGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  private me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext contextCache;
+  protected static net.minecraft.class_2350[] directionsToTry;
+  protected static net.minecraft.class_243[] hitVecsToTry;
+  public me.aleksilassila.litematica.printer.guides.placement.GuesserGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext getPlacementContext(net.minecraft.class_746);
+  public boolean canExecute(net.minecraft.class_746);
+  private boolean correctChestPlacement(net.minecraft.class_2680, net.minecraft.class_2680);
+  static {};
+}
+Compiled from "LogGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.LogGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.LogGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_2350> getPossibleSides();
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  public boolean canExecute(net.minecraft.class_746);
+  private static boolean lambda$getPossibleSides$0(net.minecraft.class_2350$class_2351, net.minecraft.class_2350);
+}
+Compiled from "PlacementGuide.java"
+public abstract class me.aleksilassila.litematica.printer.guides.placement.PlacementGuide extends me.aleksilassila.litematica.printer.guides.Guide {
+  public me.aleksilassila.litematica.printer.guides.placement.PlacementGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected net.minecraft.class_1799 getBlockItem(net.minecraft.class_2680);
+  protected java.util.Optional<net.minecraft.class_2248> getRequiredItemAsBlock(net.minecraft.class_746);
+  protected java.util.List<net.minecraft.class_1799> getRequiredItems();
+  protected abstract boolean getUseShift(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public abstract me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext getPlacementContext(net.minecraft.class_746);
+  public boolean canExecute(net.minecraft.class_746);
+  public java.util.List<me.aleksilassila.litematica.printer.actions.Action> execute(net.minecraft.class_746);
+  protected static boolean canBeClicked(net.minecraft.class_1937, net.minecraft.class_2338);
+  private static net.minecraft.class_265 getOutlineShape(net.minecraft.class_1937, net.minecraft.class_2338);
+  public boolean isInteractive(net.minecraft.class_2248);
+  private boolean canPlaceInWater(net.minecraft.class_2680);
+  private static boolean lambda$canExecute$0(net.minecraft.class_1799);
+}
+Compiled from "PropertySpecificGuesserGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.PropertySpecificGuesserGuide extends me.aleksilassila.litematica.printer.guides.placement.GuesserGuide {
+  protected static net.minecraft.class_2769<?>[] ignoredProperties;
+  public me.aleksilassila.litematica.printer.guides.placement.PropertySpecificGuesserGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected boolean statesEqual(net.minecraft.class_2680, net.minecraft.class_2680);
+  static {};
+}
+Compiled from "RailGuesserGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.RailGuesserGuide extends me.aleksilassila.litematica.printer.guides.placement.GuesserGuide {
+  static final net.minecraft.class_2768[] STRAIGHT_RAIL_SHAPES;
+  public me.aleksilassila.litematica.printer.guides.placement.RailGuesserGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  public boolean skipOtherGuides();
+  protected boolean statesEqual(net.minecraft.class_2680, net.minecraft.class_2680);
+  private boolean wouldConnectCorrectly();
+  private boolean hasFreeConnections(me.aleksilassila.litematica.printer.SchematicBlockState);
+  private java.util.List<net.minecraft.class_2350> getRailDirections(me.aleksilassila.litematica.printer.SchematicBlockState);
+  private java.util.List<net.minecraft.class_2350> getRailDirections(net.minecraft.class_2768);
+  java.util.Optional<net.minecraft.class_2768> getRailShape(net.minecraft.class_2680);
+  private boolean lambda$hasFreeConnections$1(me.aleksilassila.litematica.printer.SchematicBlockState, net.minecraft.class_2350);
+  private boolean lambda$statesEqual$0(net.minecraft.class_2680, net.minecraft.class_2768);
+  static {};
+}
+Compiled from "RotatingBlockGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.RotatingBlockGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.RotatingBlockGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_2350> getPossibleSides();
+  public boolean skipOtherGuides();
+  public java.util.List<me.aleksilassila.litematica.printer.actions.Action> execute(net.minecraft.class_746);
+}
+Compiled from "SlabGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.SlabGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.SlabGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_2350> getPossibleSides();
+  protected net.minecraft.class_243 getHitModifier(net.minecraft.class_2350);
+  private net.minecraft.class_2350 getRequiredHalf(me.aleksilassila.litematica.printer.SchematicBlockState);
+}
+Compiled from "TorchGuide.java"
+public class me.aleksilassila.litematica.printer.guides.placement.TorchGuide extends me.aleksilassila.litematica.printer.guides.placement.GeneralPlacementGuide {
+  public me.aleksilassila.litematica.printer.guides.placement.TorchGuide(me.aleksilassila.litematica.printer.SchematicBlockState);
+  protected java.util.List<net.minecraft.class_2350> getPossibleSides();
+  protected java.util.Optional<net.minecraft.class_2248> getRequiredItemAsBlock(net.minecraft.class_746);
+  private static java.util.List lambda$getPossibleSides$1();
+  private static java.util.List lambda$getPossibleSides$0(net.minecraft.class_2350);
+}
+Compiled from "BlockHelperImpl.java"
+public class me.aleksilassila.litematica.printer.implementation.BlockHelperImpl extends me.aleksilassila.litematica.printer.BlockHelper {
+  public me.aleksilassila.litematica.printer.implementation.BlockHelperImpl();
+  static {};
+}
+Compiled from "PrinterPlacementContext.java"
+public class me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext extends net.minecraft.class_1750 {
+  public final net.minecraft.class_2350 lookDirection;
+  public final boolean shouldSneak;
+  public final net.minecraft.class_3965 hitResult;
+  public final int requiredItemSlot;
+  public me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext(net.minecraft.class_1657, net.minecraft.class_3965, net.minecraft.class_1799, int);
+  public me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext(net.minecraft.class_1657, net.minecraft.class_3965, net.minecraft.class_1799, int, net.minecraft.class_2350, boolean);
+  public net.minecraft.class_2350 method_7715();
+  public net.minecraft.class_2350 method_32760();
+  public net.minecraft.class_2350 method_8042();
+  public java.lang.String toString();
+}
+Compiled from "InteractActionImpl.java"
+public class me.aleksilassila.litematica.printer.implementation.actions.InteractActionImpl extends me.aleksilassila.litematica.printer.actions.InteractAction {
+  public me.aleksilassila.litematica.printer.implementation.actions.InteractActionImpl(me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext);
+  protected void interact(net.minecraft.class_310, net.minecraft.class_746, net.minecraft.class_1268, net.minecraft.class_3965);
+}
+Compiled from "MixinClientPlayerEntity.java"
+public class me.aleksilassila.litematica.printer.implementation.mixin.MixinClientPlayerEntity extends net.minecraft.class_742 {
+  private static boolean didCheckForUpdates;
+  protected net.minecraft.class_310 field_3937;
+  public net.minecraft.class_634 field_3944;
+  public me.aleksilassila.litematica.printer.implementation.mixin.MixinClientPlayerEntity(net.minecraft.class_638, com.mojang.authlib.GameProfile);
+  public void tick(org.spongepowered.asm.mixin.injection.callback.CallbackInfo);
+  public void checkForUpdates();
+  public void openEditSignScreen(net.minecraft.class_2625, boolean, org.spongepowered.asm.mixin.injection.callback.CallbackInfo);
+  private java.util.Optional<net.minecraft.class_2625> getTargetSignEntity(net.minecraft.class_2625);
+  private void lambda$openEditSignScreen$1(net.minecraft.class_2625, boolean, org.spongepowered.asm.mixin.injection.callback.CallbackInfo, net.minecraft.class_2625);
+  private void lambda$checkForUpdates$0();
+  static {};
+}
+Compiled from "AxeItemAccessor.java"
+public interface me.aleksilassila.litematica.printer.mixin.AxeItemAccessor {
+  public static java.util.Map<net.minecraft.class_2248, net.minecraft.class_2248> getStrippedBlocks();
+}
+Compiled from "ConfigsMixin.java"
+public class me.aleksilassila.litematica.printer.mixin.ConfigsMixin {
+  public me.aleksilassila.litematica.printer.mixin.ConfigsMixin();
+  private static com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigBase> moreOptions();
+  private static com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigBase> moreeOptions();
+  private static java.util.List<fi.dy.masa.malilib.config.options.ConfigHotkey> moreHotkeys();
+  private static java.util.List<fi.dy.masa.malilib.config.options.ConfigHotkey> moreeHotkeys();
+}
+Compiled from "GuiConfigsMixin.java"
+public class me.aleksilassila.litematica.printer.mixin.GuiConfigsMixin {
+  public me.aleksilassila.litematica.printer.mixin.GuiConfigsMixin();
+  private com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigBase> moreOptions();
+  private java.util.List<fi.dy.masa.malilib.config.options.ConfigHotkey> moreHotkeys();
+}
+Compiled from "InputHandlerMixin.java"
+public class me.aleksilassila.litematica.printer.mixin.InputHandlerMixin {
+  public me.aleksilassila.litematica.printer.mixin.InputHandlerMixin();
+  private java.util.List<fi.dy.masa.malilib.config.options.ConfigHotkey> moreHotkeys();
+  private java.util.List<fi.dy.masa.malilib.config.options.ConfigHotkey> moreeHotkeys();
+}
+Compiled from "PlayerMoveC2SPacketMixin.java"
+public class me.aleksilassila.litematica.printer.mixin.PlayerMoveC2SPacketMixin {
+  public me.aleksilassila.litematica.printer.mixin.PlayerMoveC2SPacketMixin();
+  private static float modifyLookYaw(float);
+  private static float modifyLookPitch(float);
+}

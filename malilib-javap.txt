@@ -1,0 +1,1055 @@
+Compiled from "ConfigType.java"
+public final class fi.dy.masa.malilib.config.ConfigType extends java.lang.Enum<fi.dy.masa.malilib.config.ConfigType> implements net.minecraft.class_3542 {
+  public static final fi.dy.masa.malilib.config.ConfigType BOOLEAN;
+  public static final fi.dy.masa.malilib.config.ConfigType INTEGER;
+  public static final fi.dy.masa.malilib.config.ConfigType DOUBLE;
+  public static final fi.dy.masa.malilib.config.ConfigType FLOAT;
+  public static final fi.dy.masa.malilib.config.ConfigType COLOR;
+  public static final fi.dy.masa.malilib.config.ConfigType BLOCK_STATE;
+  public static final fi.dy.masa.malilib.config.ConfigType STRING;
+  public static final fi.dy.masa.malilib.config.ConfigType STRING_LIST;
+  public static final fi.dy.masa.malilib.config.ConfigType LOCKED_LIST;
+  public static final fi.dy.masa.malilib.config.ConfigType COLOR_LIST;
+  public static final fi.dy.masa.malilib.config.ConfigType OPTION_LIST;
+  public static final fi.dy.masa.malilib.config.ConfigType OPTION_VALUES;
+  public static final fi.dy.masa.malilib.config.ConfigType BLOCK_STATE_LIST;
+  public static final fi.dy.masa.malilib.config.ConfigType HOTKEY;
+  public static final fi.dy.masa.malilib.config.ConfigType TABLE;
+  public static final net.minecraft.class_3542$class_7292<fi.dy.masa.malilib.config.ConfigType> CODEC;
+  public static final net.minecraft.class_9139<io.netty.buffer.ByteBuf, fi.dy.masa.malilib.config.ConfigType> PACKET_CODEC;
+  private final java.lang.String name;
+  private final com.mojang.serialization.Codec<? extends fi.dy.masa.malilib.config.IConfigBase> codec;
+  private static final fi.dy.masa.malilib.config.ConfigType[] $VALUES;
+  public static fi.dy.masa.malilib.config.ConfigType[] values();
+  public static fi.dy.masa.malilib.config.ConfigType valueOf(java.lang.String);
+  private fi.dy.masa.malilib.config.ConfigType(java.lang.String, com.mojang.serialization.Codec<? extends fi.dy.masa.malilib.config.IConfigBase>);
+  public java.lang.String method_15434();
+  public com.mojang.serialization.Codec<? extends fi.dy.masa.malilib.config.IConfigBase> codec();
+  public static fi.dy.masa.malilib.config.ConfigType fromString(java.lang.String);
+  private static fi.dy.masa.malilib.config.ConfigType[] $values();
+  static {};
+}
+Compiled from "IConfigBase.java"
+public interface fi.dy.masa.malilib.config.IConfigBase {
+  public abstract fi.dy.masa.malilib.config.ConfigType getType();
+  public abstract java.lang.String getName();
+  public default java.lang.String getLowerName();
+  public default java.lang.String getCleanName();
+  public abstract java.lang.String getComment();
+  public default net.minecraft.class_5250 getCommentComponent();
+  public default java.lang.String getPrettyName();
+  public default java.lang.String getConfigGuiDisplayName();
+  public abstract java.lang.String getTranslatedName();
+  public abstract void setPrettyName(java.lang.String);
+  public abstract void setTranslatedName(java.lang.String);
+  public abstract void setComment(java.lang.String);
+  public abstract boolean isDirty();
+  public abstract void markDirty();
+  public abstract void markClean();
+  public abstract void checkIfClean();
+  public abstract void setValueFromJsonElement(com.google.gson.JsonElement);
+  public abstract com.google.gson.JsonElement getAsJsonElement();
+}
+Compiled from "IConfigBlockState.java"
+public interface fi.dy.masa.malilib.config.IConfigBlockState extends fi.dy.masa.malilib.config.IConfigValue {
+  public abstract net.minecraft.class_2680 getBlockStateValue();
+  public abstract net.minecraft.class_2680 getDefaultBlockStateValue();
+  public abstract void setBlockStateValue(net.minecraft.class_2680);
+  public abstract net.minecraft.class_2680 getLastBlockStateValue();
+  public abstract void updateLastBlockStateValue();
+}
+Compiled from "IConfigBlockStateList.java"
+public interface fi.dy.masa.malilib.config.IConfigBlockStateList extends fi.dy.masa.malilib.config.IConfigBase {
+  public abstract java.util.List<net.minecraft.class_2680> getBlockStates();
+  public abstract com.google.common.collect.ImmutableList<net.minecraft.class_2680> getDefaultBlockStates();
+  public abstract void setBlockStates(java.util.List<net.minecraft.class_2680>);
+  public abstract void setModified();
+  public default java.util.List<net.minecraft.class_2680> getLastBlockStateListValue();
+  public default void updateLastBlockStateListValue();
+}
+Compiled from "IConfigBoolean.java"
+public interface fi.dy.masa.malilib.config.IConfigBoolean extends fi.dy.masa.malilib.config.IConfigValue {
+  public abstract boolean getBooleanValue();
+  public abstract boolean getDefaultBooleanValue();
+  public abstract void setBooleanValue(boolean);
+  public default void toggleBooleanValue();
+  public default boolean getLastBooleanValue();
+  public default void updateLastBooleanValue();
+}
+Compiled from "IConfigColor.java"
+public interface fi.dy.masa.malilib.config.IConfigColor extends fi.dy.masa.malilib.config.IConfigValue {
+  public abstract fi.dy.masa.malilib.util.data.Color4f getColor();
+  public abstract int getIntegerValue();
+  public abstract int getDefaultIntegerValue();
+  public abstract void setIntegerValue(int);
+  public abstract int getMinIntegerValue();
+  public abstract int getMaxIntegerValue();
+  public default fi.dy.masa.malilib.util.data.Color4f getLastColorValue();
+  public default void updateLastColorValue();
+}
+Compiled from "IConfigColorList.java"
+public interface fi.dy.masa.malilib.config.IConfigColorList extends fi.dy.masa.malilib.config.IConfigBase {
+  public abstract java.util.List<fi.dy.masa.malilib.util.data.Color4f> getColors();
+  public abstract com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f> getDefaultColors();
+  public abstract void setColors(java.util.List<fi.dy.masa.malilib.util.data.Color4f>);
+  public abstract void setModified();
+  public default java.util.List<fi.dy.masa.malilib.util.data.Color4f> getLastColorsValue();
+  public default void updateLastColorsValue();
+}
+Compiled from "IConfigDouble.java"
+public interface fi.dy.masa.malilib.config.IConfigDouble extends fi.dy.masa.malilib.config.IConfigValue,fi.dy.masa.malilib.config.IConfigSlider {
+  public abstract double getDoubleValue();
+  public abstract double getDefaultDoubleValue();
+  public abstract void setDoubleValue(double);
+  public abstract double getMinDoubleValue();
+  public abstract double getMaxDoubleValue();
+  public default double getLastDoubleValue();
+  public default void updateLastDoubleValue();
+}
+Compiled from "IConfigFloat.java"
+public interface fi.dy.masa.malilib.config.IConfigFloat extends fi.dy.masa.malilib.config.IConfigValue,fi.dy.masa.malilib.config.IConfigSlider {
+  public abstract float getFloatValue();
+  public abstract float getDefaultFloatValue();
+  public abstract void setFloatValue(float);
+  public abstract float getMinFloatValue();
+  public abstract float getMaxFloatValue();
+  public default float getLastFloatValue();
+  public default void updateLastFloatValue();
+}
+Compiled from "IConfigHandler.java"
+public interface fi.dy.masa.malilib.config.IConfigHandler {
+  public default void onConfigsChanged();
+  public abstract void load();
+  public abstract void save();
+  public default void onLanguageChanged(java.lang.String);
+}
+Compiled from "IConfigHotkey.java"
+public interface fi.dy.masa.malilib.config.IConfigHotkey {
+  public default java.lang.String getHotkeyStringValue();
+  public default java.lang.String getDefaultHotkeyStringValue();
+  public default void setHotkeyStringValue(java.lang.String);
+  public default java.lang.String getLastHotkeyStringValue();
+  public default void updateLastHotkeyStringValue();
+}
+Compiled from "IConfigInteger.java"
+public interface fi.dy.masa.malilib.config.IConfigInteger extends fi.dy.masa.malilib.config.IConfigValue,fi.dy.masa.malilib.config.IConfigSlider {
+  public abstract int getIntegerValue();
+  public abstract int getDefaultIntegerValue();
+  public abstract void setIntegerValue(int);
+  public abstract int getMinIntegerValue();
+  public abstract int getMaxIntegerValue();
+  public default int getLastIntegerValue();
+  public default void updateLastIntegerValue();
+}
+Compiled from "IConfigLockedList.java"
+public interface fi.dy.masa.malilib.config.IConfigLockedList extends fi.dy.masa.malilib.config.IConfigBase {
+  public abstract com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigLockedListEntry> getDefaultEntries();
+  public abstract java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry> getEntries();
+  public abstract java.util.List<java.lang.String> getConfigKeys();
+  public abstract void setEntries(java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry>);
+  public abstract fi.dy.masa.malilib.config.IConfigLockedListEntry getEmpty();
+  public abstract fi.dy.masa.malilib.config.IConfigLockedListEntry getEntry(java.lang.String);
+  public abstract int getEntryIndex(fi.dy.masa.malilib.config.IConfigLockedListEntry);
+  public abstract void setModified();
+  public default java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry> getLastLockedListValue();
+  public default void updateLastLockedListValue();
+}
+Compiled from "IConfigLockedListEntry.java"
+public interface fi.dy.masa.malilib.config.IConfigLockedListEntry {
+  public static fi.dy.masa.malilib.config.IConfigLockedListEntry empty();
+  public abstract java.lang.String getStringValue();
+  public abstract java.lang.String getDisplayName();
+}
+Compiled from "IConfigLockedListType.java"
+public interface fi.dy.masa.malilib.config.IConfigLockedListType {
+  public abstract com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigLockedListEntry> getDefaultEntries();
+  public abstract fi.dy.masa.malilib.config.IConfigLockedListEntry fromString(java.lang.String);
+}
+Compiled from "IConfigManager.java"
+public interface fi.dy.masa.malilib.config.IConfigManager {
+  public abstract void registerConfigHandler(java.lang.String, fi.dy.masa.malilib.config.IConfigHandler);
+  public abstract void onConfigsChanged(java.lang.String);
+}
+Compiled from "IConfigNotifiable.java"
+public interface fi.dy.masa.malilib.config.IConfigNotifiable<T extends fi.dy.masa.malilib.config.IConfigBase> {
+  public abstract void onValueChanged();
+  public abstract void setValueChangeCallback(fi.dy.masa.malilib.interfaces.IValueChangeCallback<T>);
+}
+Compiled from "IConfigOptionList.java"
+public interface fi.dy.masa.malilib.config.IConfigOptionList {
+  public abstract fi.dy.masa.malilib.config.IConfigOptionListEntry getOptionListValue();
+  public abstract fi.dy.masa.malilib.config.IConfigOptionListEntry getDefaultOptionListValue();
+  public abstract void setOptionListValue(fi.dy.masa.malilib.config.IConfigOptionListEntry);
+  public default fi.dy.masa.malilib.config.IConfigOptionListEntry getLastOptionListValue();
+  public default void updateLastOptionListValue();
+}
+Compiled from "IConfigOptionListEntry.java"
+public interface fi.dy.masa.malilib.config.IConfigOptionListEntry {
+  public abstract java.lang.String getStringValue();
+  public abstract java.lang.String getDisplayName();
+  public default java.util.List<java.lang.String> getHoverText();
+  public abstract fi.dy.masa.malilib.config.IConfigOptionListEntry cycle(boolean);
+  public abstract fi.dy.masa.malilib.config.IConfigOptionListEntry fromString(java.lang.String);
+  public static fi.dy.masa.malilib.config.IConfigOptionListEntry empty();
+}
+Compiled from "IConfigOptionValues.java"
+public interface fi.dy.masa.malilib.config.IConfigOptionValues<T extends fi.dy.masa.malilib.config.value.OptionListConfigValue> extends fi.dy.masa.malilib.config.IConfigValue {
+  public abstract T getOptionValue();
+  public abstract T getDefaultOptionValue();
+  public abstract com.google.common.collect.ImmutableList<T> getAllValues();
+  public abstract com.google.common.collect.ImmutableSet<T> getAllowedValues();
+  public abstract void setAllowedValues(java.util.Collection<T>);
+  public abstract void addAllowedValues(java.util.Collection<T>);
+  public abstract void removeAllowedValues(java.util.Collection<T>);
+  public abstract void setOptionValue(T);
+  public abstract void setOptionValueFromString(java.lang.String);
+  public abstract void cycleValue(boolean);
+  public abstract void resetToDefault();
+  public default T getLastOptionValue();
+  public default void updateLastOptionValue();
+}
+Compiled from "IConfigResettable.java"
+public interface fi.dy.masa.malilib.config.IConfigResettable {
+  public abstract boolean isModified();
+  public abstract void resetToDefault();
+}
+Compiled from "IConfigSlider.java"
+public interface fi.dy.masa.malilib.config.IConfigSlider extends fi.dy.masa.malilib.config.IConfigValue {
+  public default boolean shouldUseSlider();
+  public default void toggleUseSlider();
+}
+Compiled from "IConfigString.java"
+public interface fi.dy.masa.malilib.config.IConfigString {
+  public default java.lang.String getStringValue();
+  public default java.lang.String getDefaultStringValue();
+  public default void setStringValue(java.lang.String);
+  public default java.lang.String getLastStringValue();
+  public default void updateLastStringValue();
+}
+Compiled from "IConfigStringList.java"
+public interface fi.dy.masa.malilib.config.IConfigStringList extends fi.dy.masa.malilib.config.IConfigBase {
+  public abstract java.util.List<java.lang.String> getStrings();
+  public abstract com.google.common.collect.ImmutableList<java.lang.String> getDefaultStrings();
+  public abstract void setStrings(java.util.List<java.lang.String>);
+  public abstract void setModified();
+  public default java.util.List<java.lang.String> getLastStringListValue();
+  public default void updateLastStringListValue();
+}
+Compiled from "IConfigTable.java"
+public interface fi.dy.masa.malilib.config.IConfigTable extends fi.dy.masa.malilib.config.IConfigBase {
+  public abstract java.util.List<fi.dy.masa.malilib.config.options.table.TableRow> getTable();
+  public abstract java.util.List<java.util.List<java.lang.Object>> getRawTable();
+  public abstract com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.options.table.TableRow> getDefaultTable();
+  public abstract com.google.common.collect.ImmutableList<java.util.List<java.lang.Object>> getDefaultRawTable();
+  public abstract void setTable(java.util.List<fi.dy.masa.malilib.config.options.table.TableRow>);
+  public abstract void setModified();
+  public abstract java.lang.String getDisplayString();
+  public abstract java.util.List<fi.dy.masa.malilib.config.options.table.type.EntryTypes> getTypes();
+  public abstract java.util.List<fi.dy.masa.malilib.config.options.table.Label> getLabels();
+  public abstract boolean allowNewEntry();
+  public abstract boolean showEntryNumbers();
+  public default java.util.List<fi.dy.masa.malilib.config.options.table.TableRow> getLastTableValue();
+  public default void updateLastTableValue();
+}
+Compiled from "IConfigValue.java"
+public interface fi.dy.masa.malilib.config.IConfigValue extends fi.dy.masa.malilib.config.IConfigBase,fi.dy.masa.malilib.config.IConfigResettable,fi.dy.masa.malilib.config.IStringRepresentable {
+}
+Compiled from "BooleanHotkeyGuiWrapper.java"
+public class fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper extends fi.dy.masa.malilib.config.options.ConfigBoolean implements fi.dy.masa.malilib.config.IHotkeyTogglable {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper> CODEC;
+  protected final fi.dy.masa.malilib.config.IConfigBoolean booleanConfig;
+  protected final fi.dy.masa.malilib.hotkeys.IKeybind keybind;
+  private org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> lastBooleanHotkey;
+  public fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper(java.lang.String, fi.dy.masa.malilib.config.IConfigBoolean, fi.dy.masa.malilib.hotkeys.IKeybind);
+  private fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper(java.lang.String, boolean, boolean, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String, java.lang.String, java.lang.String);
+  public boolean getBooleanValue();
+  public void setBooleanValue(boolean);
+  public void toggleBooleanValue();
+  public fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper translatedName(java.lang.String);
+  public fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper apply(java.lang.String);
+  public java.lang.String getTranslatedName();
+  public boolean isModified();
+  public void resetToDefault();
+  public boolean isDirty();
+  public void markDirty();
+  public void markClean();
+  public void checkIfClean();
+  public fi.dy.masa.malilib.config.IConfigBoolean getBooleanConfig();
+  public fi.dy.masa.malilib.hotkeys.IKeybind getKeybind();
+  public boolean getLastBooleanValue();
+  public org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> getBooleanHotkeyValue();
+  public org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> getDefaultBooleanHotkeyValue();
+  public void setBooleanHotkeyValue(org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String>);
+  public org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> getLastBooleanHotkeyValue();
+  public void updateLastBooleanHotkeyValue();
+  public fi.dy.masa.malilib.config.IConfigBase apply(java.lang.String);
+  public fi.dy.masa.malilib.config.IConfigBase translatedName(java.lang.String);
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$7(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  private static java.lang.String lambda$static$6(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  private static fi.dy.masa.malilib.hotkeys.KeybindSettings lambda$static$4(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  private static java.lang.Boolean lambda$static$2(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  private static java.lang.Boolean lambda$static$1(fi.dy.masa.malilib.config.options.BooleanHotkeyGuiWrapper);
+  static {};
+}
+Compiled from "ConfigBase.java"
+public abstract class fi.dy.masa.malilib.config.options.ConfigBase<T extends fi.dy.masa.malilib.config.IConfigBase> implements fi.dy.masa.malilib.config.IConfigBase, fi.dy.masa.malilib.config.IConfigResettable, fi.dy.masa.malilib.config.IConfigNotifiable<T> {
+  private final fi.dy.masa.malilib.config.ConfigType type;
+  private final java.lang.String name;
+  protected java.lang.String prettyName;
+  protected java.lang.String comment;
+  protected net.minecraft.class_5250 commentComponent;
+  protected java.lang.String translatedName;
+  private java.lang.String translationPrefix;
+  private fi.dy.masa.malilib.interfaces.IValueChangeCallback<T> callback;
+  protected boolean dirty;
+  public static final java.lang.String COMMENT_KEY;
+  public static final java.lang.String PRETTY_NAME_KEY;
+  public static final java.lang.String TRANSLATED_NAME_KEY;
+  private static final boolean CONFIG_TYPE_DEBUG;
+  public fi.dy.masa.malilib.config.options.ConfigBase(fi.dy.masa.malilib.config.ConfigType, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBase(fi.dy.masa.malilib.config.ConfigType, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBase(fi.dy.masa.malilib.config.ConfigType, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBase(fi.dy.masa.malilib.config.ConfigType, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.ConfigType getType();
+  public java.lang.String getName();
+  public java.lang.String getPrettyName();
+  public java.lang.String getComment();
+  public net.minecraft.class_5250 getCommentComponent();
+  public T translatedName(java.lang.String);
+  public T apply(java.lang.String);
+  public java.lang.String getTranslatedName();
+  public void setPrettyName(java.lang.String);
+  public void setTranslatedName(java.lang.String);
+  public void setComment(java.lang.String);
+  public void setCommentComponent(net.minecraft.class_5250);
+  public void setValueChangeCallback(fi.dy.masa.malilib.interfaces.IValueChangeCallback<T>);
+  public boolean isDirty();
+  public void markDirty();
+  public void markClean();
+  public void checkIfClean();
+  public void onValueChanged();
+  protected void printConfigElementDebug(fi.dy.masa.malilib.config.ConfigType, java.lang.String, java.lang.String, java.lang.String);
+  public java.lang.String toString();
+  static {};
+}
+Compiled from "ConfigBlockState.java"
+public class fi.dy.masa.malilib.config.options.ConfigBlockState extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigBlockState> implements fi.dy.masa.malilib.config.IConfigBlockState {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigBlockState> CODEC;
+  private final net.minecraft.class_2680 defaultValue;
+  private net.minecraft.class_2680 value;
+  private net.minecraft.class_2680 previousValue;
+  public fi.dy.masa.malilib.config.options.ConfigBlockState(java.lang.String, net.minecraft.class_2680);
+  public fi.dy.masa.malilib.config.options.ConfigBlockState(java.lang.String, net.minecraft.class_2680, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBlockState(java.lang.String, net.minecraft.class_2680, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBlockState(java.lang.String, net.minecraft.class_2680, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBlockState(java.lang.String, net.minecraft.class_2680, net.minecraft.class_2680, net.minecraft.class_2680, java.lang.String, java.lang.String, java.lang.String);
+  public net.minecraft.class_2680 getBlockStateValue();
+  public net.minecraft.class_2680 getDefaultBlockStateValue();
+  public net.minecraft.class_2680 getLastBlockStateValue();
+  public void setBlockStateValue(net.minecraft.class_2680);
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public java.lang.String getStringValue();
+  public void updateLastBlockStateValue();
+  public void resetToDefault();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static void lambda$setValueFromJsonElement$0(com.google.gson.JsonElement);
+  private java.lang.Boolean lambda$isModified$0(net.minecraft.class_2680);
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$6(fi.dy.masa.malilib.config.options.ConfigBlockState);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigBlockState);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigBlockState);
+  private static net.minecraft.class_2680 lambda$static$3(fi.dy.masa.malilib.config.options.ConfigBlockState);
+  private static net.minecraft.class_2680 lambda$static$2(fi.dy.masa.malilib.config.options.ConfigBlockState);
+  private static net.minecraft.class_2680 lambda$static$1(fi.dy.masa.malilib.config.options.ConfigBlockState);
+  static {};
+}
+Compiled from "ConfigBlockStateList.java"
+public class fi.dy.masa.malilib.config.options.ConfigBlockStateList extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigBlockStateList> implements fi.dy.masa.malilib.config.IConfigBlockStateList {
+  private final com.google.common.collect.ImmutableList<net.minecraft.class_2680> defaultStates;
+  private final java.util.List<net.minecraft.class_2680> states;
+  private final java.util.List<net.minecraft.class_2680> lastStates;
+  public fi.dy.masa.malilib.config.options.ConfigBlockStateList(java.lang.String, com.google.common.collect.ImmutableList<net.minecraft.class_2680>);
+  public fi.dy.masa.malilib.config.options.ConfigBlockStateList(java.lang.String, com.google.common.collect.ImmutableList<net.minecraft.class_2680>, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBlockStateList(java.lang.String, com.google.common.collect.ImmutableList<net.minecraft.class_2680>, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBlockStateList(java.lang.String, com.google.common.collect.ImmutableList<net.minecraft.class_2680>, java.lang.String, java.lang.String, java.lang.String);
+  public java.util.List<net.minecraft.class_2680> getBlockStates();
+  public com.google.common.collect.ImmutableList<net.minecraft.class_2680> getDefaultBlockStates();
+  public void setBlockStates(java.util.List<net.minecraft.class_2680>);
+  public void setModified();
+  public boolean isModified();
+  public void resetToDefault();
+  private void addBlockState(net.minecraft.class_2680);
+  public java.util.List<net.minecraft.class_2680> getLastBlockStateListValue();
+  public void updateLastBlockStateListValue();
+  public com.google.gson.JsonElement getAsJsonElement();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+}
+Compiled from "ConfigBoolean.java"
+public class fi.dy.masa.malilib.config.options.ConfigBoolean extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigBoolean> implements fi.dy.masa.malilib.config.IConfigBoolean {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigBoolean> CODEC;
+  private final boolean defaultValue;
+  private boolean value;
+  private boolean lastValue;
+  public fi.dy.masa.malilib.config.options.ConfigBoolean(java.lang.String, boolean);
+  public fi.dy.masa.malilib.config.options.ConfigBoolean(java.lang.String, boolean, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBoolean(java.lang.String, boolean, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBoolean(java.lang.String, boolean, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigBoolean(java.lang.String, java.lang.Boolean, java.lang.Boolean, java.lang.String, java.lang.String, java.lang.String);
+  public boolean getBooleanValue();
+  public boolean getDefaultBooleanValue();
+  public void setBooleanValue(boolean);
+  public boolean getLastBooleanValue();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void updateLastBooleanValue();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigBoolean);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigBoolean);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigBoolean);
+  private static java.lang.Boolean lambda$static$2(fi.dy.masa.malilib.config.options.ConfigBoolean);
+  private static java.lang.Boolean lambda$static$1(fi.dy.masa.malilib.config.options.ConfigBoolean);
+  static {};
+}
+Compiled from "ConfigBooleanHotkeyed.java"
+public class fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed extends fi.dy.masa.malilib.config.options.ConfigBoolean implements fi.dy.masa.malilib.config.IHotkeyTogglable {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed> CODEC;
+  protected final fi.dy.masa.malilib.hotkeys.IKeybind keybind;
+  private org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> lastBooleanHotkey;
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed(java.lang.String, boolean, boolean, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.hotkeys.IKeybind getKeybind();
+  public java.lang.String getDefaultHotkey();
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed translatedName(java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed apply(java.lang.String);
+  public boolean isModified();
+  public void toggleBooleanValue();
+  public void resetToDefault();
+  public org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> getBooleanHotkeyValue();
+  public org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> getDefaultBooleanHotkeyValue();
+  public void setBooleanHotkeyValue(org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String>);
+  public org.apache.commons.lang3.tuple.Pair<java.lang.Boolean, java.lang.String> getLastBooleanHotkeyValue();
+  public void updateLastBooleanHotkeyValue();
+  public boolean isDirty();
+  public void markDirty();
+  public void markClean();
+  public void checkIfClean();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  public fi.dy.masa.malilib.config.IConfigBase apply(java.lang.String);
+  public fi.dy.masa.malilib.config.IConfigBase translatedName(java.lang.String);
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed);
+  private static fi.dy.masa.malilib.hotkeys.KeybindSettings lambda$static$2(fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed);
+  private static java.lang.String lambda$static$1(fi.dy.masa.malilib.config.options.ConfigBooleanHotkeyed);
+  static {};
+}
+Compiled from "ConfigColor.java"
+public class fi.dy.masa.malilib.config.options.ConfigColor extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigColor> implements fi.dy.masa.malilib.config.IConfigColor {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigColor> CODEC;
+  private fi.dy.masa.malilib.util.data.Color4f defaultValue;
+  protected final int minValue;
+  protected final int maxValue;
+  private fi.dy.masa.malilib.util.data.Color4f color;
+  private fi.dy.masa.malilib.util.data.Color4f lastColor;
+  public fi.dy.masa.malilib.config.options.ConfigColor(java.lang.String, fi.dy.masa.malilib.util.data.Color4f);
+  public fi.dy.masa.malilib.config.options.ConfigColor(java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigColor(java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigColor(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigColor(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigColor(java.lang.String, fi.dy.masa.malilib.util.data.Color4f, fi.dy.masa.malilib.util.data.Color4f, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.ConfigType getType();
+  public fi.dy.masa.malilib.util.data.Color4f getColor();
+  public fi.dy.masa.malilib.config.options.ConfigColor translatedName(java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigColor apply(java.lang.String);
+  public int getIntegerValue();
+  public int getDefaultIntegerValue();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void setIntegerValue(int);
+  public int getMinIntegerValue();
+  public int getMaxIntegerValue();
+  public fi.dy.masa.malilib.util.data.Color4f getLastColorValue();
+  public void updateLastColorValue();
+  protected int getClampedValue(int);
+  public boolean isModified();
+  public void resetToDefault();
+  public boolean isModified(java.lang.String);
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  public fi.dy.masa.malilib.config.IConfigBase apply(java.lang.String);
+  public fi.dy.masa.malilib.config.IConfigBase translatedName(java.lang.String);
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigColor);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigColor);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigColor);
+  private static fi.dy.masa.malilib.util.data.Color4f lambda$static$2(fi.dy.masa.malilib.config.options.ConfigColor);
+  private static fi.dy.masa.malilib.util.data.Color4f lambda$static$1(fi.dy.masa.malilib.config.options.ConfigColor);
+  static {};
+}
+Compiled from "ConfigColorList.java"
+public class fi.dy.masa.malilib.config.options.ConfigColorList extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigColorList> implements fi.dy.masa.malilib.config.IConfigColorList {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigColorList> CODEC;
+  private final com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f> defaultValue;
+  private final java.util.List<fi.dy.masa.malilib.util.data.Color4f> colors;
+  private final java.util.List<fi.dy.masa.malilib.util.data.Color4f> lastColors;
+  public fi.dy.masa.malilib.config.options.ConfigColorList(java.lang.String, com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f>);
+  public fi.dy.masa.malilib.config.options.ConfigColorList(java.lang.String, com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f>, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigColorList(java.lang.String, com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f>, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigColorList(java.lang.String, com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f>, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigColorList(java.lang.String, java.util.List<fi.dy.masa.malilib.util.data.Color4f>, java.util.List<fi.dy.masa.malilib.util.data.Color4f>, java.lang.String, java.lang.String, java.lang.String);
+  public java.util.List<fi.dy.masa.malilib.util.data.Color4f> getColors();
+  public com.google.common.collect.ImmutableList<fi.dy.masa.malilib.util.data.Color4f> getDefaultColors();
+  public void setColors(java.util.List<fi.dy.masa.malilib.util.data.Color4f>);
+  public java.util.List<fi.dy.masa.malilib.util.data.Color4f> getLastColorsValue();
+  public void setModified();
+  public void resetToDefault();
+  public boolean isModified();
+  private void addColor(fi.dy.masa.malilib.util.data.Color4f);
+  public void updateLastColorsValue();
+  public com.google.gson.JsonElement getAsJsonElement();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigColorList);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigColorList);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigColorList);
+  private static java.util.List lambda$static$2(fi.dy.masa.malilib.config.options.ConfigColorList);
+  private static java.util.List lambda$static$1(fi.dy.masa.malilib.config.options.ConfigColorList);
+  static {};
+}
+Compiled from "ConfigDouble.java"
+public class fi.dy.masa.malilib.config.options.ConfigDouble extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigDouble> implements fi.dy.masa.malilib.config.IConfigDouble {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigDouble> CODEC;
+  private final double minValue;
+  private final double maxValue;
+  private final double defaultValue;
+  private double value;
+  private boolean useSlider;
+  private double lastValue;
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, boolean);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, boolean, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, boolean, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, double, double, double, boolean, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigDouble(java.lang.String, java.lang.Double, java.lang.Double, java.lang.Double, java.lang.Double, java.lang.Boolean, java.lang.String, java.lang.String, java.lang.String);
+  public boolean shouldUseSlider();
+  public void toggleUseSlider();
+  public double getDoubleValue();
+  public double getDefaultDoubleValue();
+  public void setDoubleValue(double);
+  public double getMinDoubleValue();
+  public double getMaxDoubleValue();
+  public double getLastDoubleValue();
+  protected double getClampedValue(double);
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void updateLastDoubleValue();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$8(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.String lambda$static$7(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.String lambda$static$6(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.Boolean lambda$static$5(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.Double lambda$static$4(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.Double lambda$static$3(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.Double lambda$static$2(fi.dy.masa.malilib.config.options.ConfigDouble);
+  private static java.lang.Double lambda$static$1(fi.dy.masa.malilib.config.options.ConfigDouble);
+  static {};
+}
+Compiled from "ConfigFloat.java"
+public class fi.dy.masa.malilib.config.options.ConfigFloat extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigFloat> implements fi.dy.masa.malilib.config.IConfigFloat {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigFloat> CODEC;
+  protected final float minValue;
+  protected final float maxValue;
+  protected final float defaultValue;
+  protected float value;
+  protected boolean useSlider;
+  private float lastFloat;
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float, boolean);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float, boolean, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float, boolean, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, float, float, float, boolean, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigFloat(java.lang.String, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Float, java.lang.Boolean, java.lang.String, java.lang.String, java.lang.String);
+  public boolean shouldUseSlider();
+  public void toggleUseSlider();
+  public float getFloatValue();
+  public float getDefaultFloatValue();
+  public void setFloatValue(float);
+  public float getMinFloatValue();
+  public float getMaxFloatValue();
+  public float getLastFloatValue();
+  protected float getClampedValue(float);
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void updateLastFloatValue();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$8(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.String lambda$static$7(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.String lambda$static$6(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.Boolean lambda$static$5(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.Float lambda$static$4(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.Float lambda$static$3(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.Float lambda$static$2(fi.dy.masa.malilib.config.options.ConfigFloat);
+  private static java.lang.Float lambda$static$1(fi.dy.masa.malilib.config.options.ConfigFloat);
+  static {};
+}
+Compiled from "ConfigHotkey.java"
+public class fi.dy.masa.malilib.config.options.ConfigHotkey extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigHotkey> implements fi.dy.masa.malilib.hotkeys.IHotkey, fi.dy.masa.malilib.config.IConfigHotkey {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigHotkey> CODEC;
+  private final fi.dy.masa.malilib.hotkeys.IKeybind keybind;
+  private java.lang.String lastHotkey;
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigHotkey(java.lang.String, java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.hotkeys.IKeybind getKeybind();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public java.lang.String getHotkeyStringValue();
+  public java.lang.String getDefaultHotkeyStringValue();
+  public void setHotkeyStringValue(java.lang.String);
+  public java.lang.String getLastHotkeyStringValue();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public boolean isDirty();
+  public void markDirty();
+  public void markClean();
+  public void checkIfClean();
+  public void updateLastHotkeyStringValue();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigHotkey);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigHotkey);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigHotkey);
+  private static fi.dy.masa.malilib.hotkeys.KeybindSettings lambda$static$2(fi.dy.masa.malilib.config.options.ConfigHotkey);
+  private static java.lang.String lambda$static$1(fi.dy.masa.malilib.config.options.ConfigHotkey);
+  static {};
+}
+Compiled from "ConfigInteger.java"
+public class fi.dy.masa.malilib.config.options.ConfigInteger extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigInteger> implements fi.dy.masa.malilib.config.IConfigInteger {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigInteger> CODEC;
+  protected final int minValue;
+  protected final int maxValue;
+  protected final int defaultValue;
+  protected int value;
+  private boolean useSlider;
+  private int lastValue;
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, boolean);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, boolean, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, boolean, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, int, int, int, boolean, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigInteger(java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.Integer, java.lang.Boolean, java.lang.String, java.lang.String, java.lang.String);
+  public boolean shouldUseSlider();
+  public void toggleUseSlider();
+  public int getIntegerValue();
+  public int getDefaultIntegerValue();
+  public void setIntegerValue(int);
+  public int getMinIntegerValue();
+  public int getMaxIntegerValue();
+  public int getLastIntegerValue();
+  protected int getClampedValue(int);
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void updateLastIntegerValue();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$8(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.String lambda$static$7(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.String lambda$static$6(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.Boolean lambda$static$5(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.Integer lambda$static$4(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.Integer lambda$static$3(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.Integer lambda$static$2(fi.dy.masa.malilib.config.options.ConfigInteger);
+  private static java.lang.Integer lambda$static$1(fi.dy.masa.malilib.config.options.ConfigInteger);
+  static {};
+}
+Compiled from "ConfigLockedList.java"
+public class fi.dy.masa.malilib.config.options.ConfigLockedList extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigLockedList> implements fi.dy.masa.malilib.config.IConfigLockedList {
+  fi.dy.masa.malilib.config.IConfigLockedListType handler;
+  com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigLockedListEntry> defaultList;
+  java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry> values;
+  java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry> lastValues;
+  public fi.dy.masa.malilib.config.options.ConfigLockedList(java.lang.String, fi.dy.masa.malilib.config.IConfigLockedListType);
+  public fi.dy.masa.malilib.config.options.ConfigLockedList(java.lang.String, fi.dy.masa.malilib.config.IConfigLockedListType, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigLockedList(java.lang.String, fi.dy.masa.malilib.config.IConfigLockedListType, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigLockedList(java.lang.String, fi.dy.masa.malilib.config.IConfigLockedListType, java.lang.String, java.lang.String, java.lang.String);
+  public com.google.common.collect.ImmutableList<fi.dy.masa.malilib.config.IConfigLockedListEntry> getDefaultEntries();
+  public java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry> getEntries();
+  public java.util.List<java.lang.String> getConfigKeys();
+  public void setEntries(java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry>);
+  public fi.dy.masa.malilib.config.IConfigLockedListEntry getEmpty();
+  public fi.dy.masa.malilib.config.IConfigLockedListEntry getEntry(java.lang.String);
+  public int getEntryIndex(fi.dy.masa.malilib.config.IConfigLockedListEntry);
+  public void setModified();
+  public java.util.List<fi.dy.masa.malilib.config.IConfigLockedListEntry> getLastLockedListValue();
+  public void resetToDefault();
+  public void updateLastLockedListValue();
+  public boolean isModified();
+  public com.google.gson.JsonElement getAsJsonElement();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  private void lambda$setEntries$0(fi.dy.masa.malilib.config.IConfigLockedListEntry);
+}
+Compiled from "ConfigOptionList.java"
+public class fi.dy.masa.malilib.config.options.ConfigOptionList extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigOptionList> implements fi.dy.masa.malilib.config.IConfigOptionList, fi.dy.masa.malilib.config.IStringRepresentable {
+  private final fi.dy.masa.malilib.config.IConfigOptionListEntry defaultValue;
+  private fi.dy.masa.malilib.config.IConfigOptionListEntry value;
+  private fi.dy.masa.malilib.config.IConfigOptionListEntry lastValue;
+  public fi.dy.masa.malilib.config.options.ConfigOptionList(java.lang.String, fi.dy.masa.malilib.config.IConfigOptionListEntry);
+  public fi.dy.masa.malilib.config.options.ConfigOptionList(java.lang.String, fi.dy.masa.malilib.config.IConfigOptionListEntry, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigOptionList(java.lang.String, fi.dy.masa.malilib.config.IConfigOptionListEntry, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigOptionList(java.lang.String, fi.dy.masa.malilib.config.IConfigOptionListEntry, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.IConfigOptionListEntry getOptionListValue();
+  public fi.dy.masa.malilib.config.IConfigOptionListEntry getDefaultOptionListValue();
+  public void setOptionListValue(fi.dy.masa.malilib.config.IConfigOptionListEntry);
+  public fi.dy.masa.malilib.config.IConfigOptionListEntry getLastOptionListValue();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void updateLastOptionListValue();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+}
+Compiled from "ConfigOptionValues.java"
+public class fi.dy.masa.malilib.config.options.ConfigOptionValues<T extends fi.dy.masa.malilib.config.value.OptionListConfigValue> extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigOptionValues<T>> implements fi.dy.masa.malilib.config.IConfigOptionValues<T>, fi.dy.masa.malilib.config.IStringRepresentable {
+  protected final T defaultValue;
+  protected final com.google.common.collect.ImmutableList<T> allValues;
+  protected com.google.common.collect.ImmutableSet<T> allowedValues;
+  private T value;
+  private T lastValue;
+  public fi.dy.masa.malilib.config.options.ConfigOptionValues(java.lang.String, T, com.google.common.collect.ImmutableList<T>);
+  public fi.dy.masa.malilib.config.options.ConfigOptionValues(java.lang.String, T, com.google.common.collect.ImmutableList<T>, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigOptionValues(java.lang.String, T, com.google.common.collect.ImmutableList<T>, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigOptionValues(java.lang.String, T, com.google.common.collect.ImmutableList<T>, java.lang.String, java.lang.String, java.lang.String);
+  public T getOptionValue();
+  public T getDefaultOptionValue();
+  public com.google.common.collect.ImmutableList<T> getAllValues();
+  public com.google.common.collect.ImmutableSet<T> getAllowedValues();
+  public void setAllowedValues(java.util.Collection<T>);
+  public void addAllowedValues(java.util.Collection<T>);
+  public void removeAllowedValues(java.util.Collection<T>);
+  public void setOptionValue(T);
+  public void setOptionValueFromString(java.lang.String);
+  public void cycleValue(boolean);
+  public T getLastOptionValue();
+  public void updateLastOptionValue();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+}
+Compiled from "ConfigString.java"
+public class fi.dy.masa.malilib.config.options.ConfigString extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigString> implements fi.dy.masa.malilib.config.IConfigValue, fi.dy.masa.malilib.config.IConfigString {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigString> CODEC;
+  private final java.lang.String defaultValue;
+  private java.lang.String value;
+  private java.lang.String previousValue;
+  public fi.dy.masa.malilib.config.options.ConfigString(java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigString(java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigString(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigString(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigString(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public java.lang.String getLastStringValue();
+  public void setStringValue(java.lang.String);
+  public void setValueFromString(java.lang.String);
+  public void updateLastStringValue();
+  public void resetToDefault();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$6(fi.dy.masa.malilib.config.options.ConfigString);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigString);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigString);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigString);
+  private static java.lang.String lambda$static$2(fi.dy.masa.malilib.config.options.ConfigString);
+  private static java.lang.String lambda$static$1(fi.dy.masa.malilib.config.options.ConfigString);
+  static {};
+}
+Compiled from "ConfigStringList.java"
+public class fi.dy.masa.malilib.config.options.ConfigStringList extends fi.dy.masa.malilib.config.options.ConfigBase<fi.dy.masa.malilib.config.options.ConfigStringList> implements fi.dy.masa.malilib.config.IConfigStringList {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.config.options.ConfigStringList> CODEC;
+  private final com.google.common.collect.ImmutableList<java.lang.String> defaultValue;
+  private final java.util.List<java.lang.String> strings;
+  private final java.util.List<java.lang.String> lastStrings;
+  public fi.dy.masa.malilib.config.options.ConfigStringList(java.lang.String, com.google.common.collect.ImmutableList<java.lang.String>);
+  public fi.dy.masa.malilib.config.options.ConfigStringList(java.lang.String, com.google.common.collect.ImmutableList<java.lang.String>, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigStringList(java.lang.String, com.google.common.collect.ImmutableList<java.lang.String>, java.lang.String, java.lang.String);
+  public fi.dy.masa.malilib.config.options.ConfigStringList(java.lang.String, com.google.common.collect.ImmutableList<java.lang.String>, java.lang.String, java.lang.String, java.lang.String);
+  private fi.dy.masa.malilib.config.options.ConfigStringList(java.lang.String, java.util.List<java.lang.String>, java.util.List<java.lang.String>, java.lang.String, java.lang.String, java.lang.String);
+  public java.util.List<java.lang.String> getStrings();
+  public com.google.common.collect.ImmutableList<java.lang.String> getDefaultStrings();
+  public void setStrings(java.util.List<java.lang.String>);
+  public void setModified();
+  public void resetToDefault();
+  public boolean isModified();
+  public java.util.List<java.lang.String> getLastStringListValue();
+  public void updateLastStringListValue();
+  private void addString(java.lang.String);
+  public com.google.gson.JsonElement getAsJsonElement();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static java.lang.String lambda$static$5(fi.dy.masa.malilib.config.options.ConfigStringList);
+  private static java.lang.String lambda$static$4(fi.dy.masa.malilib.config.options.ConfigStringList);
+  private static java.lang.String lambda$static$3(fi.dy.masa.malilib.config.options.ConfigStringList);
+  private static java.util.List lambda$static$2(fi.dy.masa.malilib.config.options.ConfigStringList);
+  private static java.util.List lambda$static$1(fi.dy.masa.malilib.config.options.ConfigStringList);
+  static {};
+}
+Compiled from "ConfigTypeWrapper.java"
+class fi.dy.masa.malilib.config.options.ConfigTypeWrapper$1 {
+  static final int[] $SwitchMap$fi$dy$masa$malilib$config$ConfigType;
+  static {};
+}
+Compiled from "ConfigTypeWrapper.java"
+public class fi.dy.masa.malilib.config.options.ConfigTypeWrapper implements fi.dy.masa.malilib.config.IConfigBoolean, fi.dy.masa.malilib.config.IConfigColor, fi.dy.masa.malilib.config.IConfigDouble, fi.dy.masa.malilib.config.IConfigFloat, fi.dy.masa.malilib.config.IConfigInteger, fi.dy.masa.malilib.config.IConfigOptionList, fi.dy.masa.malilib.hotkeys.IHotkey, fi.dy.masa.malilib.config.IConfigNotifiable<fi.dy.masa.malilib.config.IConfigBase>, fi.dy.masa.malilib.config.IConfigBlockState {
+  private final fi.dy.masa.malilib.config.ConfigType wrappedType;
+  private final fi.dy.masa.malilib.config.IConfigBase wrappedConfig;
+  public fi.dy.masa.malilib.config.options.ConfigTypeWrapper(fi.dy.masa.malilib.config.ConfigType, fi.dy.masa.malilib.config.IConfigBase);
+  public boolean shouldUseSlider();
+  public void toggleUseSlider();
+  public fi.dy.masa.malilib.config.ConfigType getType();
+  public java.lang.String getName();
+  public java.lang.String getLowerName();
+  public java.lang.String getComment();
+  public net.minecraft.class_5250 getCommentComponent();
+  public java.lang.String getPrettyName();
+  public java.lang.String getConfigGuiDisplayName();
+  public java.lang.String getTranslatedName();
+  public void setPrettyName(java.lang.String);
+  public void setTranslatedName(java.lang.String);
+  public void setComment(java.lang.String);
+  public boolean isDirty();
+  public void markDirty();
+  public void markClean();
+  public void checkIfClean();
+  public void onValueChanged();
+  public void setValueChangeCallback(fi.dy.masa.malilib.interfaces.IValueChangeCallback<fi.dy.masa.malilib.config.IConfigBase>);
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public boolean getBooleanValue();
+  public boolean getDefaultBooleanValue();
+  public void setBooleanValue(boolean);
+  public fi.dy.masa.malilib.util.data.Color4f getColor();
+  public int getIntegerValue();
+  public int getDefaultIntegerValue();
+  public void setIntegerValue(int);
+  public int getMinIntegerValue();
+  public int getMaxIntegerValue();
+  public double getDoubleValue();
+  public double getDefaultDoubleValue();
+  public void setDoubleValue(double);
+  public double getMinDoubleValue();
+  public double getMaxDoubleValue();
+  public float getFloatValue();
+  public float getDefaultFloatValue();
+  public void setFloatValue(float);
+  public float getMinFloatValue();
+  public float getMaxFloatValue();
+  public net.minecraft.class_2680 getBlockStateValue();
+  public net.minecraft.class_2680 getDefaultBlockStateValue();
+  public void setBlockStateValue(net.minecraft.class_2680);
+  public net.minecraft.class_2680 getLastBlockStateValue();
+  public void updateLastBlockStateValue();
+  public fi.dy.masa.malilib.config.IConfigOptionListEntry getOptionListValue();
+  public fi.dy.masa.malilib.config.IConfigOptionListEntry getDefaultOptionListValue();
+  public void setOptionListValue(fi.dy.masa.malilib.config.IConfigOptionListEntry);
+  public fi.dy.masa.malilib.hotkeys.IKeybind getKeybind();
+  public void setValueFromJsonElement(com.google.gson.JsonElement);
+  public com.google.gson.JsonElement getAsJsonElement();
+  private void lambda$setValueFromString$0(net.minecraft.class_2680);
+}
+Compiled from "IHotkey.java"
+public interface fi.dy.masa.malilib.hotkeys.IHotkey extends fi.dy.masa.malilib.config.IConfigValue {
+  public abstract fi.dy.masa.malilib.hotkeys.IKeybind getKeybind();
+  public default java.lang.String getStringValue();
+  public default java.lang.String getDefaultStringValue();
+  public default void setValueFromString(java.lang.String);
+  public default boolean isModified();
+  public default boolean isModified(java.lang.String);
+  public default void resetToDefault();
+}
+Compiled from "IHotkeyCallback.java"
+public interface fi.dy.masa.malilib.hotkeys.IHotkeyCallback {
+  public abstract boolean onKeyAction(fi.dy.masa.malilib.hotkeys.KeyAction, fi.dy.masa.malilib.hotkeys.IKeybind);
+}
+Compiled from "IKeybind.java"
+public interface fi.dy.masa.malilib.hotkeys.IKeybind extends fi.dy.masa.malilib.config.IConfigResettable,fi.dy.masa.malilib.config.IStringRepresentable {
+  public abstract boolean isValid();
+  public abstract boolean isDirty();
+  public abstract void markDirty();
+  public abstract void markClean();
+  public abstract boolean isPressed();
+  public abstract boolean isKeybindHeld();
+  public abstract boolean updateIsPressed();
+  public abstract fi.dy.masa.malilib.hotkeys.KeybindSettings getSettings();
+  public abstract void setSettings(fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  public abstract void clearKeys();
+  public abstract void addKey(int);
+  public abstract void removeKey(int);
+  public abstract boolean matches(int);
+  public abstract boolean overlaps(fi.dy.masa.malilib.hotkeys.IKeybind);
+  public abstract void tick();
+  public abstract java.lang.String getKeysDisplayString();
+  public abstract java.util.List<java.lang.Integer> getKeys();
+  public abstract void setCallback(fi.dy.masa.malilib.hotkeys.IHotkeyCallback);
+  public abstract boolean areSettingsModified();
+  public abstract void resetSettingsToDefaults();
+  public default com.google.gson.JsonElement getAsJsonElement();
+  public default void setValueFromJsonElement(com.google.gson.JsonElement);
+}
+Compiled from "IKeybindManager.java"
+public interface fi.dy.masa.malilib.hotkeys.IKeybindManager {
+  public abstract void registerKeybindProvider(fi.dy.masa.malilib.hotkeys.IKeybindProvider);
+  public abstract void unregisterKeybindProvider(fi.dy.masa.malilib.hotkeys.IKeybindProvider);
+  public abstract java.util.List<fi.dy.masa.malilib.hotkeys.KeybindCategory> getKeybindCategories();
+  public abstract void updateUsedKeys();
+  public abstract void addKeybindToMap(fi.dy.masa.malilib.hotkeys.IKeybind);
+  public abstract void addHotkeysForCategory(java.lang.String, java.lang.String, java.util.List<? extends fi.dy.masa.malilib.hotkeys.IHotkey>);
+}
+Compiled from "IKeybindProvider.java"
+public interface fi.dy.masa.malilib.hotkeys.IKeybindProvider {
+  public abstract void addKeysToMap(fi.dy.masa.malilib.hotkeys.IKeybindManager);
+  public abstract void addHotkeys(fi.dy.masa.malilib.hotkeys.IKeybindManager);
+}
+Compiled from "KeybindMulti.java"
+public class fi.dy.masa.malilib.hotkeys.KeybindMulti implements fi.dy.masa.malilib.hotkeys.IKeybind {
+  public static final com.mojang.serialization.Codec<fi.dy.masa.malilib.hotkeys.KeybindMulti> CODEC;
+  private static final java.util.ArrayList<java.lang.Integer> PRESSED_KEYS;
+  private static int triggeredCount;
+  private final java.lang.String defaultStorageString;
+  private final fi.dy.masa.malilib.hotkeys.KeybindSettings defaultSettings;
+  private final java.util.List<java.lang.Integer> keyCodes;
+  private fi.dy.masa.malilib.hotkeys.KeybindSettings settings;
+  private boolean pressed;
+  private boolean pressedLast;
+  private int heldTime;
+  private boolean dirty;
+  private fi.dy.masa.malilib.hotkeys.IHotkeyCallback callback;
+  private fi.dy.masa.malilib.hotkeys.KeybindMulti(java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  private fi.dy.masa.malilib.hotkeys.KeybindMulti(java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings, fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  public fi.dy.masa.malilib.hotkeys.KeybindSettings getSettings();
+  public void setSettings(fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  public void setCallback(fi.dy.masa.malilib.hotkeys.IHotkeyCallback);
+  public boolean isValid();
+  public boolean isDirty();
+  public void markDirty();
+  public void markClean();
+  public boolean isPressed();
+  public boolean isKeybindHeld();
+  public boolean updateIsPressed();
+  private boolean triggerKeyAction(boolean);
+  public void clearKeys();
+  public void addKey(int);
+  public void tick();
+  public void removeKey(int);
+  public java.util.List<java.lang.Integer> getKeys();
+  public java.lang.String getKeysDisplayString();
+  public boolean isModified();
+  public boolean isModified(java.lang.String);
+  public void resetToDefault();
+  public boolean areSettingsModified();
+  public void resetSettingsToDefaults();
+  public java.lang.String getStringValue();
+  public java.lang.String getDefaultStringValue();
+  public void setValueFromString(java.lang.String);
+  public boolean matches(int);
+  public static int getKeyCode(net.minecraft.class_304);
+  public static boolean hotkeyMatchesKeybind(fi.dy.masa.malilib.hotkeys.IHotkey, net.minecraft.class_304);
+  public boolean overlaps(fi.dy.masa.malilib.hotkeys.IKeybind);
+  public boolean contextOverlaps(fi.dy.masa.malilib.hotkeys.IKeybind);
+  public static fi.dy.masa.malilib.hotkeys.KeybindMulti fromStorageString(java.lang.String, fi.dy.masa.malilib.hotkeys.KeybindSettings);
+  public static boolean isKeyDown(int);
+  public static void onKeyInputPre(net.minecraft.class_11908, int);
+  public static void reCheckPressedKeys();
+  private static void printKeybindDebugMessage(int, int, int, int);
+  public static java.lang.String getActiveKeysString();
+  public static java.lang.String getStorageStringForKeyCode(int);
+  public static int getTriggeredCount();
+  public fi.dy.masa.malilib.hotkeys.IHotkeyCallback getCallback();
+  private static com.mojang.datafixers.kinds.App lambda$static$0(com.mojang.serialization.codecs.RecordCodecBuilder$Instance);
+  private static fi.dy.masa.malilib.hotkeys.KeybindSettings lambda$static$3(fi.dy.masa.malilib.hotkeys.KeybindMulti);
+  private static fi.dy.masa.malilib.hotkeys.KeybindSettings lambda$static$2(fi.dy.masa.malilib.hotkeys.KeybindMulti);
+  private static java.lang.String lambda$static$1(fi.dy.masa.malilib.hotkeys.KeybindMulti);
+  static {};
+}

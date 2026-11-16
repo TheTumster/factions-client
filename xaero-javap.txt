@@ -1,0 +1,434 @@
+Compiled from "HudMod.java"
+public abstract class xaero.common.HudMod implements xaero.common.IXaeroMinimap {
+  public static final org.apache.logging.log4j.Logger LOGGER;
+  public static final boolean FAIRPLAY = false;
+  public static final java.lang.String MINIMAP_ID = "xaerominimap";
+  public static xaero.common.HudMod INSTANCE;
+  protected xaero.common.PlatformContext platformContext;
+  protected boolean loadedClient;
+  protected boolean loadedServer;
+  protected boolean firstStageLoaded;
+  protected static final java.lang.String versionID_minecraft = "1.21.11";
+  private java.lang.String versionID;
+  private int newestUpdateID;
+  private boolean isOutdated;
+  private java.lang.String latestVersion;
+  private java.lang.String latestVersionMD5;
+  private xaero.lib.common.config.channel.ConfigChannel hudConfigs;
+  private xaero.common.settings.ModSettings settings;
+  private java.lang.String message;
+  private xaero.hud.controls.ControlsRegister controlsRegister;
+  protected final xaero.common.events.ClientEvents events;
+  protected final xaero.common.events.ModClientEvents modClientEvents;
+  private xaero.common.gui.GuiHelper guiHelper;
+  private xaero.common.validator.FieldValidatorHolder fieldValidators;
+  private xaero.common.mods.SupportMods supportMods;
+  private xaero.common.server.mods.SupportServerMods supportServerMods;
+  private xaero.hud.minimap.common.radar.category.EntityRadarCategorySerializers entityRadarCategorySerializers;
+  private xaero.hud.minimap.radar.category.EntityRadarCategoryManager entityRadarCategoryManager;
+  private xaero.common.server.player.ServerPlayerTickHandler serverPlayerTickHandler;
+  private xaero.hud.minimap.player.tracker.system.RenderedPlayerTrackerManager renderedPlayerTrackerManager;
+  private xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElementRenderer trackedPlayerRenderer;
+  private xaero.lib.common.packet.IPacketHandler messageHandler;
+  protected final xaero.common.events.CommonEvents commonEvents;
+  protected final xaero.common.events.ModCommonEvents modCommonEvents;
+  private xaero.common.config.LegacyCommonConfigIO commonConfigIO;
+  private xaero.common.events.ClientEventsListener clientEventsListener;
+  protected xaero.hud.Hud hud;
+  protected xaero.hud.render.HudRenderer hudRenderer;
+  protected xaero.hud.io.HudIO hudIO;
+  private xaero.common.HudCommonBase hudCommon;
+  private xaero.common.HudClientOnlyBase clientOnlyBase;
+  private xaero.hud.minimap.Minimap minimap;
+  public boolean shouldLoadLegacySettings;
+  private final xaero.hud.minimap.info.InfoDisplayIO infoDisplaysIO;
+  private java.io.File modJAR;
+  private java.nio.file.Path configFile;
+  public java.nio.file.Path waypointsFile;
+  public java.nio.file.Path minimapFolder;
+  private xaero.common.server.XaeroMinimapServer minimapServer;
+  public boolean isLoadedClient();
+  public boolean isLoadedServer();
+  protected xaero.common.HudMod();
+  protected abstract xaero.common.PlatformContext createPlatformContext();
+  protected abstract java.lang.String getCommonConfigFileName();
+  protected abstract xaero.common.settings.ModSettings createModSettings();
+  protected abstract xaero.hud.controls.ControlsRegister createControlsRegister();
+  protected abstract xaero.common.gui.GuiHelper createGuiHelper();
+  public abstract java.lang.String getOldConfigFileName();
+  protected abstract xaero.common.HudClientOnlyBase createClientOnly();
+  protected abstract java.lang.String getModName();
+  protected abstract org.apache.logging.log4j.Logger getLogger();
+  protected abstract xaero.common.events.ClientEventsListener createForgeEventHandlerListener();
+  protected abstract xaero.hud.common.config.channel.register.HudModConfigCommonRegistryHandler createConfigCommonRegistryHandler();
+  protected abstract java.util.function.Supplier<xaero.lib.client.config.channel.register.handler.IConfigChannelClientRegistryHandler> createConfigClientRegistryHandlerSupplier();
+  protected void loadClient() throws java.io.IOException;
+  public void loadLater();
+  public void loadServer();
+  protected void loadCommon();
+  protected void loadLaterServer();
+  public java.nio.file.Path getConfigFile();
+  public java.io.File getModJAR();
+  public xaero.common.settings.ModSettings getSettings();
+  public void setSettings(xaero.common.settings.ModSettings);
+  public void resetSettings() throws java.io.IOException;
+  public boolean isOutdated();
+  public void setOutdated(boolean);
+  public java.lang.String getMessage();
+  public void setMessage(java.lang.String);
+  public java.lang.String getLatestVersion();
+  public void setLatestVersion(java.lang.String);
+  public int getNewestUpdateID();
+  public void setNewestUpdateID(int);
+  public xaero.lib.patreon.PatreonMod getPatreon();
+  public java.nio.file.Path getWaypointsFile();
+  public java.nio.file.Path getMinimapFolder();
+  public xaero.common.mods.SupportMods getSupportMods();
+  public xaero.common.events.ModClientEvents getModEvents();
+  public xaero.common.gui.GuiHelper getGuiHelper();
+  public xaero.common.validator.FieldValidatorHolder getFieldValidators();
+  public xaero.hud.controls.ControlsRegister getControlsRegister();
+  public xaero.common.events.ClientEvents getEvents();
+  public void setLatestVersionMD5(java.lang.String);
+  public java.lang.String getLatestVersionMD5();
+  public boolean isStandalone();
+  public xaero.hud.minimap.radar.category.EntityRadarCategoryManager getEntityRadarCategoryManager();
+  public boolean isFairPlay();
+  public xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElementRenderer getTrackedPlayerRenderer();
+  public xaero.hud.minimap.player.tracker.system.RenderedPlayerTrackerManager getRenderedPlayerTrackerManager();
+  public xaero.common.server.player.ServerPlayerTickHandler getServerPlayerTickHandler();
+  public void setServerPlayerTickHandler(xaero.common.server.player.ServerPlayerTickHandler);
+  public xaero.lib.common.packet.IPacketHandler getMessageHandler();
+  public xaero.common.events.CommonEvents getCommonEvents();
+  public xaero.common.server.mods.SupportServerMods getSupportServerMods();
+  public void setCommonConfigIO(xaero.common.config.LegacyCommonConfigIO);
+  public xaero.common.config.LegacyCommonConfigIO getCommonConfigIO();
+  public xaero.common.events.ClientEventsListener getClientEventsListener();
+  public xaero.common.PlatformContext getPlatformContext();
+  public void ensureControlsRegister();
+  public xaero.common.events.ModClientEvents getModClientEvents();
+  public xaero.common.events.ModCommonEvents getModCommonEvents();
+  public void tryLoadLater();
+  public void tryLoadLaterServer();
+  public java.lang.String getVersionID();
+  public xaero.hud.Hud getHud();
+  public xaero.hud.render.HudRenderer getHudRenderer();
+  public xaero.hud.io.HudIO getHudIO();
+  public xaero.hud.minimap.Minimap getMinimap();
+  public boolean isFirstStageLoaded();
+  public xaero.hud.controls.key.KeyMappingControllerManager getKeyMappingControllers();
+  public abstract java.nio.file.Path getConfigSubFolder();
+  public abstract java.nio.file.Path getDefaultConfigsSubFolder();
+  public xaero.lib.common.config.channel.ConfigChannel getHudConfigs();
+  public xaero.hud.minimap.info.InfoDisplayIO getInfoDisplaysIO();
+  public xaero.hud.minimap.common.radar.category.EntityRadarCategorySerializers getEntityRadarCategorySerializers();
+  private void lambda$loadLater$0();
+  static {};
+}
+Compiled from "IXaeroMinimap.java"
+public interface xaero.common.IXaeroMinimap {
+  public static final java.nio.file.Path old_waypointsFile;
+  public static final java.io.File wrongWaypointsFile;
+  public static final java.io.File wrongWaypointsFolder;
+  public abstract java.lang.String getVersionID();
+  public abstract java.lang.String getFileLayoutID();
+  public abstract java.nio.file.Path getConfigFile();
+  public abstract java.io.File getModJAR();
+  public abstract xaero.common.settings.ModSettings getSettings();
+  public abstract void setSettings(xaero.common.settings.ModSettings);
+  public abstract boolean isOutdated();
+  public abstract void setOutdated(boolean);
+  public abstract java.lang.String getMessage();
+  public abstract void setMessage(java.lang.String);
+  public abstract java.lang.String getLatestVersion();
+  public abstract java.lang.String getLatestVersionMD5();
+  public abstract void setLatestVersion(java.lang.String);
+  public abstract void setLatestVersionMD5(java.lang.String);
+  public abstract int getNewestUpdateID();
+  public abstract void setNewestUpdateID(int);
+  public abstract xaero.lib.patreon.PatreonMod getPatreon();
+  public abstract java.lang.String getVersionsURL();
+  public abstract void resetSettings() throws java.io.IOException;
+  public abstract java.lang.String getUpdateLink();
+  public abstract java.lang.Object getSettingsKey();
+  public abstract java.lang.Object getServerSettingsKey();
+  public abstract java.nio.file.Path getWaypointsFile();
+  public abstract java.nio.file.Path getMinimapFolder();
+  public abstract xaero.common.XaeroMinimapSession createSession();
+  public abstract xaero.common.mods.SupportMods getSupportMods();
+  public abstract xaero.common.server.mods.SupportServerMods getSupportServerMods();
+  public abstract xaero.common.gui.GuiHelper getGuiHelper();
+  public abstract xaero.common.validator.FieldValidatorHolder getFieldValidators();
+  public abstract xaero.hud.controls.ControlsRegister getControlsRegister();
+  public abstract xaero.common.events.ClientEvents getEvents();
+  public abstract void tryLoadLater();
+  public abstract void tryLoadLaterServer();
+  public abstract xaero.common.events.ModClientEvents getModEvents();
+  public abstract boolean isStandalone();
+  public abstract xaero.hud.minimap.radar.category.EntityRadarCategoryManager getEntityRadarCategoryManager();
+  public abstract boolean isFairPlay();
+  public abstract xaero.hud.minimap.player.tracker.PlayerTrackerMinimapElementRenderer getTrackedPlayerRenderer();
+  public abstract xaero.hud.minimap.player.tracker.system.RenderedPlayerTrackerManager getRenderedPlayerTrackerManager();
+  public abstract xaero.common.server.player.ServerPlayerTickHandler getServerPlayerTickHandler();
+  public abstract void setServerPlayerTickHandler(xaero.common.server.player.ServerPlayerTickHandler);
+  public abstract xaero.lib.common.packet.IPacketHandler getMessageHandler();
+  public abstract xaero.common.events.CommonEvents getCommonEvents();
+  public abstract void setCommonConfigIO(xaero.common.config.LegacyCommonConfigIO);
+  public abstract xaero.common.config.LegacyCommonConfigIO getCommonConfigIO();
+  public abstract xaero.common.events.ClientEventsListener getClientEventsListener();
+  public abstract xaero.common.PlatformContext getPlatformContext();
+  public abstract void ensureControlsRegister();
+  public abstract xaero.common.events.ModClientEvents getModClientEvents();
+  public abstract xaero.common.events.ModCommonEvents getModCommonEvents();
+  public abstract java.lang.String getModId();
+  public abstract boolean isLoadedClient();
+  public abstract boolean isLoadedServer();
+  public abstract xaero.hud.Hud getHud();
+  public abstract xaero.hud.render.HudRenderer getHudRenderer();
+  public abstract xaero.hud.io.HudIO getHudIO();
+  public abstract xaero.hud.minimap.Minimap getMinimap();
+  public abstract boolean isFirstStageLoaded();
+  static {};
+}
+Compiled from "XaeroMinimapSession.java"
+public class xaero.common.XaeroMinimapSession extends xaero.hud.HudSession {
+  public xaero.common.XaeroMinimapSession(xaero.common.HudMod);
+  public void init(net.minecraft.class_634) throws java.io.IOException;
+  protected void cleanup();
+  public xaero.common.minimap.MinimapProcessor getMinimapProcessor();
+  public static xaero.common.XaeroMinimapSession getCurrentSession();
+  public static xaero.common.XaeroMinimapSession getForPlayer(net.minecraft.class_746);
+  public xaero.common.IXaeroMinimap getModMain();
+}
+Compiled from "XaeroMinimapCore.java"
+public class xaero.common.core.XaeroMinimapCore {
+  public static xaero.common.IXaeroMinimap modMain;
+  public static java.lang.reflect.Field chunkCleanField;
+  public static xaero.common.XaeroMinimapSession currentSession;
+  public static org.joml.Matrix4f waypointsProjection;
+  public static org.joml.Matrix4f waypointModelView;
+  public xaero.common.core.XaeroMinimapCore();
+  public static void ensureField();
+  public static void chunkUpdateCallback(int, int);
+  public static void onChunkData(int, int, net.minecraft.class_6603);
+  private static void onChunkLightData(int, int);
+  public static void onHandleLevelChunkWithLight(net.minecraft.class_2672);
+  public static void onHandleLightUpdatePacket(net.minecraft.class_2676);
+  public static void onQueueLightRemoval(net.minecraft.class_2666);
+  public static void onBlockChange(net.minecraft.class_2626);
+  public static void onMultiBlockChange(net.minecraft.class_2637);
+  public static void onPlayNetHandler(net.minecraft.class_634, net.minecraft.class_2678);
+  private static void cleanupCurrentSession();
+  public static void onPlayNetHandlerCleanup(net.minecraft.class_634);
+  public static void beforeRespawn(net.minecraft.class_1657);
+  public static void onProjectionMatrix(org.joml.Matrix4f);
+  public static void onWorldModelViewMatrix(org.joml.Matrix4f);
+  public static void onRenderLevelMatrices(org.joml.Matrix4f, org.joml.Matrix4f);
+  public static void beforeIngameGuiRender(net.minecraft.class_332, net.minecraft.class_9779);
+  public static void afterIngameGuiRender(net.minecraft.class_332, net.minecraft.class_9779);
+  public static void onRenderStatusEffectOverlayPost(net.minecraft.class_332);
+  public static void onBossHealthRender(int);
+  public static void onEntityIconsModelRenderDetection(net.minecraft.class_3879, net.minecraft.class_4588, int);
+  public static void onEntityIconsModelPartRenderDetection(net.minecraft.class_630, int);
+  public static void onDeleteWorld(net.minecraft.class_32$class_5143);
+  public static void onSpawn(net.minecraft.class_2759);
+  public static boolean onLocalPlayerCommand(java.lang.String);
+  public static boolean onSystemChat(net.minecraft.class_2561);
+  public static boolean onHandleDisguisedChatMessage(net.minecraft.class_2556$class_7602, net.minecraft.class_2561);
+  public static boolean isModLoaded();
+  public static boolean onRenderStatusEffectOverlay(net.minecraft.class_332);
+  public static boolean onRenderCrosshair(net.minecraft.class_332);
+  public static void handleRenderModOverlay(net.minecraft.class_332, net.minecraft.class_9779);
+  public static void onBufferSourceGetBuffer(xaero.common.core.IBufferSource, net.minecraft.class_1921);
+  public static boolean onToggleKeyIsDown(net.minecraft.class_4666);
+  static {};
+}
+Compiled from "XaeroMinimapCoreFabric.java"
+public class xaero.common.core.XaeroMinimapCoreFabric {
+  public xaero.common.core.XaeroMinimapCoreFabric();
+}
+Compiled from "XaeroMinimapServer.java"
+public class xaero.common.server.XaeroMinimapServer {
+  public static int SERVER_COMPATIBILITY;
+  private final org.apache.logging.log4j.Logger LOGGER;
+  private xaero.common.IXaeroMinimap modMain;
+  private xaero.common.server.events.ServerEvents serverEvents;
+  public xaero.common.server.XaeroMinimapServer(xaero.common.IXaeroMinimap);
+  public void load();
+  public void loadLater();
+  public xaero.common.IXaeroMinimap getModMain();
+  public xaero.common.server.events.ServerEvents getServerEvents();
+  static {};
+}
+Compiled from "XaeroMinimapServerCore.java"
+public class xaero.common.server.core.XaeroMinimapServerCore {
+  public static xaero.common.IXaeroMinimap modMain;
+  public xaero.common.server.core.XaeroMinimapServerCore();
+  public static void onServerWorldInfo(net.minecraft.class_1657);
+  public static boolean isModLoaded();
+}
+Compiled from "ModSettings.java"
+public class xaero.common.settings.ModSettings {
+  public static int defaultSettings;
+  public static final java.lang.String format = "\u00a7";
+  protected xaero.common.IXaeroMinimap modMain;
+  private xaero.hud.minimap.radar.category.EntityRadarBackwardsCompatibilityConfig entityRadarBackwardsCompatibilityConfig;
+  private boolean foundOldRadarSettings;
+  public boolean needsLegacySlimeSeedResave;
+  private java.lang.String loadedWaypointLines;
+  public static int serverSettings;
+  private static java.util.HashMap<xaero.hud.path.XaeroPath, java.lang.Long> legacyServerSlimeSeeds;
+  private static final java.lang.String[] SHOW_LIGHT_LEVEL_NAMES;
+  private static int[] OLD_MINIMAP_SIZES;
+  public java.lang.Boolean showCoordsLegacy;
+  public java.lang.Boolean showBiomeLegacy;
+  public java.lang.Integer showLightLevelLegacy;
+  public java.lang.Integer showTimeLegacy;
+  public java.lang.Boolean showAnglesLegacy;
+  public java.lang.Boolean showDimensionNameLegacy;
+  public java.lang.Boolean displayWeatherInfoLegacy;
+  public xaero.common.settings.ModSettings(xaero.common.IXaeroMinimap);
+  public boolean isKeyRepeat(net.minecraft.class_304);
+  public boolean getMinimap();
+  public void setSlimeChunksSeed(long, xaero.hud.path.XaeroPath);
+  public java.lang.Long getSlimeChunksSeed(xaero.hud.path.XaeroPath);
+  public java.lang.Long getLegacySlimeChunksSeed(xaero.hud.path.XaeroPath);
+  public java.lang.Long removeLegacySlimeChunksSeed(xaero.hud.path.XaeroPath);
+  public boolean getSlimeChunks(xaero.hud.minimap.module.MinimapSession);
+  public boolean waypointsGUI(xaero.hud.minimap.module.MinimapSession);
+  public float getMinimapScale();
+  public float getUIScale(int, int, int);
+  public int getAutoUIScale();
+  private int getMaxWaypointsDistance(int);
+  private boolean assumeUsingFBO();
+  public boolean isIgnoreHeightmaps();
+  public void writeSettings(java.io.PrintWriter);
+  public void saveSettings() throws java.io.IOException;
+  public void readSetting(java.lang.String[]);
+  public void loadDefaultSettings(boolean) throws java.io.IOException;
+  public void loadSettings(boolean) throws java.io.IOException;
+  private void loadSettingsFile(java.io.File, boolean) throws java.io.IOException;
+  public static java.lang.String getTranslation(boolean);
+  private void refreshScreen();
+  public boolean minimapDisabled();
+  public boolean caveMapsDisabled();
+  public boolean showWaypointsDisabled();
+  public boolean deathpointsDisabled();
+  public void resetServerSettings();
+  public static void setServerSettings();
+  public static boolean canEditIngameSettings();
+  public xaero.hud.minimap.radar.category.EntityRadarBackwardsCompatibilityConfig getEntityRadarBackwardsCompatibilityConfig();
+  public void resetEntityRadarBackwardsCompatibilityConfig();
+  public boolean foundOldRadarSettings();
+  public java.lang.String getLoadedWaypointLines();
+  public void removeLoadedWaypointLines();
+  static {};
+}
+Compiled from "HudModConfigCommonRegistryHandler.java"
+public class xaero.hud.common.config.channel.register.HudModConfigCommonRegistryHandler implements xaero.lib.common.config.channel.register.handler.IConfigChannelCommonRegistryHandler {
+  public xaero.hud.common.config.channel.register.HudModConfigCommonRegistryHandler();
+  public void registerPrimaryCommonOptions(xaero.lib.common.config.option.ConfigOptionManager);
+  public void registerProfiledOptions(xaero.lib.common.config.option.ConfigOptionManager);
+  public void registerServerOptionChangeHandlers(xaero.lib.common.config.server.listener.ServerConfigChangeListener);
+  public void registerOptionServerRedirectors(xaero.lib.common.config.option.value.redirect.OptionValueRedirectorManager);
+}
+Compiled from "HudModConfigClientRegistryHandler.java"
+public class xaero.hud.config.channel.register.HudModConfigClientRegistryHandler implements xaero.lib.client.config.channel.register.handler.IConfigChannelClientRegistryHandler {
+  public xaero.hud.config.channel.register.HudModConfigClientRegistryHandler();
+  public void registerPrimaryClientOptions(xaero.lib.client.config.option.ClientConfigOptionManager);
+  public void registerConfigOptionUITypes(xaero.lib.client.config.option.ui.ConfigOptionUITypeManager);
+  public void registerClientOptionChangeHandlers(xaero.lib.client.config.listener.ClientConfigChangeListener);
+  public void registerOptionClientRedirectors(xaero.lib.client.config.option.value.redirect.ClientOptionValueRedirectorManager);
+}
+Compiled from "MinimapLogs.java"
+public class xaero.hud.minimap.MinimapLogs {
+  public static final org.apache.logging.log4j.Logger LOGGER;
+  public xaero.hud.minimap.MinimapLogs();
+  static {};
+}
+Compiled from "HudModule.java"
+public final class xaero.hud.module.HudModule<MS extends xaero.hud.module.ModuleSession<MS>> {
+  private final net.minecraft.class_2960 id;
+  private final net.minecraft.class_2561 displayName;
+  private final org.apache.commons.lang3.function.TriFunction<xaero.common.HudMod, xaero.hud.module.HudModule<MS>, net.minecraft.class_634, MS> sessionFactory;
+  private final java.util.function.Supplier<xaero.hud.render.module.IModuleRenderer<MS>> rendererFactory;
+  private final java.util.function.Function<net.minecraft.class_437, net.minecraft.class_437> configScreenFactory;
+  private xaero.hud.render.module.IModuleRenderer<MS> renderer;
+  private xaero.hud.module.ModuleTransform transform;
+  private xaero.hud.module.ModuleTransform unconfirmedTransform;
+  private xaero.hud.pushbox.PushboxHandler$State pushState;
+  private xaero.lib.common.config.option.BooleanConfigOption activeOption;
+  public xaero.hud.module.HudModule(net.minecraft.class_2960, net.minecraft.class_2561, org.apache.commons.lang3.function.TriFunction<xaero.common.HudMod, xaero.hud.module.HudModule<MS>, net.minecraft.class_634, MS>, java.util.function.Supplier<xaero.hud.render.module.IModuleRenderer<MS>>, java.util.function.Function<net.minecraft.class_437, net.minecraft.class_437>, xaero.lib.common.config.option.BooleanConfigOption);
+  public net.minecraft.class_2960 getId();
+  public boolean isActive(xaero.lib.client.config.ClientConfigManager);
+  public void setActive(xaero.lib.client.config.ClientConfigManager, boolean);
+  public MS getCurrentSession();
+  public xaero.hud.render.module.IModuleRenderer<MS> getRenderer();
+  public xaero.hud.module.ModuleTransform getUsedTransform();
+  public xaero.hud.module.ModuleTransform getUnconfirmedTransform();
+  public void confirmTransform();
+  public xaero.hud.module.ModuleTransform getConfirmedTransform();
+  public void setTransform(xaero.hud.module.ModuleTransform);
+  public void cancelTransform();
+  public xaero.hud.pushbox.PushboxHandler$State getPushState();
+  public net.minecraft.class_2561 getDisplayName();
+  public java.util.function.Function<net.minecraft.class_437, net.minecraft.class_437> getConfigScreenFactory();
+  org.apache.commons.lang3.function.TriFunction<xaero.common.HudMod, xaero.hud.module.HudModule<MS>, net.minecraft.class_634, MS> getSessionFactory();
+  void setRenderer(xaero.hud.render.module.IModuleRenderer<MS>);
+}
+Compiled from "XaeroMinimap.java"
+public abstract class xaero.minimap.XaeroMinimap extends xaero.common.HudMod {
+  public static final org.apache.logging.log4j.Logger LOGGER;
+  public static xaero.minimap.XaeroMinimap instance;
+  public static final java.lang.String MOD_ID = "xaerominimap";
+  public xaero.minimap.XaeroMinimap();
+  protected void loadClient() throws java.io.IOException;
+  protected void loadCommon();
+  protected java.lang.String getCommonConfigFileName();
+  public java.lang.String getModId();
+  protected xaero.common.settings.ModSettings createModSettings();
+  protected xaero.common.gui.GuiHelper createGuiHelper();
+  public java.lang.String getOldConfigFileName();
+  protected xaero.common.HudClientOnlyBase createClientOnly();
+  protected java.lang.String getModName();
+  protected org.apache.logging.log4j.Logger getLogger();
+  protected xaero.common.events.ClientEventsListener createForgeEventHandlerListener();
+  public java.lang.String getVersionsURL();
+  public java.lang.String getUpdateLink();
+  protected xaero.hud.controls.ControlsRegister createControlsRegister();
+  public xaero.common.XaeroMinimapSession createSession();
+  public java.lang.Object getSettingsKey();
+  public java.lang.Object getServerSettingsKey();
+  public java.nio.file.Path getConfigSubFolder();
+  public java.nio.file.Path getDefaultConfigsSubFolder();
+  protected xaero.hud.common.config.channel.register.HudModConfigCommonRegistryHandler createConfigCommonRegistryHandler();
+  protected java.util.function.Supplier<xaero.lib.client.config.channel.register.handler.IConfigChannelClientRegistryHandler> createConfigClientRegistryHandlerSupplier();
+  public boolean isStandalone();
+  static {};
+}
+Compiled from "XaeroMinimapFabric.java"
+public class xaero.minimap.XaeroMinimapFabric extends xaero.minimap.XaeroMinimap implements net.fabricmc.api.ClientModInitializer,net.fabricmc.api.DedicatedServerModInitializer {
+  public static java.lang.String fileLayoutID;
+  private final xaero.common.PlatformContextFabric xaeroHudFabric;
+  public xaero.minimap.XaeroMinimapFabric();
+  public void onInitializeClient();
+  public void onInitializeServer();
+  protected void loadClient() throws java.io.IOException;
+  protected void loadCommon();
+  public void loadServer();
+  public void tryLoadLater();
+  public void tryLoadLaterServer();
+  protected xaero.common.PlatformContext createPlatformContext();
+  public java.lang.String getFileLayoutID();
+  static {};
+}
+Compiled from "XaeroMinimapStandaloneSession.java"
+public class xaero.minimap.XaeroMinimapStandaloneSession extends xaero.common.XaeroMinimapSession {
+  public xaero.minimap.XaeroMinimapStandaloneSession(xaero.common.HudMod);
+  public void init(net.minecraft.class_634) throws java.io.IOException;
+}
+Compiled from "XaeroMinimapSupportMods.java"
+public abstract class xaero.minimap.mods.XaeroMinimapSupportMods {
+  public xaero.minimap.mods.XaeroMinimapSupportMods();
+  public static void checkForMinimapDuplicates();
+}
