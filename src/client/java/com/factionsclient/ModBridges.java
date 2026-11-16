@@ -56,11 +56,12 @@ public final class ModBridges {
 	}
 
 	/** The malilib options declared as public static fields of one class (not lists other mods mixed into). */
-	public static List<?> malilibFields(String className) {
+	public static List<?> malilibFields(String className, String... skip) {
 		List<Object> out = new ArrayList<>();
+		java.util.Set<String> skipSet = java.util.Set.of(skip);
 		try {
 			for (Field f : Class.forName(className).getFields()) {
-				if (!Modifier.isStatic(f.getModifiers())) continue;
+				if (!Modifier.isStatic(f.getModifiers()) || skipSet.contains(f.getName())) continue;
 				Object o = f.get(null);
 				if (o != null && o.getClass().getName().startsWith("fi.dy.masa.malilib.config.options.")) out.add(o);
 			}

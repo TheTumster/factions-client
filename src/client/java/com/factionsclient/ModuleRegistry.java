@@ -287,7 +287,7 @@ public final class ModuleRegistry {
 						return s;
 					}
 					// Only the printer's own options (its config lists also contain everything Litematica has)
-					s.addAll(ModBridges.malilib(ModBridges.malilibFields("me.aleksilassila.litematica.printer.config.Configs"), ModBridges::saveLitematica));
+					s.addAll(ModBridges.malilib(ModBridges.malilibFields("me.aleksilassila.litematica.printer.config.Configs", "PRINT_MODE") /* = the Enabled switch */, ModBridges::saveLitematica));
 					s.addAll(ModBridges.malilib(ModBridges.malilibFields("me.aleksilassila.litematica.printer.config.Hotkeys"), ModBridges::saveLitematica));
 					return s;
 				}));
