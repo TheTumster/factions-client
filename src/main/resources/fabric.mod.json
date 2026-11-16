@@ -8,6 +8,8 @@
 		"Jacob"
 	],
 	"license": "All-Rights-Reserved",
+	"icon": "assets/factionsclient/icon.png",
+	"contact": { "homepage": "https://relapsedmc.com" },
 	"environment": "client",
 	"entrypoints": {
 		"client": [

@@ -34,6 +34,7 @@ public final class Hud {
 	static {
 		ELEMENTS.put("info", "FPS / Ping / TNT");
 		ELEMENTS.put("coords", "Coords");
+		ELEMENTS.put("territory", "Territory");
 		ELEMENTS.put("status", "Sprint / Sneak");
 		ELEMENTS.put("team", "Team List");
 		ELEMENTS.put("keystrokes", "Keystrokes + CPS");
@@ -46,6 +47,7 @@ public final class Hud {
 		return switch (id) {
 			case "info" -> new float[] {0.005f, 0.01f, 1f};
 			case "coords" -> new float[] {0.005f, 0.055f, 1f};
+			case "territory" -> new float[] {0.5f, 0.02f, 1f};
 			case "status" -> new float[] {0.005f, 0.135f, 1f};
 			case "team" -> new float[] {0.005f, 0.18f, 1f};
 			case "keystrokes" -> new float[] {0.005f, 0.62f, 1f};
@@ -65,6 +67,7 @@ public final class Hud {
 		return switch (id) {
 			case "info" -> c.hudInfo;
 			case "coords" -> c.hudCoords;
+			case "territory" -> c.hudTerritory && c.claimMap;
 			case "status" -> c.hudStatus;
 			case "team" -> c.team && c.hudTeamList;
 			case "keystrokes" -> c.hudKeystrokes;
@@ -134,6 +137,21 @@ public final class Hud {
 					lines.add(new Line(String.format(Locale.ROOT, "Overworld %d %d", p.getBlockX() * 8, p.getBlockZ() * 8), GRAY));
 				}
 			}
+			case "territory" -> {
+				if (!ServerLink.connected && !preview) break;
+				ServerLink.Claim here = ServerLink.claimHere(mc);
+				if (here == null && preview && !ServerLink.connected) here = new ServerLink.Claim(ServerLink.OWN, "YourFaction");
+				if (here == null) {
+					lines.add(new Line("Wilderness", 0xFF9AA3B5));
+				} else {
+					String what = switch (here.rel()) {
+						case ServerLink.SAFEZONE -> "SafeZone";
+						case ServerLink.WARZONE -> "WarZone";
+						default -> here.tag();
+					};
+					lines.add(new Line(what, 0xFF000000 | WorldRender.relationColor(here.rel())));
+				}
+			}
 			case "status" -> {
 				boolean tSprint = mc.options.toggleSprint().get() || cfg.autoSprint;
 				boolean tSneak = mc.options.toggleCrouch().get();
@@ -156,6 +174,11 @@ public final class Hud {
 							where = "(" + m.dim().replace("minecraft:", "") + ")";
 						}
 						lines.add(new Line(m.name() + "  " + where, accent));
+					}
+					ServerLink.Home h = ServerLink.HOME;
+					if (cfg.homeBeacon && h != null && h.dim().equals(dim)) {
+						double dx = h.x() - p.getX(), dz = h.z() - p.getZ();
+						lines.add(new Line("Home  " + (int) Math.sqrt(dx * dx + dz * dz) + "m " + arrow(p.getYRot(), dx, dz), 0xFF4DFF88));
 					}
 					if (lines.isEmpty() && preview) lines.add(new Line("Teammate  42m ↗  120 64 -300", accent));
 				}

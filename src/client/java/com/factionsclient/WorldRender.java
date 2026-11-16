@@ -40,6 +40,8 @@ public final class WorldRender {
 		}
 
 		if (cfg.chunkGrid) chunkBorders(m, vc, cam, mc);
+		if (cfg.claimMap) claimBorders(m, vc, cam, mc);
+		if (cfg.homeBeacon) homeBeacon(m, vc, cam, mc);
 
 		if (cfg.team) {
 			String dim = ServerLink.dimId(mc);
@@ -91,6 +93,77 @@ public final class WorldRender {
 				box(m, vc, cam, x - 0.05, yMin, z - 0.05, x + 0.05, yMax, z + 0.05, CHUNK_CORNER);
 			}
 		}
+	}
+
+	/** Relation colors (RGB) used by the claim map and the territory HUD. */
+	public static int relationColor(int rel) {
+		return switch (rel) {
+			case ServerLink.OWN -> 0x4DFF88;      // green
+			case ServerLink.ALLY -> 0xB040FF;     // purple
+			case ServerLink.TRUCE -> 0x38E0FF;    // cyan
+			case ServerLink.ENEMY -> 0xFF3B4E;    // red
+			case ServerLink.SAFEZONE -> 0xFFC23D; // gold
+			case ServerLink.WARZONE -> 0xFF7A1A;  // orange
+			default -> 0xE6E6F0;                  // neutral
+		};
+	}
+
+	/**
+	 * Faction claims around you: a soft translucent wall on every edge where the owner changes,
+	 * with a bright line along the top and bottom. Wilderness edges of a claim get a wall too.
+	 */
+	private static void claimBorders(Matrix4f m, VertexConsumer vc, Vec3 cam, Minecraft mc) {
+		var claims = ServerLink.CLAIMS;
+		if (claims.isEmpty() || !ServerLink.CLAIMS_DIM.equals(ServerLink.dimId(mc))) return;
+		double py = Math.floor(mc.player.getY());
+		int hh = Math.max(2, FactionsClient.CONFIG.claimWallHeight);
+		double y0 = py - 1, y1 = py + hh;
+		double t = 0.02;
+		for (var e : claims.entrySet()) {
+			int cx = ServerLink.chunkX(e.getKey()), cz = ServerLink.chunkZ(e.getKey());
+			ServerLink.Claim c = e.getValue();
+			int rgb = relationColor(c.rel());
+			int wall = alpha(rgb, 0x22), edge = alpha(rgb, 0xC0);
+			double x0 = cx << 4, z0 = cz << 4, x1 = x0 + 16, z1 = z0 + 16;
+			// north (-z), south (+z), west (-x), east (+x)
+			if (differs(c, claims.get(ServerLink.chunkKey(cx, cz - 1)))) wallX(m, vc, cam, x0, x1, z0, y0, y1, t, wall, edge);
+			if (differs(c, claims.get(ServerLink.chunkKey(cx, cz + 1)))) wallX(m, vc, cam, x0, x1, z1, y0, y1, t, wall, edge);
+			if (differs(c, claims.get(ServerLink.chunkKey(cx - 1, cz)))) wallZ(m, vc, cam, z0, z1, x0, y0, y1, t, wall, edge);
+			if (differs(c, claims.get(ServerLink.chunkKey(cx + 1, cz)))) wallZ(m, vc, cam, z0, z1, x1, y0, y1, t, wall, edge);
+		}
+	}
+
+	private static boolean differs(ServerLink.Claim a, ServerLink.Claim b) {
+		return b == null || b.rel() != a.rel() || !b.tag().equals(a.tag());
+	}
+
+	private static void wallX(Matrix4f m, VertexConsumer vc, Vec3 cam, double xa, double xb, double z, double y0, double y1, double t, int wall, int edge) {
+		box(m, vc, cam, xa, y0, z - t, xb, y1, z + t, wall);
+		box(m, vc, cam, xa, y0 - 0.03, z - 0.04, xb, y0 + 0.03, z + 0.04, edge);
+		box(m, vc, cam, xa, y1 - 0.03, z - 0.04, xb, y1 + 0.03, z + 0.04, edge);
+	}
+
+	private static void wallZ(Matrix4f m, VertexConsumer vc, Vec3 cam, double za, double zb, double x, double y0, double y1, double t, int wall, int edge) {
+		box(m, vc, cam, x - t, y0, za, x + t, y1, zb, wall);
+		box(m, vc, cam, x - 0.04, y0 - 0.03, za, x + 0.04, y0 + 0.03, zb, edge);
+		box(m, vc, cam, x - 0.04, y1 - 0.03, za, x + 0.04, y1 + 0.03, zb, edge);
+	}
+
+	/** A tall gradient beam at your faction's /f home, visible from far away. */
+	private static void homeBeacon(Matrix4f m, VertexConsumer vc, Vec3 cam, Minecraft mc) {
+		ServerLink.Home h = ServerLink.HOME;
+		if (h == null || !h.dim().equals(ServerLink.dimId(mc))) return;
+		double bx = Math.floor(h.x()) + 0.5, bz = Math.floor(h.z()) + 0.5, by = Math.floor(h.y());
+		double dist = Math.sqrt(mc.player.distanceToSqr(bx, by, bz));
+		if (dist < 6) return; // you're there
+		double r = 0.18 + Math.min(0.6, dist / 400.0); // a bit thicker far away so it stays visible
+		int segs = 12;
+		for (int i = 0; i < segs; i++) {
+			int col = com.factionsclient.ui.Theme.gradientAt(i / (float) (segs - 1));
+			double ya = by + i * 16, yb = ya + 16;
+			box(m, vc, cam, bx - r, ya, bz - r, bx + r, yb, bz + r, alpha(col, 0x70));
+		}
+		box(m, vc, cam, bx - 0.5, by, bz - 0.5, bx + 0.5, by + 0.05, bz + 0.5, alpha(0x4DFF88, 0xA0));
 	}
 
 	private static int alpha(int rgb, int a) {

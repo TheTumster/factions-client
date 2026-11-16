@@ -33,7 +33,7 @@ public abstract class LoadingOverlayMixin {
 
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Ljava/util/function/IntSupplier;getAsInt()I"))
 	private int factionsclient$background(IntSupplier supplier) {
-		return 0xFF07090D;
+		return 0xFF0B0716;
 	}
 
 	/** First half of the Mojang logo -> our whole logo. */

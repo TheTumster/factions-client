@@ -56,7 +56,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Install virtual display + software OpenGL
         run: sudo apt-get update -q && sudo apt-get install -yq xvfb mesa-utils libgl1-mesa-dri x11-apps imagemagick xdotool >/dev/null
-      - name: Launch the game for 150s
+      - name: Launch the game
         env:
           LAGCLIENT_SMOKE: "1"
           LIBGL_ALWAYS_SOFTWARE: "1"
@@ -69,7 +69,7 @@ jobs:
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2
-          (timeout 230 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
+          (timeout 260 ./gradlew runClient --no-daemon > game.log 2>&1 || true) &
           GAME=$!
           mkdir -p shots
           wait $GAME || true
@@ -80,16 +80,17 @@ jobs:
         if: always()
         run: |
           echo "===== KEY LINES"
-          grep -nE "laG Client loaded|Mixin|mixin|ERROR|Exception|Caused by|crash|OpenGL|Backend library|Sound engine started|Created: " game.log | head -80
+          grep -nE "laG Client loaded|SMOKE|Mixin|mixin|ERROR|Exception|Caused by|crash|OpenGL|Backend library|Sound engine started|Created: " game.log | head -80
           echo "===== TAIL"
           tail -60 game.log
           ls run/crash-reports 2>/dev/null && cat run/crash-reports/* | head -80 || true
       - name: Verify the game reached every laG screen without crashing
         run: |
           if ls run/crash-reports/*.txt >/dev/null 2>&1; then echo "Game crashed"; exit 1; fi
-          for st in title menu menu-hud options; do
+          for st in title menu menu-hud options multiplayer menu-factions; do
             grep -q "SMOKE stage $st" game.log || { echo "Never reached: $st"; exit 1; }
           done
+          grep -q "SMOKE pinned=true" game.log || { echo "RelapsedMC is not pinned to the top of the server list"; exit 1; }
           echo "All screens OK"
 
   publish:

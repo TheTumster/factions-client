@@ -78,6 +78,22 @@ final class Smoke {
 			FactionsClient.LOG.info("SMOKE stage options");
 			Screen parent = new LaGTitleScreen();
 			mc.setScreen(new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options));
+		} else if (stage == 3 && t > 80_000) {
+			stage = 4;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage multiplayer");
+			var list = new net.minecraft.client.multiplayer.ServerList(mc);
+			list.load();
+			boolean pinned = list.size() > 0 && com.factionsclient.RelapsedServer.isRelapsed(list.get(0).ip);
+			FactionsClient.LOG.info("SMOKE pinned={}", pinned);
+			mc.setScreen(new net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen(new LaGTitleScreen()));
+		} else if (stage == 4 && t > 100_000) {
+			stage = 5;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage menu-factions");
+			ModuleRegistry.init();
+			mc.setScreen(new LaGMenu(new LaGTitleScreen()));
+			setCategory(ModuleRegistry.Category.FACTIONS);
 		}
 	}
 

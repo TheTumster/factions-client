@@ -202,6 +202,18 @@ public final class ModuleRegistry {
 				.toggle(() -> c().team, v -> c().team = v)
 				.settings(() -> List.of(new InfoS(ModuleRegistry::backendLine))));
 
+		add(new Module("Claim Map", "Faction claims around you as colored walls (RelapsedMC)", Category.FACTIONS)
+				.toggle(() -> c().claimMap, v -> c().claimMap = v)
+				.settings(() -> List.of(
+						new IntS("Wall height", 2, 24, 1, " blocks", () -> c().claimWallHeight, v -> c().claimWallHeight = v),
+						new InfoS(() -> "Green you · Purple ally · Cyan truce · White neutral · Red enemy"),
+						new InfoS(ModuleRegistry::backendLine))));
+
+		add(new Module("Home Beacon", "Beam + distance to your faction's /f home (RelapsedMC)", Category.FACTIONS)
+				.toggle(() -> c().homeBeacon, v -> c().homeBeacon = v)
+				.settings(() -> List.of(new InfoS(() -> ServerLink.HOME == null ? "No /f home set (or not on RelapsedMC)."
+						: "Home: " + (int) ServerLink.HOME.x() + " " + (int) ServerLink.HOME.y() + " " + (int) ServerLink.HOME.z()))));
+
 		add(new Module("Schem Share", "Send schematics to your team with a code", Category.FACTIONS)
 				.settings(ModuleRegistry::schemShareSettings));
 
@@ -269,6 +281,7 @@ public final class ModuleRegistry {
 		hudElement("keystrokes", "Keystrokes + CPS", "WASD, mouse buttons and clicks per second", () -> c().hudKeystrokes, v -> c().hudKeystrokes = v);
 		hudElement("effects", "Potion Effects", "Active effects with timers in their colors", () -> c().hudEffects, v -> c().hudEffects = v);
 		hudElement("armor", "Armor", "Armor pieces and durability", () -> c().hudArmor, v -> c().hudArmor = v);
+		hudElement("territory", "Territory", "Whose land you're standing in, colored by relation", () -> c().hudTerritory, v -> c().hudTerritory = v);
 		hudElement("team", "Team List", "Teammates, distance and direction", () -> c().hudTeamList, v -> c().hudTeamList = v);
 
 		// ------------------------------------------------ MODS (their own settings screens)
@@ -293,6 +306,8 @@ public final class ModuleRegistry {
 						new InfoS(() -> "Turn off Discord RPC in the Modrinth App so it doesn't override this."))));
 		add(new Module("Updates", "The client updates itself on launch", Category.CLIENT)
 				.settings(() -> List.of(new InfoS(() -> Updater.pending != null ? Updater.pending : "You're on the latest build."))));
+		add(new Module("Pin RelapsedMC", "Keep play.relapsedmc.com at the top of your server list", Category.CLIENT)
+				.toggle(() -> c().pinServer, v -> c().pinServer = v));
 		add(new Module("RelapsedMC Link", "Faction data sent by the RelapsedMC server", Category.CLIENT)
 				.settings(() -> List.of(new InfoS(ModuleRegistry::backendLine),
 						new ActionS("Reload config file", "Reload", () -> FactionsClient.CONFIG = Config.load()))));

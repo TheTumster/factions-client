@@ -1,46 +1,119 @@
-"""Generates the splash/menu logo. Usage: python tools/make_logo.py "RELAPSED" "CLIENT" out.png"""
-import sys
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+#!/usr/bin/env python3
+"""Client branding art, drawn exactly like the RelapsedMC server's wordmark (lag-network tools/pack/genpack.py).
 
-big, small, out = sys.argv[1], sys.argv[2], sys.argv[3]
-W, H = 1024, 384
-FONT_DIR = "/usr/share/fonts/truetype/google-fonts/"
-size = 210
-fbig = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", size)
-while ImageDraw.Draw(Image.new("L", (1, 1))).textlength(big, font=fbig) > W - 60 and size > 60:
-    size -= 6
-    fbig = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", size)
-fsmall = ImageFont.truetype(FONT_DIR + "Poppins-Bold.ttf", 56)
+Writes into src/client/resources/assets/factionsclient/:
+  textures/gui/logo.png      1024x384  white RELAPSED, purple glow, gradient bar, tiny MC bottom-right
+  textures/gui/gradient.png  256x16    cyan -> purple -> pink (buttons, bars, switches)
+  icon.png                   128x128   "R" monogram (Mod Menu / window)
+Run: python3 tools/make_logo.py   (needs Pillow and the Inter font in /usr/share/fonts/opentype/inter)
+"""
+import os
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-# Gradient-filled big word
-text_mask = Image.new("L", (W, H), 0)
-d = ImageDraw.Draw(text_mask)
-bw = d.textlength(big, font=fbig)
-d.text(((W - bw) / 2, 10 + (210 - size) * 0.6), big, font=fbig, fill=255)
+ROOT = os.path.join(os.path.dirname(__file__), "..")
+ASSETS = os.path.join(ROOT, "src", "client", "resources", "assets", "factionsclient")
+FONT_DIR = "/usr/share/fonts/opentype/inter"
+CYAN, PURPLE, PINK = (0x38, 0xE0, 0xFF), (0xB0, 0x40, 0xFF), (0xFF, 0x4D, 0xD2)
 
-grad = Image.new("RGBA", (W, H))
-c1, c2 = (56, 224, 255), (176, 64, 255)  # cyan -> purple
-x0, x1 = (W - bw) / 2, (W + bw) / 2
-for x in range(W):
-    t = min(1, max(0, (x - x0) / (x1 - x0)))
-    col = tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3)) + (255,)
-    ImageDraw.Draw(grad).line([(x, 0), (x, H)], fill=col)
 
-img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-# Glow
-glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-glow.paste(grad, (0, 0), text_mask)
-glow = glow.filter(ImageFilter.GaussianBlur(18))
-glow.putalpha(glow.getchannel("A").point(lambda a: int(a * 0.55)))
-img = Image.alpha_composite(img, glow)
-word = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-word.paste(grad, (0, 0), text_mask)
-img = Image.alpha_composite(img, word)
+def lerp(a, b, t):
+    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
 
-# Spaced small word
-d = ImageDraw.Draw(img)
-spaced = "  ".join(small)
-sw = d.textlength(spaced, font=fsmall)
-d.text(((W - sw) / 2, 270), spaced, font=fsmall, fill=(235, 240, 245, 255))
-img.save(out)
-print("wrote", out)
+
+def gradient(w, h, stops, sheen=True):
+    g = Image.new("RGBA", (w, h))
+    px = g.load()
+    for x in range(w):
+        t = x / max(1, w - 1)
+        seg = min(len(stops) - 2, int(t * (len(stops) - 1)))
+        c = lerp(stops[seg], stops[seg + 1], t * (len(stops) - 1) - seg)
+        for y in range(h):
+            k = 1.12 - 0.28 * (y / max(1, h - 1)) if sheen else 1.0
+            px[x, y] = (min(255, int(c[0] * k)), min(255, int(c[1] * k)), min(255, int(c[2] * k)), 255)
+    return g
+
+
+def wordmark(scale):
+    f = ImageFont.truetype(os.path.join(FONT_DIR, "InterDisplay-Black.otf"), 38 * scale)
+    word, spacing, pad = "RELAPSED", 5 * scale, 6 * scale
+    bb = f.getbbox(word)
+    w = int(bb[2] - bb[0] + spacing * len(word) + pad * 2)
+    h = bb[3] - bb[1] + pad * 2
+    m = Image.new("L", (w, h))
+    d = ImageDraw.Draw(m)
+    x = pad
+    for ch in word:
+        d.text((x - bb[0], pad - bb[1]), ch, font=f, fill=255)
+        x += f.getlength(ch) + spacing
+    W, H = w + 4 * scale, h + 24 * scale
+    out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    glow.paste((176, 64, 255, 255), (2 * scale, 0), m)
+    out = Image.alpha_composite(out, glow.filter(ImageFilter.GaussianBlur(5 * scale)))
+    face = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    face.paste((255, 255, 255, 255), (2 * scale, 0), m)
+    out = Image.alpha_composite(out, face)
+    f2 = ImageFont.truetype(os.path.join(FONT_DIR, "InterDisplay-Black.otf"), 14 * scale)
+    mb = f2.getbbox("MC")
+    mw = int(mb[2] - mb[0] + 3 * scale * 2)
+    mm = Image.new("L", (mw + 2, mb[3] - mb[1] + 2))
+    md = ImageDraw.Draw(mm)
+    mx = 0
+    for ch in "MC":
+        md.text((mx - mb[0], -mb[1]), ch, font=f2, fill=255)
+        mx += f2.getlength(ch) + 3 * scale
+    mcx, mcy = W - mm.width - 3 * scale, h - 1 * scale
+    mcl = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    mcl.paste(gradient(mm.width, mm.height, [PURPLE, PINK]), (mcx, mcy), mm)
+    out = Image.alpha_composite(out, mcl.filter(ImageFilter.GaussianBlur(3 * scale)))
+    out = Image.alpha_composite(out, mcl)
+    bar = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    bm = Image.new("L", (W, H))
+    by = mcy + mm.height // 2 - 1 * scale
+    ImageDraw.Draw(bm).rounded_rectangle((4 * scale, by, mcx - 4 * scale, by + 3 * scale), radius=2 * scale, fill=255)
+    bar.paste(gradient(W, H, [CYAN, PURPLE, PINK]), (0, 0), bm)
+    out = Image.alpha_composite(out, bar.filter(ImageFilter.GaussianBlur(2 * scale)))
+    out = Image.alpha_composite(out, bar)
+    return out
+
+
+def logo():
+    W, H = 1024, 384
+    mark = wordmark(8)
+    mark = mark.crop(mark.getbbox())
+    k = min((W - 48) / mark.width, (H - 48) / mark.height)
+    mark = mark.resize((int(mark.width * k), int(mark.height * k)), Image.LANCZOS)
+    out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    out.alpha_composite(mark, ((W - mark.width) // 2, (H - mark.height) // 2))
+    out.save(os.path.join(ASSETS, "textures", "gui", "logo.png"))
+
+
+def icon(size=128):
+    s = size * 4
+    im = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    m = Image.new("L", (s, s))
+    ImageDraw.Draw(m).rounded_rectangle((0, 0, s - 1, s - 1), radius=s // 5, fill=255)
+    im.paste(gradient(s, s, [(20, 10, 40), (40, 14, 70)]), (0, 0), m)
+    bm = Image.new("L", (s, s))
+    ImageDraw.Draw(bm).rounded_rectangle((0, 0, s - 1, s - 1), radius=s // 5, outline=255, width=s // 28)
+    im.paste(gradient(s, s, [CYAN, PURPLE, PINK]), (0, 0), bm)
+    f = ImageFont.truetype(os.path.join(FONT_DIR, "Inter-BlackItalic.otf"), int(s * 0.78))
+    tm = Image.new("L", (s, s))
+    bb = f.getbbox("R")
+    ImageDraw.Draw(tm).text(((s - (bb[2] - bb[0])) // 2 - bb[0], (s - (bb[3] - bb[1])) // 2 - bb[1]), "R", font=f, fill=255)
+    glow = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    glow.paste(gradient(s, s, [CYAN, PURPLE, PINK]), (0, 0), tm)
+    im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(s // 30)))
+    im = Image.alpha_composite(im, glow)
+    im.resize((size, size), Image.LANCZOS).save(os.path.join(ASSETS, "icon.png"))
+
+
+def bar():
+    gradient(256, 16, [CYAN, PURPLE, PINK], sheen=False).save(os.path.join(ASSETS, "textures", "gui", "gradient.png"))
+
+
+if __name__ == "__main__":
+    logo()
+    icon()
+    bar()
+    print("wrote logo.png, icon.png, gradient.png")

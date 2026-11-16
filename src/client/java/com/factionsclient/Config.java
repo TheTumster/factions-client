@@ -25,6 +25,13 @@ public class Config {
 	public boolean crumbs = true;
 	public boolean team = true;
 	public boolean shareCrumbs = true;
+	/** Faction claim borders in the world, colored by relation (RelapsedMC sends them). */
+	public boolean claimMap = true;
+	public int claimWallHeight = 6;
+	/** Beam at your faction's /f home. */
+	public boolean homeBeacon = true;
+	/** Keep play.relapsedmc.com pinned to the top of the server list. */
+	public boolean pinServer = true;
 	public boolean chunkGrid = false;
 	public int chunkHeight = 24;
 	public boolean chunkCorners = true;
@@ -41,6 +48,7 @@ public class Config {
 	public boolean hudKeystrokes = true;
 	public boolean hudStatus = true;
 	public boolean hudInfo = true;
+	public boolean hudTerritory = true;
 
 	// Look
 	public boolean customMenu = true;

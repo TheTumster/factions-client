@@ -1,6 +1,8 @@
 package com.factionsclient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -22,6 +24,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
  * Wire format (must match ClientLink.java in lag-network):
  *  relapsed:mates  -> varint n, then n x (utf name, utf dim, double x, double y, double z)
  *  relapsed:crumbs -> utf dim, varint n, then n x (int x, int y, int z)
+ *  relapsed:claims -> utf dim, varint radius, varint nTags, nTags x utf, varint n, n x (int cx, int cz, byte rel, varint tag)
+ *  relapsed:home   -> bool has, then utf dim, double x, double y, double z
  */
 public final class ServerLink {
 	public record Mate(String name, double x, double y, double z, String dim) { }
@@ -78,6 +82,101 @@ public final class ServerLink {
 		}
 	}
 
+	/** Relation codes sent by the server. */
+	public static final int OWN = 0, ALLY = 1, TRUCE = 2, NEUTRAL = 3, ENEMY = 4, SAFEZONE = 5, WARZONE = 6;
+
+	public record Claim(int rel, String tag) { }
+
+	public record ClaimsPayload(String dim, int radius, Map<Long, Claim> claims) implements CustomPacketPayload {
+		public static final Type<ClaimsPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath("relapsed", "claims"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, ClaimsPayload> CODEC = StreamCodec.of(
+				(buf, p) -> {
+					List<String> tags = new ArrayList<>();
+					for (Claim c : p.claims.values()) if (!tags.contains(c.tag())) tags.add(c.tag());
+					buf.writeUtf(p.dim);
+					buf.writeVarInt(p.radius);
+					buf.writeVarInt(tags.size());
+					for (String t : tags) buf.writeUtf(t);
+					buf.writeVarInt(p.claims.size());
+					for (var e : p.claims.entrySet()) {
+						buf.writeInt(chunkX(e.getKey()));
+						buf.writeInt(chunkZ(e.getKey()));
+						buf.writeByte(e.getValue().rel());
+						buf.writeVarInt(tags.indexOf(e.getValue().tag()));
+					}
+				},
+				buf -> {
+					String dim = buf.readUtf(128);
+					int radius = Math.min(buf.readVarInt(), 32);
+					int nt = Math.min(buf.readVarInt(), 1024);
+					String[] tags = new String[nt];
+					for (int i = 0; i < nt; i++) tags[i] = buf.readUtf(64);
+					int n = Math.min(buf.readVarInt(), 4096);
+					Map<Long, Claim> map = new HashMap<>(n * 2);
+					for (int i = 0; i < n; i++) {
+						int cx = buf.readInt(), cz = buf.readInt();
+						int rel = buf.readByte();
+						int ti = buf.readVarInt();
+						map.put(chunkKey(cx, cz), new Claim(rel, ti >= 0 && ti < nt ? tags[ti] : "?"));
+					}
+					return new ClaimsPayload(dim, radius, map);
+				});
+
+		@Override
+		public Type<? extends CustomPacketPayload> type() {
+			return TYPE;
+		}
+	}
+
+	public record Home(String dim, double x, double y, double z) { }
+
+	public record HomePayload(Home home) implements CustomPacketPayload {
+		public static final Type<HomePayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath("relapsed", "home"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HomePayload> CODEC = StreamCodec.of(
+				(buf, p) -> {
+					buf.writeBoolean(p.home != null);
+					if (p.home != null) {
+						buf.writeUtf(p.home.dim());
+						buf.writeDouble(p.home.x());
+						buf.writeDouble(p.home.y());
+						buf.writeDouble(p.home.z());
+					}
+				},
+				buf -> buf.readBoolean()
+						? new HomePayload(new Home(buf.readUtf(128), buf.readDouble(), buf.readDouble(), buf.readDouble()))
+						: new HomePayload(null));
+
+		@Override
+		public Type<? extends CustomPacketPayload> type() {
+			return TYPE;
+		}
+	}
+
+	public static long chunkKey(int cx, int cz) {
+		return ((long) cx << 32) | (cz & 0xFFFFFFFFL);
+	}
+
+	public static int chunkX(long k) {
+		return (int) (k >> 32);
+	}
+
+	public static int chunkZ(long k) {
+		return (int) k;
+	}
+
+	/** Claimed chunks around you (wilderness is absent), for CLAIMS_DIM. */
+	public static volatile Map<Long, Claim> CLAIMS = Map.of();
+	public static volatile String CLAIMS_DIM = "";
+	public static volatile int CLAIMS_RADIUS = 0;
+	/** Your faction's /f home, or null. */
+	public static volatile Home HOME = null;
+
+	/** Owner of the chunk you're standing in, or null for wilderness / unknown. */
+	public static Claim claimHere(Minecraft mc) {
+		if (mc.player == null || !CLAIMS_DIM.equals(dimId(mc))) return null;
+		return CLAIMS.get(chunkKey(mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4));
+	}
+
 	/** Teammates on this server, as last sent by the server. */
 	public static volatile List<Mate> MATES = List.of();
 	/** True once the server has sent us anything this session (i.e. we're on RelapsedMC). */
@@ -89,6 +188,20 @@ public final class ServerLink {
 	public static void init() {
 		PayloadTypeRegistry.playS2C().register(MatesPayload.TYPE, MatesPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(CrumbsPayload.TYPE, CrumbsPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(ClaimsPayload.TYPE, ClaimsPayload.CODEC);
+		PayloadTypeRegistry.playS2C().register(HomePayload.TYPE, HomePayload.CODEC);
+
+		ClientPlayNetworking.registerGlobalReceiver(ClaimsPayload.TYPE, (payload, ctx) -> {
+			connected = true;
+			CLAIMS = payload.claims();
+			CLAIMS_DIM = payload.dim();
+			CLAIMS_RADIUS = payload.radius();
+		});
+
+		ClientPlayNetworking.registerGlobalReceiver(HomePayload.TYPE, (payload, ctx) -> {
+			connected = true;
+			HOME = payload.home();
+		});
 
 		ClientPlayNetworking.registerGlobalReceiver(MatesPayload.TYPE, (payload, ctx) -> {
 			connected = true;
@@ -120,6 +233,9 @@ public final class ServerLink {
 
 	private static void reset() {
 		MATES = List.of();
+		CLAIMS = Map.of();
+		CLAIMS_DIM = "";
+		HOME = null;
 		connected = false;
 	}
 

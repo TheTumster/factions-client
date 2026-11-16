@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
-/** laG look: dark glass panels, cyan -> purple gradient, soft glow. All drawing helpers live here. */
+/** RelapsedMC look (same palette as the server): purple-black glass, cyan -> purple -> pink gradient, soft glow. */
 public final class Theme {
 	public static final String BRAND = "RelapsedMC Client";
 
@@ -16,16 +16,18 @@ public final class Theme {
 
 	public static final int CYAN = 0xFF38E0FF;
 	public static final int PURPLE = 0xFFB040FF;
-	public static final int BG = 0xF00A0D12;
-	public static final int PANEL = 0xF20E1219;
-	public static final int SIDEBAR = 0xF5090C11;
-	public static final int CARD = 0xFF141A23;
-	public static final int CARD_HOVER = 0xFF1A2230;
-	public static final int FIELD = 0xFF0B0F15;
+	public static final int PINK = 0xFFFF4DD2;
+	public static final int GREEN = 0xFF4DFF88;
+	public static final int BG = 0xF00B0716;
+	public static final int PANEL = 0xF20F0A1E;
+	public static final int SIDEBAR = 0xF5080512;
+	public static final int CARD = 0xFF161026;
+	public static final int CARD_HOVER = 0xFF1F1636;
+	public static final int FIELD = 0xFF0B0716;
 	public static final int LINE = 0x1FFFFFFF;
-	public static final int TEXT = 0xFFEEF2F7;
-	public static final int MUTED = 0xFF8A94A6;
-	public static final int DIM = 0xFF5A6374;
+	public static final int TEXT = 0xFFF1EEF8;
+	public static final int MUTED = 0xFF978DB0;
+	public static final int DIM = 0xFF5F5677;
 
 	private static long lastFrame = System.nanoTime();
 	private static float dt = 0.016f;
@@ -66,7 +68,8 @@ public final class Theme {
 
 	/** Color along the logo gradient, t in 0..1. */
 	public static int gradientAt(float t) {
-		return lerp(CYAN, PURPLE, t);
+		t = Math.max(0, Math.min(1, t));
+		return t < 0.5f ? lerp(CYAN, PURPLE, t * 2) : lerp(PURPLE, PINK, (t - 0.5f) * 2);
 	}
 
 	/** Filled rectangle with 1px rounded corners. */
@@ -159,6 +162,9 @@ public final class Theme {
 		public String label;
 		public final Runnable action;
 		public boolean primary;
+		/** Optional small second line (e.g. "● 42 online"). */
+		public String sub;
+		public int subColor = 0xFFD8D0EA;
 		private float hover;
 
 		public Btn(String label, Runnable action) {
@@ -188,7 +194,13 @@ public final class Theme {
 			gradient(g, x, y, w, h, a * lit);
 			outline(g, x, y, w, h, alpha(lerp(0x30FFFFFF, 0x80FFFFFF, hover), a));
 			int tc = alpha(lerp(primary ? TEXT : 0xFFC9D1DD, 0xFFFFFFFF, hover), a);
-			g.drawString(f, label, x + (w - f.width(label)) / 2, y + (h - 8) / 2, tc, lit > 0.3f);
+			if (sub != null) {
+				int ty = y + h / 2 - 9;
+				g.drawString(f, label, x + (w - f.width(label)) / 2, ty, tc, lit > 0.3f);
+				scaled(g, f, sub, x + (w - f.width(sub) * 0.75f) / 2f, ty + 12, 0.75f, alpha(subColor, a), false);
+			} else {
+				g.drawString(f, label, x + (w - f.width(label)) / 2, y + (h - 8) / 2, tc, lit > 0.3f);
+			}
 		}
 
 		public boolean click(double mx, double my) {
