@@ -8,7 +8,9 @@
 		"MinecraftMixin",
 		"AbstractButtonMixin",
 		"SliderMixin",
-		"ServerListMixin"
+		"ServerListMixin",
+		"ChatComponentMixin",
+		"ChatScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

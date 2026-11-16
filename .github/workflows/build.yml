@@ -95,10 +95,11 @@ jobs:
       - name: Verify the game reached every laG screen without crashing
         run: |
           if ls run/crash-reports/*.txt >/dev/null 2>&1; then echo "Game crashed"; exit 1; fi
-          for st in title menu menu-hud options multiplayer menu-factions hud-editor menu-small world-create ingame ingame-hud-editor ingame-menu printer-page minimap-page video-page done; do
+          for st in title menu menu-hud options multiplayer menu-factions hud-editor menu-small world-create ingame ingame-hud-editor ingame-menu printer-page minimap-page video-page chat-tabs done; do
             grep -q "SMOKE stage $st" game.log || { echo "Never reached: $st"; exit 1; }
           done
           grep -q "SMOKE bridges ok" game.log || { echo "Settings pages for Printer/Litematica/Minimap/Video are empty"; grep "SMOKE bridges" game.log; exit 1; }
+          grep -q "SMOKE chattabs ok" game.log || { echo "Chat tabs filter is broken"; grep "SMOKE chattabs" game.log; exit 1; }
           grep -q "SMOKE modes=ok" game.log || { echo "Mode switching is broken"; grep "SMOKE modes" game.log; exit 1; }
           grep -q "SMOKE pinned=true" game.log || { echo "RelapsedMC is not pinned to the top of the server list"; exit 1; }
           echo "All screens OK"

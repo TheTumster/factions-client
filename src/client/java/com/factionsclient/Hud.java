@@ -99,6 +99,7 @@ public final class Hud {
 
 	/** Draws every enabled element at its saved position. preview = show sample data for empty elements. */
 	public static void drawAll(GuiGraphics g, Minecraft mc, boolean preview) {
+		if (!preview) ChatTabs.renderUnread(g, mc.font);
 		BOUNDS.clear();
 		int stackY = 3; // left column: elements you haven't moved stack under each other, never overlapping
 		for (String id : ELEMENTS.keySet()) {

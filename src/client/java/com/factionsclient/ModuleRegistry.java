@@ -390,6 +390,37 @@ public final class ModuleRegistry {
 						new InfoS(() -> "Turn off Discord RPC in the Modrinth App so it doesn't override this."))));
 		add(new Module("Updates", "The client updates itself on launch", Category.CLIENT)
 				.settings(() -> List.of(new InfoS(() -> Updater.pending != null ? Updater.pending : "You're on the latest build."))));
+		add(new Module("Chat Tabs", "TabbyChat-style tabs: Faction, Ally, Private, Server + your own", Category.CLIENT)
+				.toggle(() -> c().chatTabs, v -> {
+					c().chatTabs = v;
+					ChatTabs.reset();
+					net.minecraft.client.Minecraft.getInstance().gui.getChat().rescaleChat();
+				})
+				.settings(() -> {
+					List<Setting> s = new ArrayList<>();
+					s.add(new BoolS("Faction tab", () -> c().chatTabFaction, v -> { c().chatTabFaction = v; ChatTabs.rebuild(); }));
+					s.add(new BoolS("Ally tab", () -> c().chatTabAlly, v -> { c().chatTabAlly = v; ChatTabs.rebuild(); }));
+					s.add(new BoolS("Private tab", () -> c().chatTabPrivate, v -> { c().chatTabPrivate = v; ChatTabs.rebuild(); }));
+					s.add(new BoolS("Server tab (announcements, no player chat)", () -> c().chatTabServer, v -> { c().chatTabServer = v; ChatTabs.rebuild(); }));
+					s.add(new BoolS("Typing in a tab sends there", () -> c().chatRoute, v -> c().chatRoute = v));
+					s.add(new BoolS("Timestamps", () -> c().chatTimestamps, v -> c().chatTimestamps = v));
+					s.add(new BoolS("Stack repeated messages (x3)", () -> c().chatStack, v -> c().chatStack = v));
+					s.add(new BoolS("Sound on private message", () -> c().chatPrivatePing, v -> c().chatPrivatePing = v));
+					for (String spec : new ArrayList<>(c().chatCustomTabs)) {
+						s.add(new ActionS("Tab  " + spec, "Remove", () -> {
+							c().chatCustomTabs.remove(spec);
+							ChatTabs.rebuild();
+						}));
+					}
+					s.add(new TextS("Add a tab  (Name: words|or|regex)", "Trades: wts|wtb|selling", 120, "Add", v -> {
+						if (v.indexOf(':') > 0) {
+							c().chatCustomTabs.add(v.trim());
+							ChatTabs.rebuild();
+						}
+					}));
+					return s;
+				}));
+
 		add(new Module("Pin RelapsedMC", "Keep play.relapsedmc.com at the top of your server list", Category.CLIENT)
 				.toggle(() -> c().pinServer, v -> c().pinServer = v));
 		add(new Module("RelapsedMC Link", "Faction data sent by the RelapsedMC server", Category.CLIENT)

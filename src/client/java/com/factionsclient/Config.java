@@ -85,6 +85,20 @@ public class Config {
 	/** One-time FPS tune (clouds off, render distance 16, no FPS cap) already applied. */
 	public boolean perfTuned = false;
 
+	// Chat tabs (ChatTabs.java)
+	public boolean chatTabs = true;
+	public boolean chatTabFaction = true;
+	public boolean chatTabAlly = true;
+	public boolean chatTabPrivate = true;
+	public boolean chatTabServer = true;
+	/** Typing in Faction/Ally switches /f chat mode; typing in Private replies. */
+	public boolean chatRoute = true;
+	public boolean chatTimestamps = false;
+	public boolean chatStack = true;
+	public boolean chatPrivatePing = true;
+	/** Your own tabs: "Name: regex" */
+	public java.util.List<String> chatCustomTabs = new java.util.ArrayList<>();
+
 	// Crumbs
 	public int crumbSeconds = 20;
 	public int crumbRange = 160;

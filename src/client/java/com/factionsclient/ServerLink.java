@@ -271,6 +271,7 @@ public final class ServerLink {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) -> reset());
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> {
 			reset();
+			ChatTabs.reset();
 			var sd = mc.getCurrentServer();
 			if (sd == null || !RelapsedServer.isRelapsed(sd.ip)) Modes.onOtherServer();
 		});
