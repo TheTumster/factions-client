@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p /tmp/hub
           cp net/plugins/lag-core/src/main/resources/hub-spawn.txt.gz /tmp/hub/
-          python3 tools/holos.py net/plugins/lag-core/src/main/resources/config.yml /tmp/hub/holos.json
+          python3 tools/holos.py net/plugins/lag-core/src/main/resources/config.yml /tmp/hub/holos.json net/plugins/lag-core/src/main/resources/glyphs.json
       - name: Launch the game
         env:
           LAGCLIENT_HUBPREVIEW: /tmp/hub
@@ -40,9 +40,10 @@ jobs:
           MESA_GL_VERSION_OVERRIDE: "4.5"
         run: |
           chmod +x ./gradlew
-          mkdir -p run
+          mkdir -p run/resourcepacks
+          curl -sSL -o run/resourcepacks/RelapsedMC-pack.zip https://github.com/TheTumster/lag-network/releases/latest/download/RelapsedMC-pack.zip || true
           echo "eula=true" > run/eula.txt
-          printf "onboardAccessibility:false\nskipMultiplayerWarning:true\njoinedFirstServer:true\ntutorialStep:none\nrenderDistance:12\nfov:0.0\n" > run/options.txt
+          printf "onboardAccessibility:false\nskipMultiplayerWarning:true\njoinedFirstServer:true\ntutorialStep:none\nrenderDistance:12\nfov:0.0\nresourcePacks:[\"vanilla\",\"file/RelapsedMC-pack.zip\"]\n" > run/options.txt
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2

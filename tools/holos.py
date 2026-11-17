@@ -36,11 +36,16 @@ def mm(text):
             elif tag.startswith("#"):
                 st["color"] = tag
                 st.pop("gradient", None)
+            elif tag.startswith("font:"):
+                st["font"] = tag[5:]
             elif tag.startswith("gradient"):
                 st["gradient"] = [c for c in tag.split(":")[1:] if c.startswith("#")]
             stack.append(st)
             continue
         st = stack[-1]
+        if st.get("font"):
+            parts.append({"text": tok, "color": st["color"], "font": st["font"]})
+            continue
         if st.get("gradient") and len(st["gradient"]) > 1:
             g = st["gradient"]
             n = max(1, len(tok) - 1)
@@ -62,6 +67,9 @@ def argb(h):
     return v - (1 << 32) if v >= 1 << 31 else v
 
 
+if len(sys.argv) > 3:
+    g = json.load(open(sys.argv[3]))
+    FILL["logo"] = "<white><font:relapsed:ui>" + g.get("logo_holo", "RELAPSED") + "</font></white>"
 c = yaml.safe_load(open(sys.argv[1]))["hub"]
 out = []
 for h in c.get("holograms", []):
