@@ -39,6 +39,10 @@ final class HubPreview {
 			{-14.0, 2.0, -12.0, 90f, 4f, "west"},
 			{14.0, 2.0, -12.0, -90f, 4f, "east"},
 			{0.5, 2.0, 24.0, 180f, 0f, "south"},
+			{0.5, 2.0, 16.0, 0f, 0f, "south-board"},
+			{-5.0, 2.0, -11.5, 90f, 2f, "lore-west"},
+			{6.0, 2.0, -11.5, -90f, 2f, "network-east"},
+			{9.5, 4.0, -24.0, 180f, -14f, "cannons-board"},
 			{55.0, 45.0, 45.0, 135f, 30f, "aerial"},
 	};
 
@@ -180,11 +184,14 @@ final class HubPreview {
 					c = String.format(java.util.Locale.ROOT, "summon item_display %.2f %.2f %.2f {item:{id:\"minecraft:%s\",count:1},billboard:\"center\",%s}",
 							x, y, z, o.get("item").getAsString().toLowerCase(java.util.Locale.ROOT), tf);
 				} else {
-					String text = o.get("text").getAsString().replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
-					String color = o.has("color") ? o.get("color").getAsString() : "#FFFFFF";
+					String bb = o.has("billboard") ? o.get("billboard").getAsString() : "center";
+					float yaw = o.has("yaw") ? o.get("yaw").getAsFloat() : 0f;
+					int bg = o.has("background") ? o.get("background").getAsInt() : 0;
+					int width = o.has("width") ? o.get("width").getAsInt() : 400;
 					c = String.format(java.util.Locale.ROOT,
-							"summon text_display %.2f %.2f %.2f {text:{text:\"%s\",color:\"%s\",bold:%s},billboard:\"center\",background:0,shadow:1b,%s}",
-							x, y, z, text, color, o.has("bold") && o.get("bold").getAsBoolean() ? "true" : "false", tf);
+							"summon text_display %.2f %.2f %.2f {text:%s,billboard:\"%s\",Rotation:[%sf,0f],background:%d,line_width:%d,shadow:1b,%s%s}",
+							x, y, z, o.get("snbt").getAsString(), bb, yaw, bg, width,
+							bg != 0 ? "brightness:{sky:15,block:15}," : "", tf);
 				}
 				try {
 					server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), c);

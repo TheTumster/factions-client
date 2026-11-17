@@ -7,7 +7,7 @@ on:
     inputs:
       net_ref:
         description: lag-network branch to preview
-        default: hub-v4
+        default: main
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: TheTumster/lag-network
-          ref: ${{ github.event.inputs.net_ref || 'hub-v4' }}
+          ref: ${{ github.event.inputs.net_ref || 'main' }}
           path: net
       - uses: actions/setup-java@v4
         with: { java-version: '25', distribution: 'temurin' }
@@ -32,23 +32,7 @@ jobs:
         run: |
           mkdir -p /tmp/hub
           cp net/plugins/lag-core/src/main/resources/hub-spawn.txt.gz /tmp/hub/
-          python3 - <<'EOF'
-          import yaml, json, re
-          c = yaml.safe_load(open("net/plugins/lag-core/src/main/resources/config.yml"))["hub"]
-          out = []
-          fill = {"logo": "RELAPSED MC", "online": "128", "phase": "0"}
-          for h in c.get("holograms", []):
-              t = h["text"]
-              m = re.search(r"#([0-9A-Fa-f]{6})", t)
-              t = re.sub(r"\{(\w+)\}", lambda k: fill.get(k.group(1), "12"), t)
-              t = re.sub(r"<[^>]*>", "", t)
-              out.append({"offset": h["offset"], "scale": h.get("scale", 1), "text": t,
-                          "color": "#" + m.group(1) if m else "#FFFFFF", "bold": "<bold>" in h["text"] or "{logo}" in h["text"]})
-          for d in c.get("displays", []):
-              out.append({"offset": d["offset"], "scale": d.get("scale", 1), "item": d["item"]})
-          json.dump(out, open("/tmp/hub/holos.json", "w"), indent=1)
-          print(len(out), "holos")
-          EOF
+          python3 tools/holos.py net/plugins/lag-core/src/main/resources/config.yml /tmp/hub/holos.json
       - name: Launch the game
         env:
           LAGCLIENT_HUBPREVIEW: /tmp/hub
