@@ -22,7 +22,7 @@ final class Smoke {
 	private static int shotStage = -1;
 
 	/** Uses Minecraft's own screenshot code (found by reflection so signature changes don't break the build). */
-	private static void screenshot(Minecraft mc) {
+	static void screenshot(Minecraft mc) {
 		try {
 			for (var m : Class.forName("net.minecraft.client.Screenshot").getMethods()) {
 				var p = m.getParameterTypes();
@@ -232,7 +232,7 @@ final class Smoke {
 	private static boolean chatCleared = false;
 
 	/** Creative world, like vanilla's debug world button. */
-	private static void createWorld(Minecraft mc) {
+	static void createWorld(Minecraft mc) {
 		try {
 			var settings = new net.minecraft.world.level.LevelSettings("SMOKE world", net.minecraft.world.level.GameType.CREATIVE,
 					false, net.minecraft.world.Difficulty.PEACEFUL, true,

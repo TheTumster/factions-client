@@ -1,0 +1,79 @@
+name: hub-preview
+# Places the RelapsedMC hub from lag-network in a test world and screenshots it the way players see it.
+on:
+  push:
+    branches: [hub-preview]
+  workflow_dispatch:
+    inputs:
+      net_ref:
+        description: lag-network branch to preview
+        default: hub-v4
+
+permissions:
+  contents: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: TheTumster/lag-network
+          ref: ${{ github.event.inputs.net_ref || 'hub-v4' }}
+          path: net
+      - uses: actions/setup-java@v4
+        with: { java-version: '25', distribution: 'temurin' }
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install virtual display + software OpenGL
+        run: sudo apt-get update -q && sudo apt-get install -yq xvfb mesa-utils libgl1-mesa-dri imagemagick python3-yaml >/dev/null
+      - name: Hub files
+        run: |
+          mkdir -p /tmp/hub
+          cp net/plugins/lag-core/src/main/resources/hub-spawn.txt.gz /tmp/hub/
+          python3 - <<'EOF'
+          import yaml, json, re
+          c = yaml.safe_load(open("net/plugins/lag-core/src/main/resources/config.yml"))["hub"]
+          out = []
+          fill = {"logo": "RELAPSED MC", "online": "128", "phase": "0"}
+          for h in c.get("holograms", []):
+              t = h["text"]
+              m = re.search(r"#([0-9A-Fa-f]{6})", t)
+              t = re.sub(r"\{(\w+)\}", lambda k: fill.get(k.group(1), "12"), t)
+              t = re.sub(r"<[^>]*>", "", t)
+              out.append({"offset": h["offset"], "scale": h.get("scale", 1), "text": t,
+                          "color": "#" + m.group(1) if m else "#FFFFFF", "bold": "<bold>" in h["text"] or "{logo}" in h["text"]})
+          for d in c.get("displays", []):
+              out.append({"offset": d["offset"], "scale": d.get("scale", 1), "item": d["item"]})
+          json.dump(out, open("/tmp/hub/holos.json", "w"), indent=1)
+          print(len(out), "holos")
+          EOF
+      - name: Launch the game
+        env:
+          LAGCLIENT_HUBPREVIEW: /tmp/hub
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          MESA_GL_VERSION_OVERRIDE: "4.5"
+        run: |
+          chmod +x ./gradlew
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
+          printf "onboardAccessibility:false\nskipMultiplayerWarning:true\njoinedFirstServer:true\ntutorialStep:none\nrenderDistance:12\nfov:0.0\n" > run/options.txt
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x720x24 &
+          sleep 2
+          timeout 1200 ./gradlew runClient -PdevPackMods --no-daemon > game.log 2>&1 &
+          GAME=$!
+          # stop as soon as every view is captured
+          for i in $(seq 1 240); do sleep 5; grep -q "HUBPREVIEW done" game.log && break; kill -0 $GAME 2>/dev/null || break; done
+          sleep 3; kill $GAME 2>/dev/null || true; pkill -f runClient || true; pkill java || true
+          pkill Xvfb || true
+          grep -nE "HUBPREVIEW|ERROR|Exception" game.log | head -60
+      - name: Push screenshots to the hub-shots branch
+        if: always()
+        run: |
+          mkdir -p /tmp/shots && cp run/screenshots/*.png /tmp/shots/ 2>/dev/null || true
+          cp game.log /tmp/shots/game.log 2>/dev/null || true
+          cd /tmp/shots && ls -la
+          git init -q -b hub-shots && git add -A && git -c user.name=ci -c user.email=ci@x commit -qm "hub preview ${{ github.run_number }}" || exit 0
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" hub-shots || true
