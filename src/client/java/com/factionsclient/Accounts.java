@@ -45,7 +45,8 @@ public final class Accounts {
 		UUID id = UUIDUtil.createOfflinePlayerUUID(name);
 		User u = new User(name, id, "0", Optional.empty(), Optional.empty());
 		((MinecraftAccountAccessor) mc).factionsclient$setUser(u);
-		((MinecraftAccountAccessor) mc).factionsclient$setKeys(ProfileKeyPairManager.EMPTY);
+		((MinecraftAccountAccessor) mc).factionsclient$setKeys(
+				ProfileKeyPairManager.create(com.mojang.authlib.minecraft.UserApiService.OFFLINE, u, mc.gameDirectory.toPath()));
 		FactionsClient.CONFIG.activeOfflineAccount = name;
 		if (!FactionsClient.CONFIG.offlineAccounts.contains(name)) FactionsClient.CONFIG.offlineAccounts.add(name);
 		FactionsClient.CONFIG.save();
