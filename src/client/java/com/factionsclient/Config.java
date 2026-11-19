@@ -46,6 +46,7 @@ public class Config {
 	/** Always sprint when walking forward (separate from vanilla tap-to-toggle sprint). */
 	public boolean autoSprint = false;
 	public int zoomFov = 15;
+	public boolean zoomScaleSensitivity = true;
 
 	// HUD pieces
 	public boolean hudCoords = true;

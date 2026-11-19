@@ -14,6 +14,7 @@ public final class Modules {
 	private static final double FULLBRIGHT_GAMMA = 16.0;
 	private static Double savedGamma = null;
 	private static Integer savedFov = null;
+	private static Double savedSens = null;
 	private static boolean sprintPressedByUs = false;
 
 	private static final Deque<Long> LEFT = new ArrayDeque<>();
@@ -44,12 +45,28 @@ public final class Modules {
 		// Zoom (hold key, like OptiFine's C)
 		OptionInstance<Integer> fov = mc.options.fov();
 		boolean zooming = zoomKey.isDown() && mc.screen == null;
+		OptionInstance<Double> sens = mc.options.sensitivity();
 		if (zooming) {
 			if (savedFov == null) savedFov = fov.get();
 			if (fov.get() != cfg.zoomFov) setRaw(fov, cfg.zoomFov);
-		} else if (savedFov != null) {
-			setRaw(fov, savedFov);
-			savedFov = null;
+			// Same mouse movement should move the crosshair the same distance on screen, zoomed or not:
+			// scale the turn speed by how much narrower the view is (vanilla turn = (s*0.6+0.2)^3).
+			if (cfg.zoomScaleSensitivity) {
+				if (savedSens == null) savedSens = sens.get();
+				double k = Math.tan(Math.toRadians(cfg.zoomFov) / 2) / Math.tan(Math.toRadians(savedFov) / 2);
+				double f = (savedSens * 0.6 + 0.2) * Math.cbrt(k);
+				double target = (f - 0.2) / 0.6;
+				if (sens.get() != target) setRaw(sens, target);
+			}
+		} else {
+			if (savedFov != null) {
+				setRaw(fov, savedFov);
+				savedFov = null;
+			}
+			if (savedSens != null) {
+				setRaw(sens, savedSens);
+				savedSens = null;
+			}
 		}
 
 		// Toggle sprint: hold sprint for you whenever you're walking forward.
@@ -93,7 +110,9 @@ public final class Modules {
 	public static void restoreAll(Minecraft mc) {
 		if (savedGamma != null) setRaw(mc.options.gamma(), savedGamma);
 		if (savedFov != null) setRaw(mc.options.fov(), savedFov);
+		if (savedSens != null) setRaw(mc.options.sensitivity(), savedSens);
 		savedGamma = null;
 		savedFov = null;
+		savedSens = null;
 	}
 }

@@ -343,6 +343,7 @@ public final class ModuleRegistry {
 		add(new Module("Zoom", "Hold to zoom in, like OptiFine", Category.RENDER)
 				.settings(() -> List.of(
 						new IntS("Zoom FOV (lower = closer)", 5, 50, 1, "°", () -> c().zoomFov, v -> c().zoomFov = v),
+						new BoolS("Slower mouse while zoomed", () -> c().zoomScaleSensitivity, v -> c().zoomScaleSensitivity = v),
 						new KeyS("Zoom key (hold)", () -> FactionsClient.zoomKey))));
 
 		add(new Module("Shaders", "Iris shader packs", Category.RENDER).opens(() -> openModConfig("iris")));
