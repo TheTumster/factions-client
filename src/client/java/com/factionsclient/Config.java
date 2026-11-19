@@ -43,6 +43,8 @@ public class Config {
 	public int chunkHeight = 24;
 	public boolean chunkCorners = true;
 	public boolean fullbright = false;
+	public boolean motionBlur = false;
+	public int motionBlurStrength = 5;
 	/** Always sprint when walking forward (separate from vanilla tap-to-toggle sprint). */
 	public boolean autoSprint = false;
 	public int zoomFov = 15;

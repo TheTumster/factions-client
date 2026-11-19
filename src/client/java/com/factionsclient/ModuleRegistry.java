@@ -340,6 +340,11 @@ public final class ModuleRegistry {
 				.toggle(() -> c().fullbright, v -> c().fullbright = v)
 				.settings(() -> List.of(new KeyS("Toggle key", () -> FactionsClient.fullbrightKey))));
 
+		add(new Module("Motion Blur", "Smooth trails when you turn, like OptiFine-era clients", Category.RENDER)
+				.toggle(() -> c().motionBlur, v -> c().motionBlur = v)
+				.settings(() -> List.of(
+						new IntS("Strength", 1, 10, 1, "", () -> c().motionBlurStrength, v -> c().motionBlurStrength = v))));
+
 		add(new Module("Zoom", "Hold to zoom in, like OptiFine", Category.RENDER)
 				.settings(() -> List.of(
 						new IntS("Zoom FOV (lower = closer)", 5, 50, 1, "°", () -> c().zoomFov, v -> c().zoomFov = v),

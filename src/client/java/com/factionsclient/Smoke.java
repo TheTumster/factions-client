@@ -224,6 +224,16 @@ final class Smoke {
 			menu.openPage("Team Schematics");
 		} else if (stage == 17 && System.currentTimeMillis() - stageAt > 12_000) {
 			stage = 18;
+			stageAt = System.currentTimeMillis();
+			FactionsClient.LOG.info("SMOKE stage motion-blur");
+			mc.setScreen(null);
+			FactionsClient.CONFIG.motionBlur = true;
+			FactionsClient.CONFIG.motionBlurStrength = 8;
+		} else if (stage == 18 && System.currentTimeMillis() - stageAt <= 12_000) {
+			if (mc.player != null) mc.player.setYRot(mc.player.getYRot() + 6f);   // keep turning so the trail shows
+		} else if (stage == 18) {
+			stage = 19;
+			FactionsClient.CONFIG.motionBlur = false;
 			FactionsClient.LOG.info("SMOKE stage done");
 		}
 	}
