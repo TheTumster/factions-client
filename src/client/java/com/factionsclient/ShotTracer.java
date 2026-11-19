@@ -121,7 +121,7 @@ public final class ShotTracer {
 			pos = prev;
 			if (pos.distanceToSqr(start) > MAX_DIST * MAX_DIST) break;
 		}
-		if (shot.back.size() < 3) return;
+		// (a trace that stops at once is fine: we first saw it right at the barrel, so that IS the cannon)
 		SHOTS.add(shot);
 		Vec3 origin = shot.back.get(shot.back.size() - 1);
 		for (Cannon c : CANNONS) {
