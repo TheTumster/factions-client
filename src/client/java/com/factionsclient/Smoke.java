@@ -313,9 +313,9 @@ final class Smoke {
 					"execute at @p run summon tnt ~18 ~-8 ~-3 {fuse:300,Motion:[0.04,0.4,0.0]}",
 					"execute at @p run summon tnt ~22 ~-10 ~1 {fuse:300,Motion:[-0.03,0.45,0.02]}",
 					// a "cannon" barrel 45 blocks out, firing a shot back toward us (Shot Tracer should find the barrel)
-					"execute at @p run fill ~45 ~-6 ~9 ~47 ~-4 ~11 minecraft:obsidian",
-					"execute at @p run summon tnt ~44 ~-5 ~10 {fuse:60,Motion:[-1.9,0.3,-0.2]}",
-					"execute at @p run summon falling_block ~44 ~-5 ~10.4 {BlockState:{Name:\"minecraft:sand\"},Time:1,Motion:[-1.8,0.3,-0.2]}"};
+					"execute at @p run fill ~45 ~5 ~9 ~47 ~7 ~11 minecraft:obsidian",
+					"execute at @p run summon tnt ~44 ~6 ~10 {fuse:60,Motion:[-1.9,0.3,-0.2]}",
+					"execute at @p run summon falling_block ~44 ~6 ~10.4 {BlockState:{Name:\"minecraft:sand\"},Time:1,Motion:[-1.8,0.3,-0.2]}"};
 			for (String cmd : cmds) {
 				try {
 					server.getCommands().performPrefixedCommand(src, cmd);

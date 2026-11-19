@@ -88,6 +88,8 @@ public final class ShotTracer {
 			if (w.done) continue;
 			// Use the entity's velocity, not position jumps (those happen when the server corrects a position).
 			Vec3 v = e.getDeltaMovement();
+			if (System.getenv("LAGCLIENT_SMOKE") != null && v.horizontalDistanceSqr() > 0.01)
+				FactionsClient.LOG.info("SMOKE shot-watch id={} v={} pos={}", e.getId(), v, e.position());
 			if (v.x * v.x + v.z * v.z >= minSpeedSq) {
 				if (++w.fastTicks >= 2) {   // fast two ticks in a row = a real shot, not a one-tick shove
 					w.done = true;
