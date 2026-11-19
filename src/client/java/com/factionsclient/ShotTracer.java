@@ -50,7 +50,8 @@ public final class ShotTracer {
 	}
 
 	private static final class Watch {
-		int fastTicks;
+		Vec3 last, lastStep;
+		int fastTicks, logged;
 		boolean done;
 	}
 
@@ -86,18 +87,25 @@ public final class ShotTracer {
 			seen.add(e.getId());
 			Watch w = WATCH.computeIfAbsent(e.getId(), id -> new Watch());
 			if (w.done) continue;
-			// Use the entity's velocity, not position jumps (those happen when the server corrects a position).
-			Vec3 v = e.getDeltaMovement();
-			if (System.getenv("LAGCLIENT_SMOKE") != null && v.horizontalDistanceSqr() > 0.01)
-				FactionsClient.LOG.info("SMOKE shot-watch id={} v={} pos={}", e.getId(), v, e.position());
-			if (v.x * v.x + v.z * v.z >= minSpeedSq) {
-				if (++w.fastTicks >= 2) {   // fast two ticks in a row = a real shot, not a one-tick shove
-					w.done = true;
-					trace(level, e.position(), v.scale(1 / DRAG), tnt, now);
+			Vec3 p = e.position();
+			if (w.last != null) {
+				// Per-tick step from position (the client doesn't always know the real velocity). A shot is two
+				// fast steps in a row that roughly agree; a single big jump is just a server position correction.
+				Vec3 step = p.subtract(w.last);
+				boolean fast = step.horizontalDistanceSqr() >= minSpeedSq && step.lengthSqr() < 36;
+				boolean agrees = w.lastStep != null && w.lastStep.horizontalDistanceSqr() > 0
+						&& step.subtract(w.lastStep).lengthSqr() < 0.25 * Math.max(step.lengthSqr(), w.lastStep.lengthSqr()) + 0.02;
+				if (System.getenv("LAGCLIENT_SMOKE") != null && w.logged < 6 && step.lengthSqr() > 0.0001) {
+					w.logged++;
+					FactionsClient.LOG.info("SMOKE shot-watch id={} step={} v={}", e.getId(), step, e.getDeltaMovement());
 				}
-			} else {
-				w.fastTicks = 0;
+				if (fast && agrees) {
+					w.done = true;
+					trace(level, p, step, tnt, now);
+				}
+				w.lastStep = step;
 			}
+			w.last = p;
 		}
 		WATCH.keySet().retainAll(seen);
 
