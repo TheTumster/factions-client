@@ -19,6 +19,6 @@ jobs:
           for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do echo "JAR $j"; unzip -oq "$j" 'net/minecraft/client/*'; done
           cd /tmp/mc/net/minecraft/client && pwd && ls | head
           sig() { echo "=====SIG $1"; grep -nP '^\t(public |protected |default |static |boolean |void |int |float |double |@Nullable )[^;=]*\(' "$1"; }
-          for f in gui/components/AbstractButton.java gui/components/Button.java gui/components/AbstractWidget.java gui/screens/PauseScreen.java; do echo "=====FILE $f"; cat $f; done
-          echo "=====FILE setScreen"; grep -n "public void setScreen\|public void disconnect\|disconnectFromWorld\|public void stop()" Minecraft.java
+          f=multiplayer/ClientHandshakePacketListenerImpl.java; echo "=====FILE $f"; sed -n 1,400p $f | grep -n "authenticateServer\|shouldAuthenticate\|handleHello\|private Component\|joinServer\|INVALID\|getSessionService\|disconnect" 
+          echo "=====BODY"; awk '/void handleHello/,/^\t}/' multiplayer/ClientHandshakePacketListenerImpl.java; awk '/Component authenticateServer/,/^\t}/' multiplayer/ClientHandshakePacketListenerImpl.java
           exit 0
