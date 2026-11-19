@@ -246,6 +246,15 @@ public final class ModuleRegistry {
 						new KeyS("Toggle key", () -> FactionsClient.crumbsKey),
 						new KeyS("Clear key", () -> FactionsClient.clearKey))));
 
+		add(new Module("Shot Tracer", "Traces cannon shots back to the cannon that fired them", Category.FACTIONS)
+				.toggle(() -> c().shotTracer, v -> c().shotTracer = v)
+				.settings(() -> List.of(
+						new IntS("Keep lines for", 5, 300, 5, "s", () -> c().shotSeconds, v -> c().shotSeconds = v),
+						new IntS("Min shot speed (x0.1 blocks/tick)", 3, 20, 1, "", () -> c().shotMinSpeed, v -> c().shotMinSpeed = v),
+						new ColorS("Trace line", () -> c().shotColor, v -> c().shotColor = v),
+						new ColorS("Cannon marker", () -> c().cannonColor, v -> c().cannonColor = v),
+						new ActionS("Clear traces", "Clear", ShotTracer::clear))));
+
 		add(new Module("Patch Crumbs", "TNT hitting your faction's claims shows up for you (purple boxes)", Category.FACTIONS)
 				.toggle(() -> c().shareCrumbs, v -> c().shareCrumbs = v)
 				.settings(() -> List.of(new InfoS(ModuleRegistry::backendLine))));

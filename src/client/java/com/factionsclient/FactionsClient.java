@@ -78,6 +78,7 @@ public class FactionsClient implements ClientModInitializer {
 			}
 			while (clearKey.consumeClick()) {
 				Crumbs.clear();
+						ShotTracer.clear();
 				SchemShare.msg("Crumbs cleared.", ChatFormatting.GRAY);
 			}
 			while (crumbsKey.consumeClick()) {
@@ -86,6 +87,7 @@ public class FactionsClient implements ClientModInitializer {
 				SchemShare.msg("Crumbs " + (CONFIG.crumbs ? "on" : "off"), ChatFormatting.GRAY);
 			}
 			Crumbs.tick(mc);
+			ShotTracer.tick(mc);
 			ServerLink.tick(mc);
 			TeamLink.tick(mc);
 		});
@@ -110,6 +112,7 @@ public class FactionsClient implements ClientModInitializer {
 					}))
 					.then(literal("clear").executes(ctx -> {
 						Crumbs.clear();
+						ShotTracer.clear();
 						return 1;
 					})));
 		});

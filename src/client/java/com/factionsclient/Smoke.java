@@ -234,6 +234,9 @@ final class Smoke {
 		} else if (stage == 18) {
 			stage = 19;
 			FactionsClient.CONFIG.motionBlur = false;
+			FactionsClient.LOG.info("SMOKE shots traced={} cannons={} {}", ShotTracer.SHOTS.size(), ShotTracer.CANNONS.size(),
+					ShotTracer.CANNONS.isEmpty() ? "" : ShotTracer.CANNONS.get(0).pos + " shots=" + ShotTracer.CANNONS.get(0).shots
+							+ " player=" + mc.player.position());
 			FactionsClient.LOG.info("SMOKE stage done");
 		}
 	}
@@ -305,7 +308,11 @@ final class Smoke {
 					"execute as @a at @s run tp @s ~ ~24 ~ -70 28",
 					"execute at @p run summon tnt ~14 ~-6 ~4 {fuse:300,Motion:[0.0,0.35,0.05]}",
 					"execute at @p run summon tnt ~18 ~-8 ~-3 {fuse:300,Motion:[0.04,0.4,0.0]}",
-					"execute at @p run summon tnt ~22 ~-10 ~1 {fuse:300,Motion:[-0.03,0.45,0.02]}"};
+					"execute at @p run summon tnt ~22 ~-10 ~1 {fuse:300,Motion:[-0.03,0.45,0.02]}",
+					// a "cannon" barrel 45 blocks out, firing a shot back toward us (Shot Tracer should find the barrel)
+					"execute at @p run fill ~45 ~-6 ~9 ~47 ~-4 ~11 minecraft:obsidian",
+					"execute at @p run summon tnt ~44 ~-5 ~10 {fuse:60,Motion:[-1.9,0.3,-0.2]}",
+					"execute at @p run summon falling_block ~44 ~-5 ~10.4 {BlockState:{Name:\"minecraft:sand\"},Time:1,Motion:[-1.8,0.3,-0.2]}"};
 			for (String cmd : cmds) {
 				try {
 					server.getCommands().performPrefixedCommand(src, cmd);

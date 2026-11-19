@@ -1,5 +1,7 @@
 package com.factionsclient;
 
+import java.util.List;
+
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -38,6 +40,8 @@ public final class WorldRender {
 				box(m, vc, cam, bx - 0.01, by - 0.01, bz - 0.01, bx + 1.01, by + 1.01, bz + 1.01, mk.shared() ? TEAM_BOOM : MY_BOOM);
 			}
 		}
+
+		if (cfg.shotTracer) shots(m, vc, cam, mc);
 
 		if (cfg.chunkGrid) chunkBorders(m, vc, cam, mc);
 		if (cfg.claimMap) claimBorders(m, vc, cam, mc);
@@ -203,6 +207,30 @@ public final class WorldRender {
 
 	private static int alpha(int rgb, int a) {
 		return (a << 24) | (rgb & 0xFFFFFF);
+	}
+
+	/** Traced shots: dashed line back to where they came out, plus a tall marker on each cannon. */
+	private static void shots(Matrix4f m, VertexConsumer vc, Vec3 cam, Minecraft mc) {
+		Config cfg = FactionsClient.CONFIG;
+		long now = System.currentTimeMillis();
+		int line = alpha(cfg.shotColor, 0xC0);
+		for (ShotTracer.Shot s : ShotTracer.SHOTS) {
+			List<Vec3> pts = s.back;
+			for (int i = 0; i < pts.size(); i += 2) {        // every other tick: reads as a dashed line
+				Vec3 p = pts.get(i);
+				double y = p.y + 0.49, r = 0.06;
+				box(m, vc, cam, p.x - r, y - r, p.z - r, p.x + r, y + r, p.z + r, line);
+			}
+		}
+		for (ShotTracer.Cannon c : ShotTracer.CANNONS) {
+			float fade = Math.max(0.35f, 1f - (now - c.last) / 60_000f);
+			double pulse = 0.45 + 0.12 * Math.sin(now / 160.0);
+			double x = c.pos.x, y = c.pos.y + 0.49, z = c.pos.z;
+			int col = cfg.cannonColor;
+			box(m, vc, cam, x - pulse, y - pulse, z - pulse, x + pulse, y + pulse, z + pulse, alpha(col, (int) (0xE0 * fade)));
+			double w = 0.12 + Math.min(0.5, Math.sqrt(mc.player.distanceToSqr(c.pos)) / 250.0);
+			box(m, vc, cam, x - w, y, z - w, x + w, y + 40, z + w, alpha(col, (int) (0x70 * fade)));
+		}
 	}
 
 	private static void trail(Matrix4f m, VertexConsumer vc, Vec3 cam, Crumbs.Trail t) {

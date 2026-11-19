@@ -81,6 +81,11 @@ public class Config {
 	public int accentColor = 0xFF38E0FF;
 	public int tntColor = 0xFFFF5A1F;
 	public int sandColor = 0xFFF2D16B;
+	public boolean shotTracer = true;
+	public int shotSeconds = 30;
+	public int shotMinSpeed = 6;   // tenths of a block per tick
+	public int shotColor = 0xFFFFD24D;
+	public int cannonColor = 0xFFFF3B4E;
 	public int chunkColor = 0xFFFFE040;
 
 	/** One-time: move Xaero's world map off M so it doesn't clash with Litematica. */

@@ -149,6 +149,13 @@ public final class Hud {
 				}
 				String s = "§7FPS §f" + mc.getFps() + "  §7Ping §f" + ping + "ms";
 				if (cfg.crumbs) s += "  §7TNT §f" + Crumbs.liveTnt();
+				ShotTracer.Cannon cn = cfg.shotTracer ? ShotTracer.latest() : null;
+				if (cn != null) {
+					double dx = cn.pos.x - p.getX(), dz = cn.pos.z - p.getZ();
+					String[] dirs = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+					String dir = dirs[(int) Math.floorMod(Math.round(Math.toDegrees(Math.atan2(-dx, dz)) / 45.0), 8)];
+					s += String.format(Locale.ROOT, "  §cCannon §f%dm %s §7x%d", (int) Math.sqrt(dx * dx + dz * dz), dir, cn.shots);
+				}
 				lines.add(new Line(s, WHITE));
 			}
 			case "coords" -> {
