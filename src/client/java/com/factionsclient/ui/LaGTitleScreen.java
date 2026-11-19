@@ -185,14 +185,25 @@ public class LaGTitleScreen extends Screen {
 			g.pose().popMatrix();
 		}
 
-		// You, top right
+		// You, top right (click to switch accounts)
 		String name = minecraft.getUser().getName();
-		int nw = this.font.width(name);
-		int chipW = nw + 30, chipX = this.width - chipW - 8, chipY = 8;
-		Theme.rect(g, chipX, chipY, chipW, 20, Theme.alpha(0xC0161026, ease));
-		Theme.outline(g, chipX, chipY, chipW, 20, Theme.alpha(0x40FFFFFF, ease));
-		if (skin != null) PlayerFaceRenderer.draw(g, skin.get(), chipX + 4, chipY + 4, 12);
+		boolean offline = com.factionsclient.Accounts.activeOffline() != null;
+		String tag = offline ? "  offline" : "";
+		int nw = this.font.width(name) + this.font.width(tag) + 10;
+		chipW = nw + 30;
+		chipX = this.width - chipW - 8;
+		int chipY = 8;
+		boolean chipOver = Theme.inside(mouseX, mouseY, chipX, chipY, chipW, 20);
+		Theme.rect(g, chipX, chipY, chipW, 20, Theme.alpha(chipOver ? 0xE0241A3A : 0xC0161026, ease));
+		Theme.outline(g, chipX, chipY, chipW, 20, Theme.alpha(chipOver ? 0x90FFFFFF : 0x40FFFFFF, ease));
+		if (offline) {
+			PlayerFaceRenderer.draw(g, net.minecraft.client.resources.DefaultPlayerSkin.get(minecraft.getUser().getProfileId()), chipX + 4, chipY + 4, 12);
+		} else if (skin != null) {
+			PlayerFaceRenderer.draw(g, skin.get(), chipX + 4, chipY + 4, 12);
+		}
 		g.drawString(this.font, name, chipX + 22, chipY + 6, Theme.alpha(Theme.TEXT, ease), false);
+		if (offline) g.drawString(this.font, tag, chipX + 22 + this.font.width(name), chipY + 6, Theme.alpha(0xFFFFB04D, ease), false);
+		g.drawString(this.font, "▾", chipX + chipW - 10, chipY + 6, Theme.alpha(Theme.MUTED, ease), false);
 
 		// Footer
 		String left = Theme.BRAND + " " + version + "  ·  Minecraft 1.21.11";
@@ -203,8 +214,15 @@ public class LaGTitleScreen extends Screen {
 		Theme.gradientLine(g, 0, this.height - 1, this.width, 1, 0.6f * ease);
 	}
 
+	private int chipX, chipW;
+
 	@Override
 	public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
+		if (e.button() == 0 && chipW > 0 && Theme.inside(e.x(), e.y(), chipX, 8, chipW, 20)) {
+			minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			minecraft.setScreen(new AccountScreen(this));
+			return true;
+		}
 		if (e.button() == 0) {
 			for (Theme.Btn b : buttons) {
 				if (b.click(e.x(), e.y())) {

@@ -56,6 +56,7 @@ public class FactionsClient implements ClientModInitializer {
 		ClientLifecycleEvents.CLIENT_STARTED.register(FactionsClient::moveXaeroMapKey);
 		ClientLifecycleEvents.CLIENT_STARTED.register(Performance::tuneOnce);
 		ClientLifecycleEvents.CLIENT_STARTED.register(mc -> Updater.checkAsync());
+		ClientLifecycleEvents.CLIENT_STARTED.register(Accounts::restore);
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> Updater.announce());
 		ClientLifecycleEvents.CLIENT_STOPPING.register(Modules::restoreAll);
 		ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> DiscordPresence.close());

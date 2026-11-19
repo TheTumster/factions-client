@@ -99,6 +99,8 @@ public class Config {
 	public boolean chatPrivatePing = true;
 	/** Your own tabs: "Name: regex" */
 	public java.util.List<String> chatCustomTabs = new java.util.ArrayList<>();
+	public java.util.List<String> offlineAccounts = new java.util.ArrayList<>();
+	public String activeOfflineAccount = null;
 	public boolean chatTabTeam = true;
 	/** tab name -> ARGB color (missing = the tab's default) */
 	public java.util.Map<String, Integer> chatTabColors = new java.util.HashMap<>();

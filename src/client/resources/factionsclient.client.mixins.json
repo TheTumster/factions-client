@@ -11,7 +11,8 @@
 		"ServerListMixin",
 		"ChatComponentMixin",
 		"ChatScreenMixin",
-		"ToastManagerMixin"
+		"ToastManagerMixin",
+		"MinecraftAccountAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
