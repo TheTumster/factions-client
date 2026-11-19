@@ -118,7 +118,37 @@ public final class ChatTabs {
 	/** Should this line show right now? (chat rebuilds call this for every stored message) */
 	public static boolean visible(Component msg) {
 		if (!enabled() || tabs.isEmpty() || active == 0) return true;
+		if (EVERY_TAB.contains(msg)) return true;
 		return inTab(tabs.get(active), msg.getString());
+	}
+
+	// Answers to your own commands (/f map, /f who, /bal...) and chat "art" show in every tab, whole:
+	// no timestamp, no [x3] stacking, so maps and boxes keep their shape.
+	private static final java.util.Set<Component> EVERY_TAB = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+	private static final java.util.ArrayDeque<Component> EVERY_TAB_ORDER = new java.util.ArrayDeque<>();
+	private static long lastCommandAt = 0, lastLineAt = 0;
+
+	/** Mostly symbols (map rows, separators, boxes) rather than words. */
+	static boolean isArt(String text) {
+		int letters = 0, other = 0;
+		for (int i = 0; i < text.length(); i++) {
+			char c = text.charAt(i);
+			if (Character.isLetterOrDigit(c)) letters++;
+			else if (!Character.isWhitespace(c)) other++;
+		}
+		return other >= 8 && letters * 3 < other;
+	}
+
+	/** Part of a multi-line answer to a command you just ran, or part of a burst sent in one go. */
+	static boolean commandOutput() {
+		long now = System.currentTimeMillis();
+		return now - lastCommandAt < 2500;
+	}
+
+	private static void showEverywhere(Component c) {
+		EVERY_TAB.add(c);
+		EVERY_TAB_ORDER.add(c);
+		while (EVERY_TAB_ORDER.size() > 800) EVERY_TAB.remove(EVERY_TAB_ORDER.removeFirst());
 	}
 
 	/**
@@ -141,17 +171,22 @@ public final class ChatTabs {
 				if (i != active && inTab(tabs.get(i), text)) unread.merge(tabs.get(i).name(), 1, Integer::sum);
 			}
 		}
+		boolean whole = isArt(text) || commandOutput();
 		MutableComponent out = msg.copy();
-		if (FactionsClient.CONFIG.chatTimestamps) {
+		if (FactionsClient.CONFIG.chatTimestamps && !whole) {
 			out = Component.literal("[" + LocalTime.now().format(TIME) + "] ").withStyle(ChatFormatting.DARK_GRAY).append(msg);
 		}
+		if (whole) showEverywhere(out);
 		return out;
 	}
 
 	/** Spam stacking: the same line again replaces the previous one with "[x3]". */
 	public static boolean stackRepeat(String text) {
 		if (!enabled() || !FactionsClient.CONFIG.chatStack) return false;
-		boolean same = text.equals(lastText);
+		long now = System.currentTimeMillis();
+		boolean burst = now - lastLineAt < 250;   // lines of one multi-line message arrive together: never fold those
+		lastLineAt = now;
+		boolean same = text.equals(lastText) && !burst && !isArt(text) && !commandOutput();
 		repeat = same ? repeat + 1 : 1;
 		lastText = text;
 		return same;
@@ -192,6 +227,7 @@ public final class ChatTabs {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null) return false;
 		if (msg.startsWith("/")) {
+			lastCommandAt = System.currentTimeMillis();
 			String cmd = msg.substring(1).toLowerCase(java.util.Locale.ROOT);
 			// You changed the mode yourself: remember it so we don't fight you
 			Matcher m = Pattern.compile("^f(?:actions?)?\\s+(?:c|chat)\\s+(\\w+)").matcher(cmd);
