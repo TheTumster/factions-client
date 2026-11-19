@@ -151,6 +151,9 @@ final class Smoke {
 			chatCleared = true; // command feedback arrives late: clear it before the screenshot
 			mc.gui.getChat().clearMessages(false);
 		} else if (stage == 9 && System.currentTimeMillis() - stageAt > 14_000) {
+			FactionsClient.LOG.info("SMOKE shots traced={} cannons={} {}", ShotTracer.SHOTS.size(), ShotTracer.CANNONS.size(),
+					ShotTracer.CANNONS.isEmpty() ? "" : ShotTracer.CANNONS.get(0).pos + " shots=" + ShotTracer.CANNONS.get(0).shots
+							+ " player=" + mc.player.position());
 			stage = 10;
 			stageAt = System.currentTimeMillis();
 			FactionsClient.LOG.info("SMOKE stage ingame-hud-editor");
