@@ -10,7 +10,8 @@
 		"SliderMixin",
 		"ServerListMixin",
 		"ChatComponentMixin",
-		"ChatScreenMixin"
+		"ChatScreenMixin",
+		"ToastManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
