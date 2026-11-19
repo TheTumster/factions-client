@@ -50,7 +50,7 @@ public final class ShotTracer {
 	}
 
 	private static final class Watch {
-		Vec3 last;
+		int fastTicks;
 		boolean done;
 	}
 
@@ -85,15 +85,17 @@ public final class ShotTracer {
 			if (e.distanceToSqr(mc.player) > rangeSq) continue;
 			seen.add(e.getId());
 			Watch w = WATCH.computeIfAbsent(e.getId(), id -> new Watch());
-			Vec3 p = e.position();
-			if (w.last != null && !w.done) {
-				Vec3 v = p.subtract(w.last);
-				if (v.x * v.x + v.z * v.z >= minSpeedSq) {
-					w.done = true;          // one trace per entity, from the first tick it flies fast
-					trace(level, w.last, v, tnt, now);
+			if (w.done) continue;
+			// Use the entity's velocity, not position jumps (those happen when the server corrects a position).
+			Vec3 v = e.getDeltaMovement();
+			if (v.x * v.x + v.z * v.z >= minSpeedSq) {
+				if (++w.fastTicks >= 2) {   // fast two ticks in a row = a real shot, not a one-tick shove
+					w.done = true;
+					trace(level, e.position(), v.scale(1 / DRAG), tnt, now);
 				}
+			} else {
+				w.fastTicks = 0;
 			}
-			w.last = p;
 		}
 		WATCH.keySet().retainAll(seen);
 
@@ -103,18 +105,17 @@ public final class ShotTracer {
 		if (SHOTS.size() > 600) SHOTS.subList(0, SHOTS.size() - 600).clear();
 	}
 
-	/** Run the flight backwards from p (where it was) with v (the move it made next tick). */
-	private static void trace(ClientLevel level, Vec3 p, Vec3 v, boolean tnt, long now) {
+	/** Run the flight backwards from p, where `move` is the step that brought it to p. */
+	private static void trace(ClientLevel level, Vec3 p, Vec3 move, boolean tnt, long now) {
 		Shot shot = new Shot(tnt, now);
 		Vec3 pos = p;
-		Vec3 move = v;
 		Vec3 start = p;
 		BlockPos.MutableBlockPos bp = new BlockPos.MutableBlockPos();
 		for (int i = 0; i < MAX_STEPS; i++) {
 			shot.back.add(pos);
+			Vec3 prev = pos.subtract(move);
 			// move_n = move_{n-1} * drag - gravity  =>  move_{n-1} = (move_n + gravity) / drag
 			move = new Vec3(move.x / DRAG, (move.y + GRAVITY) / DRAG, move.z / DRAG);
-			Vec3 prev = pos.subtract(move);
 			bp.set(prev.x, prev.y + 0.49, prev.z);
 			if (!level.hasChunkAt(bp)) break;
 			if (!level.getBlockState(bp).getCollisionShape(level, bp).isEmpty()) break;   // came out of here
