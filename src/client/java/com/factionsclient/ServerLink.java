@@ -281,6 +281,8 @@ public final class ServerLink {
 			ChatTabs.reset();
 			var sd = mc.getCurrentServer();
 			if (sd == null || !RelapsedServer.isRelapsed(sd.ip)) Modes.onOtherServer();
+			// RelapsedMC's own pack is always accepted without a prompt (it keeps the menus and art current)
+			else sd.setResourcePackStatus(net.minecraft.client.multiplayer.ServerData.ServerPackStatus.ENABLED);
 		});
 	}
 
