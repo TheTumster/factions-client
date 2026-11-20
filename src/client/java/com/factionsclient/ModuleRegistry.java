@@ -249,6 +249,7 @@ public final class ModuleRegistry {
 		add(new Module("Shot Tracer", "Traces cannon shots back to the cannon that fired them", Category.FACTIONS)
 				.toggle(() -> c().shotTracer, v -> c().shotTracer = v)
 				.settings(() -> List.of(
+						new BoolS("Chat alert for new cannons", () -> c().shotAlert, v -> c().shotAlert = v),
 						new IntS("Keep lines for", 5, 300, 5, "s", () -> c().shotSeconds, v -> c().shotSeconds = v),
 						new IntS("Min shot speed (x0.1 blocks/tick)", 3, 20, 1, "", () -> c().shotMinSpeed, v -> c().shotMinSpeed = v),
 						new ColorS("Trace line", () -> c().shotColor, v -> c().shotColor = v),

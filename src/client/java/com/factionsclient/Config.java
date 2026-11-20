@@ -83,7 +83,8 @@ public class Config {
 	public int sandColor = 0xFFF2D16B;
 	public boolean shotTracer = true;
 	public int shotSeconds = 30;
-	public int shotMinSpeed = 6;   // tenths of a block per tick
+	public int shotMinSpeed = 4;   // tenths of a block per tick
+	public boolean shotAlert = true;
 	public int shotColor = 0xFFFFD24D;
 	public int cannonColor = 0xFFFF3B4E;
 	public int chunkColor = 0xFFFFE040;

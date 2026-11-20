@@ -92,9 +92,15 @@ public final class ShotTracer {
 				// Per-tick step from position (the client doesn't always know the real velocity). A shot is two
 				// fast steps in a row that roughly agree; a single big jump is just a server position correction.
 				Vec3 step = p.subtract(w.last);
-				boolean fast = step.horizontalDistanceSqr() >= minSpeedSq && step.lengthSqr() < 36;
-				boolean agrees = w.lastStep != null && w.lastStep.horizontalDistanceSqr() > 0
-						&& step.subtract(w.lastStep).lengthSqr() < 0.25 * Math.max(step.lengthSqr(), w.lastStep.lengthSqr()) + 0.02;
+				Vec3 vel = e.getDeltaMovement();
+				// Real cannon shots can move 10-30+ blocks a tick, so there's no upper speed limit. A single server
+				// position correction is filtered out because it won't agree with the step before it, or with the
+				// velocity the server told us.
+				boolean fast = step.horizontalDistanceSqr() >= minSpeedSq;
+				boolean agrees = (w.lastStep != null && w.lastStep.horizontalDistanceSqr() > 0
+						&& step.subtract(w.lastStep).lengthSqr() < 0.25 * Math.max(step.lengthSqr(), w.lastStep.lengthSqr()) + 0.02)
+						|| (vel.horizontalDistanceSqr() >= minSpeedSq
+						&& step.subtract(vel).lengthSqr() < 0.16 * Math.max(step.lengthSqr(), vel.lengthSqr()) + 0.02);
 				if (System.getenv("LAGCLIENT_SMOKE") != null && w.logged < 6 && step.lengthSqr() > 0.0001) {
 					w.logged++;
 					FactionsClient.LOG.info("SMOKE shot-watch id={} step={} v={}", e.getId(), step, e.getDeltaMovement());
@@ -145,6 +151,15 @@ public final class ShotTracer {
 			}
 		}
 		CANNONS.add(new Cannon(origin, now, tnt));
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player != null && FactionsClient.CONFIG.shotAlert) {
+			double dx = origin.x - mc.player.getX(), dz = origin.z - mc.player.getZ();
+			String[] dirs = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+			String dir = dirs[(int) Math.floorMod(Math.round(Math.toDegrees(Math.atan2(-dx, dz)) / 45.0), 8)];
+			mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal(String.format(java.util.Locale.ROOT,
+					"§c§lCANNON §7shooting from §f%d %d %d §7(%dm %s)", (int) Math.floor(origin.x), (int) Math.floor(origin.y),
+					(int) Math.floor(origin.z), (int) Math.sqrt(dx * dx + dz * dz), dir)), false);
+		}
 	}
 
 	/** The cannon that fired most recently, for the HUD. */
