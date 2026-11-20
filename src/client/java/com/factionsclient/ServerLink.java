@@ -165,8 +165,9 @@ public final class ServerLink {
 	}
 
 	/**
-	 * Never actually sent: registering it makes the client advertise "relapsed:pack", which tells RelapsedMC servers
-	 * this client already has the server pack built in (so they don't prompt for it).
+	 * "This client has the RelapsedMC pack built in." Registering it advertises "relapsed:pack"; on top of that the
+	 * client sends it once to the server whenever the server says it listens on the channel (the advert alone
+	 * doesn't always get through the proxy), so servers show the pack's menus and never prompt for the pack.
 	 */
 	public record PackPayload() implements CustomPacketPayload {
 		public static final Type<PackPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath("relapsed", "pack"));
@@ -221,7 +222,12 @@ public final class ServerLink {
 		PayloadTypeRegistry.playS2C().register(HomePayload.TYPE, HomePayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(RealmPayload.TYPE, RealmPayload.CODEC);
 		PayloadTypeRegistry.playS2C().register(PackPayload.TYPE, PackPayload.CODEC);
+		PayloadTypeRegistry.playC2S().register(PackPayload.TYPE, PackPayload.CODEC);
 		ClientPlayNetworking.registerGlobalReceiver(PackPayload.TYPE, (payload, ctx) -> { });
+		// tell the server we have the pack: on join, and again whenever it (re)registers the channel (server switches)
+		net.fabricmc.fabric.api.client.networking.v1.C2SPlayChannelEvents.REGISTER.register((handler, sender, mc, channels) -> {
+			if (channels.contains(PackPayload.TYPE.id())) sayHasPack();
+		});
 
 		ClientPlayNetworking.registerGlobalReceiver(RealmPayload.TYPE, (payload, ctx) -> {
 			connected = true;
@@ -271,10 +277,19 @@ public final class ServerLink {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) -> reset());
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, mc) -> {
 			reset();
+			sayHasPack();
 			ChatTabs.reset();
 			var sd = mc.getCurrentServer();
 			if (sd == null || !RelapsedServer.isRelapsed(sd.ip)) Modes.onOtherServer();
 		});
+	}
+
+	private static void sayHasPack() {
+		try {
+			if (ClientPlayNetworking.canSend(PackPayload.TYPE)) ClientPlayNetworking.send(new PackPayload());
+		} catch (Throwable ignored) {
+			// not connected, or the server doesn't listen: nothing to do
+		}
 	}
 
 	/** Smoke test only: pretend the server just sent teammates so tick() doesn't clear them. */

@@ -13,7 +13,8 @@
 		"ChatScreenMixin",
 		"ToastManagerMixin",
 		"MinecraftAccountAccessor",
-		"GameRendererBlurMixin"
+		"GameRendererBlurMixin",
+		"ClientBrandMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
