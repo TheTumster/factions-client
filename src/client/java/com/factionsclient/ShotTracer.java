@@ -132,9 +132,21 @@ public final class ShotTracer {
 			Vec3 prev = pos.subtract(move);
 			// move_n = move_{n-1} * drag - gravity  =>  move_{n-1} = (move_n + gravity) / drag
 			move = new Vec3(move.x / DRAG, (move.y + GRAVITY) / DRAG, move.z / DRAG);
-			bp.set(prev.x, prev.y + 0.49, prev.z);
-			if (!level.hasChunkAt(bp)) break;
-			if (!level.getBlockState(bp).getCollisionShape(level, bp).isEmpty()) break;   // came out of here
+			// walk the step in half-block pieces so a fast shot can't skip over the barrel walls
+			int n = Math.max(1, (int) Math.ceil(pos.distanceTo(prev) / 0.5));
+			boolean hit = false, unloaded = false;
+			Vec3 lastFree = pos;
+			for (int k = 1; k <= n; k++) {
+				Vec3 q = pos.lerp(prev, k / (double) n);
+				bp.set(q.x, q.y + 0.49, q.z);
+				if (!level.hasChunkAt(bp)) { unloaded = true; break; }
+				if (!level.getBlockState(bp).getCollisionShape(level, bp).isEmpty()) { hit = true; break; }   // came out of here
+				lastFree = q;
+			}
+			if (hit || unloaded) {
+				if (lastFree != pos) shot.back.add(lastFree);
+				break;
+			}
 			pos = prev;
 			if (pos.distanceToSqr(start) > MAX_DIST * MAX_DIST) break;
 		}
