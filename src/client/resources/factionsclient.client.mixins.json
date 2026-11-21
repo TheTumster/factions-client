@@ -14,7 +14,8 @@
 		"ToastManagerMixin",
 		"MinecraftAccountAccessor",
 		"GameRendererBlurMixin",
-		"ClientBrandMixin"
+		"ClientBrandMixin",
+		"ResourcePackAutoAcceptMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
