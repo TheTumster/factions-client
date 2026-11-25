@@ -33,6 +33,7 @@ public class FactionsClient implements ClientModInitializer {
 	public static KeyMapping clearKey;
 	public static KeyMapping crumbsKey;
 	public static KeyMapping zoomKey;
+	public static KeyMapping freelookKey;
 	public static KeyMapping chunkKey;
 	public static KeyMapping fullbrightKey;
 	public static KeyMapping pingKey;
@@ -49,6 +50,7 @@ public class FactionsClient implements ClientModInitializer {
 		crumbsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.toggle_crumbs", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, cat));
 
 		zoomKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.zoom", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, cat));
+		freelookKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.freelook", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, cat));
 		chunkKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.chunk_borders", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, cat));
 		fullbrightKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.fullbright", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
 		pingKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.factionsclient.ping", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, cat));
@@ -88,6 +90,7 @@ public class FactionsClient implements ClientModInitializer {
 			}
 			Crumbs.tick(mc);
 			ShotTracer.tick(mc);
+			Freelook.tick(mc);
 			ServerLink.tick(mc);
 			TeamLink.tick(mc);
 		});

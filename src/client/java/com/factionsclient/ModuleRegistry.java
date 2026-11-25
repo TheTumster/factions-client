@@ -358,6 +358,27 @@ public final class ModuleRegistry {
 				.settings(() -> List.of(
 						new IntS("Strength", 1, 10, 1, "", () -> c().motionBlurStrength, v -> c().motionBlurStrength = v))));
 
+		add(new Module("No Hurt Cam", "Taking damage doesn't shake your screen", Category.RENDER)
+				.toggle(() -> c().noHurtCam, v -> c().noHurtCam = v));
+
+		add(new Module("Freelook", "Hold Left Alt to look around without turning", Category.RENDER)
+				.toggle(() -> c().freelook, v -> c().freelook = v)
+				.settings(() -> List.of(
+						new BoolS("Switch to third person while held", () -> c().freelookThirdPerson, v -> c().freelookThirdPerson = v),
+						new KeyS("Freelook key (hold)", () -> FactionsClient.freelookKey))));
+
+		add(new Module("Block Outline", "Your colour + thickness on the block you're aiming at", Category.RENDER)
+				.toggle(() -> c().blockOutline, v -> c().blockOutline = v)
+				.settings(() -> List.of(
+						new ColorS("Colour", () -> c().blockOutlineColor, v -> c().blockOutlineColor = v),
+						new IntS("Thickness", 1, 10, 1, "", () -> c().blockOutlineWidth, v -> c().blockOutlineWidth = v))));
+
+		add(new Module("Time + Weather", "Your own time of day and no rain (only you see it)", Category.RENDER)
+				.toggle(() -> c().timeChanger, v -> c().timeChanger = v)
+				.settings(() -> List.of(
+						new IntS("Time (6 noon, 18 midnight)", 0, 23, 1, "", () -> c().timeOfDay, v -> c().timeOfDay = v),
+						new BoolS("No rain / thunder", () -> c().noWeather, v -> c().noWeather = v))));
+
 		add(new Module("Zoom", "Hold to zoom in, like OptiFine", Category.RENDER)
 				.settings(() -> List.of(
 						new IntS("Zoom FOV (lower = closer)", 5, 50, 1, "°", () -> c().zoomFov, v -> c().zoomFov = v),
@@ -396,6 +417,7 @@ public final class ModuleRegistry {
 		hudElement("keystrokes", "Keystrokes + CPS", "WASD, mouse buttons and clicks per second", () -> c().hudKeystrokes, v -> c().hudKeystrokes = v);
 		hudElement("effects", "Potion Effects", "Active effects with timers in their colors", () -> c().hudEffects, v -> c().hudEffects = v);
 		hudElement("armor", "Armor", "Armor pieces and durability", () -> c().hudArmor, v -> c().hudArmor = v);
+		hudElement("items", "Item Counter", "TNT, sand, obsidian, pots, gaps, pearls you're carrying", () -> c().hudItems, v -> c().hudItems = v);
 		hudElement("territory", "Territory", "Whose land you're standing in, colored by relation", () -> c().hudTerritory, v -> c().hudTerritory = v);
 		hudElement("team", "Team List", "Teammates, distance and direction", () -> c().hudTeamList, v -> c().hudTeamList = v);
 

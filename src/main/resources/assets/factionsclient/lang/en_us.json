@@ -4,6 +4,7 @@
 	"key.factionsclient.clear_crumbs": "Clear crumbs",
 	"key.factionsclient.toggle_crumbs": "Toggle crumbs",
 	"key.factionsclient.zoom": "Zoom (hold)",
+	"key.factionsclient.freelook": "Freelook (hold)",
 	"key.factionsclient.chunk_borders": "Toggle chunk borders",
 	"key.factionsclient.fullbright": "Toggle fullbright",
 	"key.factionsclient.ping": "Team ping (Shift = enemy)"

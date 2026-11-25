@@ -19,6 +19,12 @@
 		"ScreenEffectRendererMixin",
 		"ParticleEngineMixin",
 		"EntityRenderDispatcherMixin",
+		"GameRendererHurtMixin",
+		"CameraFreelookMixin",
+		"MouseHandlerFreelookMixin",
+		"LevelRendererOutlineMixin",
+		"ClientLevelDataTimeMixin",
+		"LevelWeatherMixin",
 		"ClientBrandMixin",
 		"ResourcePackAutoAcceptMixin"
 	],

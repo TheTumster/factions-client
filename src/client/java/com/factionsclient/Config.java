@@ -99,6 +99,17 @@ public class Config {
 	public boolean fxDrips = true;
 	public boolean hideTnt = false;
 	public boolean hideSand = false;
+	// PvP + world
+	public boolean noHurtCam = false;
+	public boolean freelook = true;
+	public boolean freelookThirdPerson = true;
+	public boolean blockOutline = false;
+	public int blockOutlineColor = 0xFFB040FF;
+	public int blockOutlineWidth = 3;
+	public boolean timeChanger = false;
+	public int timeOfDay = 6;   // thousands of ticks: 6 = noon, 18 = midnight
+	public boolean noWeather = false;
+	public boolean hudItems = true;
 	public int shotColor = 0xFFFFD24D;
 	public int cannonColor = 0xFFFF3B4E;
 	public int chunkColor = 0xFFFFE040;

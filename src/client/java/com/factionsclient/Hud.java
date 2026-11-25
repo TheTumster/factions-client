@@ -40,6 +40,7 @@ public final class Hud {
 		ELEMENTS.put("keystrokes", "Keystrokes + CPS");
 		ELEMENTS.put("effects", "Potion Effects");
 		ELEMENTS.put("armor", "Armor");
+		ELEMENTS.put("items", "Item Counter");
 	}
 
 	/** Default position (fraction of screen) and scale for each element. */
@@ -53,6 +54,7 @@ public final class Hud {
 			case "keystrokes" -> new float[] {0.93f, 0.30f, 1f}; // right side: the chat lives bottom-left
 			case "effects" -> new float[] {0.85f, 0.01f, 1f};
 			case "armor" -> new float[] {0.90f, 0.70f, 1f};
+			case "items" -> new float[] {0.90f, 0.45f, 1f};
 			default -> new float[] {0.1f, 0.1f, 1f};
 		};
 	}
@@ -81,6 +83,7 @@ public final class Hud {
 			case "keystrokes" -> c.hudKeystrokes;
 			case "effects" -> c.hudEffects;
 			case "armor" -> c.hudArmor;
+			case "items" -> c.hudItems;
 			default -> false;
 		};
 	}
@@ -246,6 +249,9 @@ public final class Hud {
 			case "armor" -> {
 				return armor(g, f, p, preview);
 			}
+			case "items" -> {
+				return items(g, f, p, preview);
+			}
 			default -> { }
 		}
 		return leftAligned(g, f, lines);
@@ -364,6 +370,33 @@ public final class Hud {
 				g.fill(0, y, 16, y + 16, BG); // empty slot placeholder in the editor
 			}
 			w = Math.max(w, 16);
+			y += 17;
+		}
+		return new int[] {w, y};
+	}
+
+	private static final net.minecraft.world.item.Item[][] COUNTED = {
+			{net.minecraft.world.item.Items.TNT}, {net.minecraft.world.item.Items.SAND, net.minecraft.world.item.Items.RED_SAND},
+			{net.minecraft.world.item.Items.OBSIDIAN}, {net.minecraft.world.item.Items.SPLASH_POTION},
+			{net.minecraft.world.item.Items.GOLDEN_APPLE, net.minecraft.world.item.Items.ENCHANTED_GOLDEN_APPLE},
+			{net.minecraft.world.item.Items.ENDER_PEARL}};
+
+	/** Item Counter: how many of the factions essentials you're carrying. */
+	private static int[] items(GuiGraphics g, Font f, LocalPlayer p, boolean preview) {
+		int y = 0, w = 0;
+		var inv = p.getInventory();
+		for (net.minecraft.world.item.Item[] group : COUNTED) {
+			int n = 0;
+			for (int i = 0; i < inv.getContainerSize(); i++) {
+				ItemStack s = inv.getItem(i);
+				for (net.minecraft.world.item.Item it : group) if (s.is(it)) n += s.getCount();
+			}
+			if (n == 0 && !preview) continue;
+			if (preview && n == 0) n = 64;
+			g.renderItem(new ItemStack(group[0]), 0, y);
+			String t = n >= 1000 ? String.format(Locale.ROOT, "%.1fk", n / 1000.0) : String.valueOf(n);
+			g.drawString(f, t, 19, y + 4, WHITE, true);
+			w = Math.max(w, 19 + f.width(t));
 			y += 17;
 		}
 		return new int[] {w, y};
