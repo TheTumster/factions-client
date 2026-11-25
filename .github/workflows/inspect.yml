@@ -19,11 +19,15 @@ jobs:
           for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do echo "JAR $j"; unzip -oq "$j" 'net/minecraft/client/*'; done
           cd /tmp/mc/net/minecraft/client && pwd && ls | head
           sig() { echo "=====SIG $1"; grep -nP '^\t(public |protected |default |static |boolean |void |int |float |double |@Nullable )[^;=]*\(' "$1"; }
-          for f in renderer/PostChainConfig.java renderer/PostChain.java; do echo "=====FILE $f"; cat $f; done
-          echo "=====GR"; grep -n "PostEffect\|postEffect\|PostChain\|processBlurEffect\|BLUR_POST\|getMainRenderTarget" renderer/GameRenderer.java
-          echo "=====LR"; grep -n "PostEffect\|postEffect\|PostChain\|TRANSPARENCY_POST\|ENTITY_OUTLINE" renderer/LevelRenderer.java | head -40
-          mkdir -p /tmp/assets && cd /tmp/assets
-          for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "minecraft-*.jar" ! -name "*sources*" 2>/dev/null); do unzip -oq "$j" 'assets/minecraft/post_effect/*' 'assets/minecraft/shaders/post/*' 'assets/minecraft/shaders/include/*' 2>/dev/null; done
-          ls assets/minecraft/post_effect assets/minecraft/shaders/post
-          for f in assets/minecraft/post_effect/blur.json assets/minecraft/post_effect/invert.json assets/minecraft/post_effect/creeper.json assets/minecraft/shaders/post/blit.fsh assets/minecraft/shaders/post/invert.fsh assets/minecraft/shaders/post/sobel.vsh assets/minecraft/shaders/post/blur.fsh assets/minecraft/shaders/post/box_blur.fsh assets/minecraft/shaders/post/screenquad.vsh; do echo "=====FILE $f"; cat $f; done
+          unzip -oq $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null | head -1) 'net/minecraft/world/entity/item/*' -d /tmp/mc || true
+          echo "=====LS fog"; ls -R renderer/fog
+          for f in $(find renderer/fog -name "*.java"); do echo "=====FILE $f"; cat $f; done
+          echo "=====FIRE"; awk '/renderFire/,/^\t}/' renderer/ScreenEffectRenderer.java | head -80
+          echo "=====PE"; grep -n "public .*(" particle/ParticleEngine.java | head -40
+          echo "=====PE-create"; awk '/Particle createParticle/,/^\t}/' particle/ParticleEngine.java | head -40
+          echo "=====CL"; grep -n "addParticle\|addAlwaysVisibleParticle" multiplayer/ClientLevel.java | head
+          echo "=====LR"; grep -n "addParticle\|private .*Particle" renderer/LevelRenderer.java | head -20
+          echo "=====EXPL"; awk '/void handleExplosion/,/^\t}/' multiplayer/ClientPacketListener.java
+          echo "=====TNT"; grep -n "Particle\|isClientSide" /tmp/mc/net/minecraft/world/entity/item/PrimedTnt.java
+          echo "=====LIQUID"; grep -rn "getAverageWaterColor\|WATER_FOG\|waterFog" --include=*.java . | head -20
           exit 0
