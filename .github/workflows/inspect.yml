@@ -19,15 +19,12 @@ jobs:
           for j in $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null); do echo "JAR $j"; unzip -oq "$j" 'net/minecraft/client/*'; done
           cd /tmp/mc/net/minecraft/client && pwd && ls | head
           sig() { echo "=====SIG $1"; grep -nP '^\t(public |protected |default |static |boolean |void |int |float |double |@Nullable )[^;=]*\(' "$1"; }
-          unzip -oq $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null | head -1) 'net/minecraft/world/entity/item/*' -d /tmp/mc || true
-          echo "=====LS fog"; ls -R renderer/fog
-          for f in $(find renderer/fog -name "*.java"); do echo "=====FILE $f"; cat $f; done
-          echo "=====FIRE"; awk '/renderFire/,/^\t}/' renderer/ScreenEffectRenderer.java | head -80
-          echo "=====PE"; grep -n "public .*(" particle/ParticleEngine.java | head -40
-          echo "=====PE-create"; awk '/Particle createParticle/,/^\t}/' particle/ParticleEngine.java | head -40
-          echo "=====CL"; grep -n "addParticle\|addAlwaysVisibleParticle" multiplayer/ClientLevel.java | head
-          echo "=====LR"; grep -n "addParticle\|private .*Particle" renderer/LevelRenderer.java | head -20
-          echo "=====EXPL"; awk '/void handleExplosion/,/^\t}/' multiplayer/ClientPacketListener.java
-          echo "=====TNT"; grep -n "Particle\|isClientSide" /tmp/mc/net/minecraft/world/entity/item/PrimedTnt.java
-          echo "=====LIQUID"; grep -rn "getAverageWaterColor\|WATER_FOG\|waterFog" --include=*.java . | head -20
+          unzip -oq $(find ~/.gradle $GITHUB_WORKSPACE/.gradle -name "*minecraft-*sources.jar" 2>/dev/null | head -1) 'net/minecraft/world/entity/item/*' 'net/minecraft/world/entity/Entity.java' -d /tmp/mc || true
+          echo "=====GR"; grep -n "private void bobHurt\|void bobView\|bobHurt(\|private float getFov\|renderItemInHand(" renderer/GameRenderer.java
+          echo "=====CAM"; grep -n "public void setup\|protected void setRotation\|void setRotation\|private float xRot\|private float yRot\|public float getXRot\|public float yRot()\|public float xRot()\|getYRot\|getXRot" Camera.java
+          awk '/public void setup/,/^\t}/' Camera.java | head -40
+          echo "=====OUTLINE"; grep -rn "renderHitOutline\|BLOCK_OUTLINE\|highContrastBlockOutline\|blockOutline" --include=*.java renderer/LevelRenderer.java renderer/*.java | head -20
+          awk '/private void renderHitOutline/,/^\t}/' renderer/LevelRenderer.java | head -40
+          echo "=====TIME"; grep -n "getDayTime\|setDayTime\|getRainLevel\|getThunderLevel\|class ClientLevelData" multiplayer/ClientLevel.java | head -20
+          echo "=====ENTPLAYER"; grep -n "turn(double\|public void turn" /tmp/mc/net/minecraft/world/entity/Entity.java 2>/dev/null | head; grep -n "turnPlayer\|player.turn" MouseHandler.java | head
           exit 0
