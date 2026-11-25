@@ -14,6 +14,11 @@
 		"ToastManagerMixin",
 		"MinecraftAccountAccessor",
 		"GameRendererBlurMixin",
+		"FogEnvironmentMixins$Water",
+		"FogEnvironmentMixins$Lava",
+		"ScreenEffectRendererMixin",
+		"ParticleEngineMixin",
+		"EntityRenderDispatcherMixin",
 		"ClientBrandMixin",
 		"ResourcePackAutoAcceptMixin"
 	],

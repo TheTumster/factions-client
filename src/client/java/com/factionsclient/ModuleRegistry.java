@@ -235,6 +235,9 @@ public final class ModuleRegistry {
 				.settings(() -> List.of(new InfoS(() -> ServerLink.REALM.isEmpty() ? "Not on RelapsedMC right now."
 						: "You're on " + ServerLink.REALM + "."))));
 
+		add(new Module("Factions Visuals", "Clear water + lava, low fire, kill TNT/sand/explosion particles, hide TNT", Category.FACTIONS)
+				.settings(FactionsVisuals::settings));
+
 		add(new Module("TNT Crumbs", "Trails for every TNT & falling sand, red where TNT blew", Category.FACTIONS)
 				.toggle(() -> c().crumbs, v -> c().crumbs = v)
 				.settings(() -> List.of(

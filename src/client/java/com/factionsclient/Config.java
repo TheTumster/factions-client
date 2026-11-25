@@ -85,6 +85,20 @@ public class Config {
 	public int shotSeconds = 30;
 	public int shotMinSpeed = 4;   // tenths of a block per tick
 	public boolean shotAlert = true;
+	// Factions Visuals
+	public boolean clearWater = true;
+	public int clearWaterRange = 60;
+	public boolean clearLava = true;
+	public boolean lowFire = true;
+	public int lowFireAmount = 60;
+	public int fxExplosions = 1;      // 0 off, 1 small puff, 2 vanilla
+	public boolean fxTntSmoke = false;
+	public boolean fxBlockDust = false;
+	public boolean fxFire = true;
+	public boolean fxLava = false;
+	public boolean fxDrips = true;
+	public boolean hideTnt = false;
+	public boolean hideSand = false;
 	public int shotColor = 0xFFFFD24D;
 	public int cannonColor = 0xFFFF3B4E;
 	public int chunkColor = 0xFFFFE040;
